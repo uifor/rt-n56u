@@ -79,6 +79,17 @@ jobs:
         with:
           limit-access-to-actor: true
 
+      - name: Force gcc-7 for host build
+        run: |
+          export CC=gcc-7
+          export CXX=g++-7
+          export HOSTCC=gcc-7
+          export HOSTCXX=g++-7
+
+          echo "CC=$CC"
+          echo "HOSTCC=$HOSTCC"
+          gcc --version
+
       - name: Start build
         run: |
           cd trunk
