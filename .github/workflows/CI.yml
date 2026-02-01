@@ -43,7 +43,13 @@ jobs:
       # ✅ 3️⃣ 容器里不需要 sudo（否则会直接失败）
       - name: Prepare environment
         run: |
+          export DEBIAN_FRONTEND=noninteractive
+          ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime
+          echo "Etc/UTC" > /etc/timezone
+
           apt update
+          apt install -y tzdata
+
           apt install -y \
             gcc-7 g++-7 \
             unzip libtool-bin curl cmake gperf gawk flex bison nano xxd \
@@ -54,6 +60,9 @@ jobs:
 
           update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 70
           update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 70
+
+          gcc --version
+
 
 
       - name: Run shellcheck
