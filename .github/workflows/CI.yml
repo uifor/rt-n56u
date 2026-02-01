@@ -45,14 +45,37 @@ jobs:
         run: |
           apt update
           DEBIAN_FRONTEND=noninteractive apt install -y \
-            build-essential \
+            unzip \
             libtool-bin \
+            curl \
+            cmake \
             gperf \
+            gawk \
+            flex \
+            bison \
+            nano \
+            xxd \
+            fakeroot \
+            kmod \
+            cpio \
+            git \
             python3-docutils \
-            autopoint \
             gettext \
-            p7zip-full \
-            fakeroot
+            automake \
+            autopoint \
+            texinfo \
+            build-essential \
+            help2man \
+            pkg-config \
+            zlib1g-dev \
+            libgmp3-dev \
+            libmpc-dev \
+            libmpfr-dev \
+            libncurses5-dev \
+            libltdl-dev \
+            wget \
+            libc-dev-bin
+
 
 
       - name: Run shellcheck
