@@ -21,7 +21,7 @@ jobs:
 
     # ✅ 2️⃣ 使用 20.04 容器
     container:
-      image: ubuntu:18.04
+      image: ubuntu:20.04
       options: --user root
 
     if: ${{ !(github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) }}
@@ -54,8 +54,6 @@ jobs:
 
           update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 70
           update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 70
-
-
 
 
       - name: Run shellcheck
