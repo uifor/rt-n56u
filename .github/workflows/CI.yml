@@ -21,7 +21,7 @@ jobs:
 
     # ✅ 2️⃣ 使用 20.04 容器
     container:
-      image: ubuntu:20.04
+      image: ubuntu:18.04
       options: --user root
 
     if: ${{ !(github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) }}
@@ -44,37 +44,17 @@ jobs:
       - name: Prepare environment
         run: |
           apt update
-          DEBIAN_FRONTEND=noninteractive apt install -y \
-            unzip \
-            libtool-bin \
-            curl \
-            cmake \
-            gperf \
-            gawk \
-            flex \
-            bison \
-            nano \
-            xxd \
-            fakeroot \
-            kmod \
-            cpio \
-            git \
-            python3-docutils \
-            gettext \
-            automake \
-            autopoint \
-            texinfo \
-            build-essential \
-            help2man \
-            pkg-config \
-            zlib1g-dev \
-            libgmp3-dev \
-            libmpc-dev \
-            libmpfr-dev \
-            libncurses5-dev \
-            libltdl-dev \
-            wget \
-            libc-dev-bin
+          apt install -y \
+            gcc-7 g++-7 \
+            unzip libtool-bin curl cmake gperf gawk flex bison nano xxd \
+            fakeroot kmod cpio git python3-docutils gettext automake autopoint \
+            texinfo build-essential help2man pkg-config zlib1g-dev \
+            libgmp3-dev libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev \
+            wget libc-dev-bin
+
+          update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 70
+          update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 70
+
 
 
 
