@@ -45,6 +45,7 @@ jobs:
         run: |
           apt update
           DEBIAN_FRONTEND=noninteractive apt install -y \
+            build-essential \
             libtool-bin \
             gperf \
             python3-docutils \
@@ -52,6 +53,7 @@ jobs:
             gettext \
             p7zip-full \
             fakeroot
+
 
       - name: Run shellcheck
         run: sh ./trunk/tools/shellcheck.sh
