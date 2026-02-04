@@ -27,10 +27,6 @@ jobs:
       build_variant: ${{ matrix.build_variant }}
       targets: ${{ matrix.targets }}
       images_dir: /opt/images
-      CC: gcc-7
-      CXX: g++-7
-      HOSTCC: gcc-7
-      HOSTCXX: g++-7
 
     strategy:
       matrix:
@@ -59,85 +55,50 @@ jobs:
           apt update
           apt install -y tzdata
 
-          apt install -y gcc-7 g++-7
-          
           apt install -y \
-            unzip libtool-bin curl cmake gperf gawk flex bison nano xxd \
-            fakeroot kmod cpio git python3-docutils gettext automake autopoint \
-            texinfo build-essential help2man pkg-config zlib1g-dev \
-            libgmp3-dev libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev \
-            wget libc-dev-bin p7zip-full
-
-          update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 100
-          update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 100
-          update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 50
-          update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 50
-          
-          update-alternatives --set gcc /usr/bin/gcc-7
-          update-alternatives --set g++ /usr/bin/g++-7
-
-          echo "=== Compiler versions ==="
-          gcc --version
-          g++ --version
-          echo "CC: $CC"
-          echo "CXX: $CXX"
-
-      - name: Run shellcheck
-        run: sh ./trunk/tools/shellcheck.sh
-
-      # ✅ 缓存工具链
-      - name: Cache toolchain
-        id: cache-toolchain
-        uses: actions/cache@v4
-        with:
-          path: |
-            toolchain-mipsel/toolchain-3.4.x
-            toolchain-mipsel/toolchain-4.9.x
-          key: ${{ runner.os }}-toolchain-${{ hashFiles('toolchain-mipsel/dl_toolchain.sh') }}
-          restore-keys: |
-            ${{ runner.os }}-toolchain-
+            unzip \
+            libtool-bin \
+            curl \
+            cmake \
+            gperf \
+            gawk \
+            flex \
+            bison \
+            nano \
+            xxd \
+            fakeroot \
+            kmod \
+            cpio \
+            git \
+            python3-docutils \
+            gettext \
+            automake \
+            autopoint \
+            texinfo \
+            build-essential \
+            help2man \
+            pkg-config \
+            zlib1g-dev \
+            libgmp3-dev \
+            libmpc-dev \
+            libmpfr-dev \
+            libncurses5-dev \
+            libltdl-dev \
+            wget \
+            libc-dev-bin \
+            p7zip-full
 
       - name: Prepare toolchain
-        if: steps.cache-toolchain.outputs.cache-hit != 'true'
         run: |
           cd toolchain-mipsel
-          sh dl_toolchain.sh
-
-      - name: Verify toolchain cache
-        if: steps.cache-toolchain.outputs.cache-hit == 'true'
-        run: |
-          echo "Toolchain restored from cache"
-          ls -lh toolchain-mipsel/
-
-      # ✅ 缓存已编译的用户空间工具
-      - name: Cache user tools
-        uses: actions/cache@v4
-        with:
-          path: |
-            trunk/user/*/built
-            trunk/stage
-          key: ${{ runner.os }}-user-tools-${{ matrix.build_variant }}-${{ hashFiles('trunk/user/**/Makefile') }}
-          restore-keys: |
-            ${{ runner.os }}-user-tools-${{ matrix.build_variant }}-
-            ${{ runner.os }}-user-tools-
+          ./clean_toolchain
+          ./build_toolchain
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled == 'yes' }}
         with:
           limit-access-to-actor: true
-
-      - name: Verify build environment
-        run: |
-          echo "=== Build Environment Check ==="
-          echo "CC: $CC"
-          echo "CXX: $CXX"
-          echo "HOSTCC: $HOSTCC"
-          echo "HOSTCXX: $HOSTCXX"
-          which gcc
-          which g++
-          gcc --version
-          g++ --version
 
       - name: Start build
         run: |
@@ -173,7 +134,7 @@ jobs:
 
       - name: Upload images to Releases
         if: ${{ github.event_name == 'release' && success() }}
-        uses: svenstaro/upload-release-action@2.2.0
+        uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ env.images_dir }}/*.trx
