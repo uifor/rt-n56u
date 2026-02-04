@@ -27,6 +27,7 @@ jobs:
       build_variant: ${{ matrix.build_variant }}
       targets: ${{ matrix.targets }}
       images_dir: /opt/images
+      toolchain_dir: /opt/toolchain
 
     strategy:
       matrix:
@@ -36,6 +37,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # ✅ 获取完整 Git 历史，确保 git rev-parse 能正常工作
 
       # ✅ 缓存 APT 包
       - name: Cache APT packages
@@ -45,6 +48,42 @@ jobs:
           key: ${{ runner.os }}-apt-${{ hashFiles('.github/workflows/CI.yml') }}
           restore-keys: |
             ${{ runner.os }}-apt-
+
+      # ✅ 缓存 Toolchain（最重要的缓存，可大幅减少构建时间）
+      - name: Cache Toolchain
+        id: cache-toolchain
+        uses: actions/cache@v4
+        with:
+          path: |
+            toolchain-mipsel/toolchain-4.4.x
+            toolchain-mipsel/toolchain-3.4.x
+            toolchain-mipsel/.compiled
+          key: ${{ runner.os }}-toolchain-${{ hashFiles('toolchain-mipsel/**') }}
+          restore-keys: |
+            ${{ runner.os }}-toolchain-
+
+      # ✅ 缓存编译工具和依赖
+      - name: Cache Build Tools
+        uses: actions/cache@v4
+        with:
+          path: |
+            trunk/tools
+            trunk/romfs
+            trunk/libs
+          key: ${{ runner.os }}-build-tools-${{ hashFiles('trunk/tools/**', 'trunk/libs/**') }}
+          restore-keys: |
+            ${{ runner.os }}-build-tools-
+
+      # ✅ 缓存下载的源码包
+      - name: Cache Downloads
+        uses: actions/cache@v4
+        with:
+          path: |
+            trunk/user/*/
+            trunk/libs/*/
+          key: ${{ runner.os }}-downloads-${{ hashFiles('trunk/.config') }}
+          restore-keys: |
+            ${{ runner.os }}-downloads-
 
       - name: Prepare environment
         run: |
@@ -87,10 +126,27 @@ jobs:
             wget \
             libc-dev-bin \
             p7zip-full
+          
+          # ✅ 配置 Git safe.directory，解决 Docker container 中的权限问题
+          git config --global --add safe.directory '*'
 
       - name: Prepare toolchain
         run: |
           cd toolchain-mipsel
+          
+          # ✅ 如果缓存命中，跳过编译
+          if [ "${{ steps.cache-toolchain.outputs.cache-hit }}" == "true" ]; then
+            echo "Toolchain cache hit, skipping build"
+            # 验证 toolchain 是否完整
+            if [ -d "toolchain-4.4.x/bin" ] && [ -d "toolchain-3.4.x/bin" ]; then
+              echo "Toolchain verified successfully"
+              exit 0
+            else
+              echo "Toolchain cache incomplete, rebuilding..."
+            fi
+          fi
+          
+          # 如果缓存未命中或不完整，则构建 toolchain
           ./clean_toolchain
           ./build_toolchain
 
@@ -104,7 +160,14 @@ jobs:
         run: |
           cd trunk
           mkdir -p ${images_dir}
+          
+          # ✅ 显示缓存状态
+          echo "=== Cache Status ==="
+          echo "Toolchain cache hit: ${{ steps.cache-toolchain.outputs.cache-hit }}"
+          echo "===================="
+          
           for m in $targets; do
+            echo "Building firmware for $m..."
             fakeroot ./build_firmware_ci $m || exit 1
             cp -f images/*.trx ${images_dir}/$m.trx
             ./clear_tree_simple >/dev/null 2>&1
@@ -114,12 +177,16 @@ jobs:
         if: ${{ github.event_name != 'release' && success() }}
         run: |
           ls -lh ${images_dir}
-          GIT_VERSION=$(git rev-parse --short=7 HEAD 2>/dev/null)
+          
+          # ✅ 更安全的方式获取 Git 版本，即使失败也不会导致脚本退出
+          GIT_VERSION=$(git rev-parse --short=7 HEAD 2>/dev/null || echo "")
+          
           if [ -n "$GIT_VERSION" ]; then
             image_name=images_${build_variant}_${GIT_VERSION}
           else
             image_name=images_${build_variant}
           fi
+          
           cd ${images_dir}
           md5sum *.trx | tee md5sum.txt
           7z a -mx=9 ${image_name}.7z ./*
