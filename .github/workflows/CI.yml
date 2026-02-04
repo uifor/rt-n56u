@@ -27,7 +27,6 @@ jobs:
       build_variant: ${{ matrix.build_variant }}
       targets: ${{ matrix.targets }}
       images_dir: /opt/images
-      toolchain_dir: /opt/toolchain
 
     strategy:
       matrix:
@@ -45,7 +44,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /var/cache/apt/archives
-          key: ${{ runner.os }}-apt-${{ hashFiles('.github/workflows/CI.yml') }}
+          key: ${{ runner.os }}-apt-v1
           restore-keys: |
             ${{ runner.os }}-apt-
 
@@ -57,33 +56,21 @@ jobs:
           path: |
             toolchain-mipsel/toolchain-4.4.x
             toolchain-mipsel/toolchain-3.4.x
-            toolchain-mipsel/.compiled
-          key: ${{ runner.os }}-toolchain-${{ hashFiles('toolchain-mipsel/**') }}
+          key: ${{ runner.os }}-toolchain-mipsel-${{ matrix.build_variant }}-v2
           restore-keys: |
-            ${{ runner.os }}-toolchain-
+            ${{ runner.os }}-toolchain-mipsel-${{ matrix.build_variant }}-
+            ${{ runner.os }}-toolchain-mipsel-
 
-      # ✅ 缓存编译工具和依赖
-      - name: Cache Build Tools
+      # ✅ 缓存编译临时文件（加速构建）
+      - name: Cache Build Objects
         uses: actions/cache@v4
         with:
           path: |
-            trunk/tools
+            trunk/stage
             trunk/romfs
-            trunk/libs
-          key: ${{ runner.os }}-build-tools-${{ hashFiles('trunk/tools/**', 'trunk/libs/**') }}
+          key: ${{ runner.os }}-build-${{ matrix.build_variant }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-build-tools-
-
-      # ✅ 缓存下载的源码包
-      - name: Cache Downloads
-        uses: actions/cache@v4
-        with:
-          path: |
-            trunk/user/*/
-            trunk/libs/*/
-          key: ${{ runner.os }}-downloads-${{ hashFiles('trunk/.config') }}
-          restore-keys: |
-            ${{ runner.os }}-downloads-
+            ${{ runner.os }}-build-${{ matrix.build_variant }}-
 
       - name: Prepare environment
         run: |
@@ -136,19 +123,23 @@ jobs:
           
           # ✅ 如果缓存命中，跳过编译
           if [ "${{ steps.cache-toolchain.outputs.cache-hit }}" == "true" ]; then
-            echo "Toolchain cache hit, skipping build"
+            echo "✅ Toolchain cache hit, skipping build"
             # 验证 toolchain 是否完整
             if [ -d "toolchain-4.4.x/bin" ] && [ -d "toolchain-3.4.x/bin" ]; then
-              echo "Toolchain verified successfully"
+              echo "✅ Toolchain verified successfully"
+              ls -lh toolchain-4.4.x/bin/ | head -5
+              ls -lh toolchain-3.4.x/bin/ | head -5
               exit 0
             else
-              echo "Toolchain cache incomplete, rebuilding..."
+              echo "⚠️  Toolchain cache incomplete, rebuilding..."
             fi
           fi
           
           # 如果缓存未命中或不完整，则构建 toolchain
+          echo "🔨 Building toolchain from source..."
           ./clean_toolchain
           ./build_toolchain
+          echo "✅ Toolchain build completed"
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
@@ -162,15 +153,19 @@ jobs:
           mkdir -p ${images_dir}
           
           # ✅ 显示缓存状态
-          echo "=== Cache Status ==="
-          echo "Toolchain cache hit: ${{ steps.cache-toolchain.outputs.cache-hit }}"
-          echo "===================="
+          echo "================================================"
+          echo "📦 Cache Status:"
+          echo "   Toolchain cache hit: ${{ steps.cache-toolchain.outputs.cache-hit }}"
+          echo "   Build variant: ${{ matrix.build_variant }}"
+          echo "   Targets: ${{ matrix.targets }}"
+          echo "================================================"
           
           for m in $targets; do
-            echo "Building firmware for $m..."
+            echo "🔨 Building firmware for $m..."
             fakeroot ./build_firmware_ci $m || exit 1
             cp -f images/*.trx ${images_dir}/$m.trx
             ./clear_tree_simple >/dev/null 2>&1
+            echo "✅ $m build completed"
           done
 
       - name: Create archive
@@ -191,6 +186,10 @@ jobs:
           md5sum *.trx | tee md5sum.txt
           7z a -mx=9 ${image_name}.7z ./*
           echo "image_name=${image_name}" >> $GITHUB_ENV
+          
+          echo "================================================"
+          echo "📦 Archive created: ${image_name}.7z"
+          echo "================================================"
 
       - name: Upload images to Artifact
         if: ${{ github.event_name != 'release' && success() }}
