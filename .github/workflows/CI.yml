@@ -1,16 +1,20 @@
 name: CI
 
 on: 
-  push:
-  pull_request:
   workflow_dispatch:
     inputs:
       debug_enabled:
         description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'     
         required: false
         default: 'no'
-  release:
-    types: [published]
+      upload_release:
+        description: 'Upload to Release (create auto release)'
+        required: false
+        default: 'yes'
+        type: choice
+        options:
+          - 'yes'
+          - 'no'
 
 jobs:
   build:
@@ -20,8 +24,6 @@ jobs:
     container:
       image: ubuntu:20.04
       options: --user root
-
-    if: ${{ !(github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) }}
 
     env:
       build_variant: ${{ matrix.build_variant }}
@@ -158,6 +160,7 @@ jobs:
           echo "   Toolchain cache hit: ${{ steps.cache-toolchain.outputs.cache-hit }}"
           echo "   Build variant: ${{ matrix.build_variant }}"
           echo "   Targets: ${{ matrix.targets }}"
+          echo "   Upload to Release: ${{ github.event.inputs.upload_release }}"
           echo "================================================"
           
           for m in $targets; do
@@ -169,7 +172,7 @@ jobs:
           done
 
       - name: Create archive
-        if: ${{ github.event_name != 'release' && success() }}
+        if: success()
         run: |
           ls -lh ${images_dir}
           
@@ -191,19 +194,44 @@ jobs:
           echo "📦 Archive created: ${image_name}.7z"
           echo "================================================"
 
+      # ✅ 上传到 Artifacts（总是执行，用于临时存储）
       - name: Upload images to Artifact
-        if: ${{ github.event_name != 'release' && success() }}
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.image_name }}
-          path: ${{ env.images_dir }}/*.7z
+          path: |
+            ${{ env.images_dir }}/*.7z
+            ${{ env.images_dir }}/*.trx
 
-      - name: Upload images to Releases
-        if: ${{ github.event_name == 'release' && success() }}
-        uses: svenstaro/upload-release-action@v2
+      # ✅ 自动创建 Release 并上传（可选，默认开启）
+      - name: Create Release and Upload
+        if: github.event.inputs.upload_release == 'yes' && success()
+        uses: softprops/action-gh-release@v1
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ env.images_dir }}/*.trx
-          tag: ${{ github.ref }}
-          overwrite: true
-          file_glob: true
+          tag_name: auto-${{ github.run_number }}
+          name: Auto Build #${{ github.run_number }}
+          body: |
+            🤖 **Auto Build from Manual Trigger**
+            
+            **Build Information:**
+            - 🏷️ Build Number: #${{ github.run_number }}
+            - 📦 Variant: `${{ matrix.build_variant }}`
+            - 🎯 Targets: `${{ matrix.targets }}`
+            - 🔖 Commit: `${{ github.sha }}`
+            - 📝 Message: ${{ github.event.head_commit.message }}
+            - 🕐 Build Time: ${{ github.event.repository.updated_at }}
+            
+            **Files Included:**
+            - 📦 Compressed Archive: `${{ env.image_name }}.7z` (with MD5)
+            - 📄 Raw Firmware: `*.trx`
+            
+            **Download:**
+            Click the files below to download the firmware.
+          files: |
+            ${{ env.images_dir }}/*.7z
+            ${{ env.images_dir }}/*.trx
+          prerelease: false
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
