@@ -1,8 +1,9 @@
-SRC_NAME = iperf-3.7
-SRC_URL = https://downloads.es.net/pub/iperf/iperf-3.7.tar.gz
+SRC_NAME = iperf-3.15
+SRC_URL = https://downloads.es.net/pub/iperf/$(SRC_NAME).tar.gz
 THISDIR = $(shell pwd)
 
-all: download_test extract_test config_test
+#all: download_test extract_test config_test
+all: config_test
 	$(MAKE) -j$(HOST_NCPU) -C $(SRC_NAME)
 
 download_test:
@@ -42,4 +43,4 @@ clean:
 
 romfs:
 	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_NAME)/src/iperf3 /usr/bin/iperf3
-
+	$(ROMFSINST) -p +x $(THISDIR)/iperf3.sh /usr/bin/iperf3.sh
