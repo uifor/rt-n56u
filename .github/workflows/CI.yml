@@ -93,16 +93,18 @@ jobs:
 
           echo "📥 Prepare MIPS toolchain"
           cd toolchain-mipsel
+          ./clean_toolchain
+          ./build_toolchain
 
-          if [ -x "./dl_toolchain.sh" ]; then
-            sh ./dl_toolchain.sh
-          else
-            echo "❌ dl_toolchain.sh not found!"
-            exit 1
-          fi
+          # if [ -x "./dl_toolchain.sh" ]; then
+          #   sh ./dl_toolchain.sh
+          # else
+          #   echo "❌ dl_toolchain.sh not found!"
+          #   exit 1
+          # fi
 
-          echo "🔍 Verify toolchain"
-          find . -name "mipsel-linux-uclibc-gcc" -type f
+          # echo "🔍 Verify toolchain"
+          # find . -name "mipsel-linux-uclibc-gcc" -type f
 
           echo "✅ Toolchain ready"
 
