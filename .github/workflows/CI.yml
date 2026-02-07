@@ -21,9 +21,6 @@ jobs:
     name: Padavan Build (container)
     runs-on: ubuntu-latest
 
-    # ============================
-    # 🔥 核心：Padavan 构建容器
-    # ============================
     container:
       image: registry.gitlab.com/hadzhioglu/padavan-ng
 
@@ -33,12 +30,20 @@ jobs:
       images_dir: /opt/images
 
     strategy:
+      fail-fast: false
       matrix:
         include:
-          # - build_variant: "mt7621"
-          #   targets: "K2P"
+          # ========================
+          # MT7628 系列
+          # ========================
           - build_variant: "mt7628"
             targets: "MI-3C"
+
+          # ========================
+          # MT7621 系列（示例，先注释）
+          # ========================
+          # - build_variant: "mt7621"
+          #   targets: "K2P"
 
     steps:
       # ============================================================
@@ -50,26 +55,64 @@ jobs:
           fetch-depth: 0
 
       # ============================================================
-      # Basic sanity check (very important for debugging)
+      # Basic sanity check
       # ============================================================
       - name: Show build environment
         run: |
-          echo "===== System ====="
           uname -a
-          echo "===== GCC ====="
           gcc --version
-          echo "===== Make ====="
           make --version
-          echo "===== User ====="
-          whoami
-          echo "=================="
+
+      # =========================================================
+      # 2️⃣ Prepare build environment（推荐但不重）
+      # =========================================================
+      - name: Prepare build environment
+        run: |
+          set -e
+
+          echo "🕒 Fix timezone"
+          ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+          echo "Asia/Shanghai" > /etc/timezone
+
+          echo "📦 Install minimal required tools"
+          apt update
+          apt install -y \
+            wget \
+            zstd \
+            xz-utils \
+            p7zip-full
+
+          echo "✅ Build environment ready"
+
+      # =========================================================
+      # 3️⃣ Prepare Padavan toolchain（关键步骤）
+      # =========================================================
+      - name: Prepare Padavan toolchain
+        run: |
+          set -e
+
+          echo "📥 Prepare MIPS toolchain"
+          cd toolchain-mipsel
+
+          if [ -x "./dl_toolchain.sh" ]; then
+            sh ./dl_toolchain.sh
+          else
+            echo "❌ dl_toolchain.sh not found!"
+            exit 1
+          fi
+
+          echo "🔍 Verify toolchain"
+          find . -name "mipsel-linux-uclibc-gcc" -type f
+
+          echo "✅ Toolchain ready"
+
 
       # ============================================================
       # Optional tmate debug
       # ============================================================
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled == 'yes' }}
+        if: ${{ github.event.inputs.debug_enabled == 'yes' }}
         with:
           limit-access-to-actor: true
 
@@ -80,17 +123,13 @@ jobs:
         run: |
           set -e
           cd trunk
-
           mkdir -p ${images_dir}
 
-          echo "================================================"
-          echo "📦 Build info"
-          echo "   Variant: ${build_variant}"
-          echo "   Targets: ${targets}"
-          echo "================================================"
+          echo "Variant: ${build_variant}"
+          echo "Targets: ${targets}"
 
           for m in ${targets}; do
-            echo "🔨 Building firmware for ${m}"
+            echo "🔨 Building ${m}"
             fakeroot ./build_firmware_ci ${m}
             cp -f images/*.trx ${images_dir}/${m}.trx
             ./clear_tree_simple >/dev/null 2>&1
@@ -103,13 +142,10 @@ jobs:
       - name: Package images
         if: success()
         run: |
-          set -e
-          ls -lh ${images_dir}
-
-          GIT_VERSION=$(git rev-parse --short=7 HEAD 2>/dev/null || true)
+          cd ${images_dir}
+          GIT_VERSION=$(git rev-parse --short=7 HEAD || echo unknown)
           image_name=images_${build_variant}_${GIT_VERSION}
 
-          cd ${images_dir}
           md5sum *.trx | tee md5sum.txt
           7z a -mx=9 ${image_name}.7z ./*
 
@@ -139,9 +175,9 @@ jobs:
           body: |
             🤖 **Auto Build (Padavan container)**
 
-            - 🏷️ Variant: `${{ matrix.build_variant }}`
-            - 🎯 Targets: `${{ matrix.targets }}`
-            - 🔖 Commit: `${{ github.sha }}`
+            - Variant: `${{ matrix.build_variant }}`
+            - Targets: `${{ matrix.targets }}`
+            - Commit: `${{ github.sha }}`
           files: |
             ${{ env.images_dir }}/*.7z
             ${{ env.images_dir }}/*.trx
