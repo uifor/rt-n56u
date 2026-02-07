@@ -1,6 +1,6 @@
 name: CI
 
-on: 
+on:
   workflow_dispatch:
     inputs:
       debug_enabled:
@@ -18,8 +18,14 @@ on:
 
 jobs:
   build:
-    name: build
-    runs-on: ubuntu-22.04
+    name: Padavan Build (container)
+    runs-on: ubuntu-latest
+
+    # ============================
+    # 🔥 核心：Padavan 构建容器
+    # ============================
+    container:
+      image: registry.gitlab.com/hadzhioglu/padavan-ng
 
     env:
       build_variant: ${{ matrix.build_variant }}
@@ -38,108 +44,25 @@ jobs:
       # ============================================================
       # Checkout
       # ============================================================
-      - uses: actions/checkout@v4
+      - name: Checkout source
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       # ============================================================
-      # Cache APT (optional, best-effort)
+      # Basic sanity check (very important for debugging)
       # ============================================================
-      - name: Cache APT packages
-        uses: actions/cache@v4
-        with:
-          path: /var/cache/apt/archives
-          key: ${{ runner.os }}-apt-v1
-          restore-keys: |
-            ${{ runner.os }}-apt-
-
-      # ============================================================
-      # Cache Toolchain (FIXED)
-      # ============================================================
-      - name: Cache Toolchain
-        id: cache-toolchain
-        uses: actions/cache@v4
-        with:
-          path: toolchain-mipsel
-          key: ${{ runner.os }}-toolchain-mipsel-${{ matrix.build_variant }}-v3
-          restore-keys: |
-            ${{ runner.os }}-toolchain-mipsel-${{ matrix.build_variant }}-
-            ${{ runner.os }}-toolchain-mipsel-
-
-      # ============================================================
-      # Cache build objects (incremental build)
-      # ============================================================
-      - name: Cache Build Objects
-        uses: actions/cache@v4
-        with:
-          path: |
-            trunk/stage
-            trunk/romfs
-          key: ${{ runner.os }}-build-${{ matrix.build_variant }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ matrix.build_variant }}-
-
-      # ============================================================
-      # Prepare system environment
-      # ============================================================
-      - name: Prepare environment
+      - name: Show build environment
         run: |
-          set -e
-          export DEBIAN_FRONTEND=noninteractive
-
-          sudo ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime
-          echo "Etc/UTC" | sudo tee /etc/timezone
-
-          sudo apt update
-          sudo apt install -y tzdata
-
-          sudo apt install -y \
-            autoconf autoconf-archive automake autopoint \
-            bison build-essential ca-certificates cmake \
-            cpio curl dos2unix fakeroot flex gawk gettext \
-            git gperf help2man kmod libarchive-tools \
-            libblkid-dev libc-ares-dev libcurl4-openssl-dev \
-            libdevmapper-dev libev-dev libevent-dev \
-            libexif-dev libflac-dev libgmp3-dev \
-            libid3tag0-dev libidn2-dev libjpeg-dev \
-            libkeyutils-dev libltdl-dev libmpc-dev \
-            libmpfr-dev libncurses5-dev libogg-dev \
-            libsqlite3-dev libssl-dev libsystemd-dev \
-            libtool libtool-bin libudev-dev \
-            libunbound-dev libvorbis-dev libxml2-dev \
-            locales mc nano pkg-config ppp-dev \
-            python3 python3-docutils sshpass \
-            texinfo unzip uuid uuid-dev vim wget xxd \
-            zlib1g-dev
-
-          git config --global --add safe.directory '*'
-
-      # ============================================================
-      # Prepare toolchain (CACHE SAFE)
-      # ============================================================
-      - name: Prepare toolchain
-        run: |
-          set -e
-          cd toolchain-mipsel
-
-          echo "================================================"
-          echo "🔍 Toolchain cache hit: ${{ steps.cache-toolchain.outputs.cache-hit }}"
-          echo "================================================"
-
-          if [ "${{ steps.cache-toolchain.outputs.cache-hit }}" = "true" ]; then
-            if ls toolchain-*/bin/*gcc >/dev/null 2>&1; then
-              echo "✅ Toolchain binaries found, skip build"
-              ls -lh toolchain-*/bin | head -10
-              exit 0
-            else
-              echo "⚠️ Toolchain cache incomplete, rebuild required"
-            fi
-          fi
-
-          echo "🔨 Building toolchain from source..."
-          ./clean_toolchain
-          ./build_toolchain
-          echo "✅ Toolchain build completed"
+          echo "===== System ====="
+          uname -a
+          echo "===== GCC ====="
+          gcc --version
+          echo "===== Make ====="
+          make --version
+          echo "===== User ====="
+          whoami
+          echo "=================="
 
       # ============================================================
       # Optional tmate debug
@@ -153,48 +76,43 @@ jobs:
       # ============================================================
       # Build firmware
       # ============================================================
-      - name: Start build
+      - name: Build firmware
         run: |
           set -e
           cd trunk
-          sudo mkdir -p ${images_dir}
-          sudo chown $USER:$USER ${images_dir}
+
+          mkdir -p ${images_dir}
 
           echo "================================================"
-          echo "📦 Cache Status:"
-          echo "   Toolchain cache hit: ${{ steps.cache-toolchain.outputs.cache-hit }}"
-          echo "   Build variant: ${{ matrix.build_variant }}"
-          echo "   Targets: ${{ matrix.targets }}"
+          echo "📦 Build info"
+          echo "   Variant: ${build_variant}"
+          echo "   Targets: ${targets}"
           echo "================================================"
 
-          for m in $targets; do
-            echo "🔨 Building firmware for $m..."
-            fakeroot ./build_firmware_ci $m
-            cp -f images/*.trx ${images_dir}/$m.trx
+          for m in ${targets}; do
+            echo "🔨 Building firmware for ${m}"
+            fakeroot ./build_firmware_ci ${m}
+            cp -f images/*.trx ${images_dir}/${m}.trx
             ./clear_tree_simple >/dev/null 2>&1
-            echo "✅ $m build completed"
+            echo "✅ ${m} done"
           done
 
       # ============================================================
       # Package images
       # ============================================================
-      - name: Create archive
+      - name: Package images
         if: success()
         run: |
           set -e
           ls -lh ${images_dir}
 
           GIT_VERSION=$(git rev-parse --short=7 HEAD 2>/dev/null || true)
-
-          if [ -n "$GIT_VERSION" ]; then
-            image_name=images_${build_variant}_${GIT_VERSION}
-          else
-            image_name=images_${build_variant}
-          fi
+          image_name=images_${build_variant}_${GIT_VERSION}
 
           cd ${images_dir}
           md5sum *.trx | tee md5sum.txt
           7z a -mx=9 ${image_name}.7z ./*
+
           echo "image_name=${image_name}" >> $GITHUB_ENV
 
       # ============================================================
@@ -219,7 +137,7 @@ jobs:
           tag_name: auto-${{ github.run_number }}
           name: Auto Build #${{ github.run_number }}
           body: |
-            🤖 **Auto Build from Manual Trigger**
+            🤖 **Auto Build (Padavan container)**
 
             - 🏷️ Variant: `${{ matrix.build_variant }}`
             - 🎯 Targets: `${{ matrix.targets }}`
