@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       debug_enabled:
-        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'     
+        description: 'Run the build with tmate debugging enabled'
         required: false
         default: 'no'
       upload_release:
@@ -21,10 +21,6 @@ jobs:
     name: build
     runs-on: ubuntu-22.04
 
-    container:
-      image: ubuntu:20.04
-      options: --user root
-
     env:
       build_variant: ${{ matrix.build_variant }}
       targets: ${{ matrix.targets }}
@@ -33,15 +29,22 @@ jobs:
     strategy:
       matrix:
         include:
-          - build_variant: "mt7621"
-            targets: "K2P"
+          # - build_variant: "mt7621"
+          #   targets: "K2P"
+          - build_variant: "mt7628"
+            targets: "MI-3C"
 
     steps:
+      # ============================================================
+      # Checkout
+      # ============================================================
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # ✅ 获取完整 Git 历史，确保 git rev-parse 能正常工作
+          fetch-depth: 0
 
-      # ✅ 缓存 APT 包
+      # ============================================================
+      # Cache APT (optional, best-effort)
+      # ============================================================
       - name: Cache APT packages
         uses: actions/cache@v4
         with:
@@ -50,20 +53,22 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-apt-
 
-      # ✅ 缓存 Toolchain（最重要的缓存，可大幅减少构建时间）
+      # ============================================================
+      # Cache Toolchain (FIXED)
+      # ============================================================
       - name: Cache Toolchain
         id: cache-toolchain
         uses: actions/cache@v4
         with:
-          path: |
-            toolchain-mipsel/toolchain-4.4.x
-            toolchain-mipsel/toolchain-3.4.x
-          key: ${{ runner.os }}-toolchain-mipsel-${{ matrix.build_variant }}-v2
+          path: toolchain-mipsel
+          key: ${{ runner.os }}-toolchain-mipsel-${{ matrix.build_variant }}-v3
           restore-keys: |
             ${{ runner.os }}-toolchain-mipsel-${{ matrix.build_variant }}-
             ${{ runner.os }}-toolchain-mipsel-
 
-      # ✅ 缓存编译临时文件（加速构建）
+      # ============================================================
+      # Cache build objects (incremental build)
+      # ============================================================
       - name: Cache Build Objects
         uses: actions/cache@v4
         with:
@@ -74,127 +79,116 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-build-${{ matrix.build_variant }}-
 
+      # ============================================================
+      # Prepare system environment
+      # ============================================================
       - name: Prepare environment
         run: |
+          set -e
           export DEBIAN_FRONTEND=noninteractive
-          ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime
-          echo "Etc/UTC" > /etc/timezone
 
-          apt update
-          apt install -y tzdata
+          sudo ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime
+          echo "Etc/UTC" | sudo tee /etc/timezone
 
-          apt install -y \
-            unzip \
-            libtool-bin \
-            curl \
-            cmake \
-            gperf \
-            gawk \
-            flex \
-            bison \
-            nano \
-            xxd \
-            fakeroot \
-            kmod \
-            cpio \
-            git \
-            python3-docutils \
-            gettext \
-            automake \
-            autopoint \
-            texinfo \
-            build-essential \
-            help2man \
-            pkg-config \
-            zlib1g-dev \
-            libgmp3-dev \
-            libmpc-dev \
-            libmpfr-dev \
-            libncurses5-dev \
-            libltdl-dev \
-            wget \
-            libc-dev-bin \
-            p7zip-full
-          
-          # ✅ 配置 Git safe.directory，解决 Docker container 中的权限问题
+          sudo apt update
+          sudo apt install -y tzdata
+
+          sudo apt install -y \
+            unzip curl cmake gperf gawk flex bison nano xxd \
+            fakeroot kmod cpio git gettext automake autopoint \
+            texinfo build-essential help2man pkg-config \
+            zlib1g-dev libgmp3-dev libmpc-dev libmpfr-dev \
+            libncurses5-dev libltdl-dev wget libc-dev-bin \
+            p7zip-full python3-docutils
+
           git config --global --add safe.directory '*'
 
+      # ============================================================
+      # Prepare toolchain (CACHE SAFE)
+      # ============================================================
       - name: Prepare toolchain
         run: |
+          set -e
           cd toolchain-mipsel
-          
-          # ✅ 如果缓存命中，跳过编译
-          if [ "${{ steps.cache-toolchain.outputs.cache-hit }}" == "true" ]; then
-            echo "✅ Toolchain cache hit, skipping build"
-            # 验证 toolchain 是否完整
-            if [ -d "toolchain-4.4.x/bin" ] && [ -d "toolchain-3.4.x/bin" ]; then
-              echo "✅ Toolchain verified successfully"
-              ls -lh toolchain-4.4.x/bin/ | head -5
-              ls -lh toolchain-3.4.x/bin/ | head -5
+
+          echo "================================================"
+          echo "🔍 Toolchain cache hit: ${{ steps.cache-toolchain.outputs.cache-hit }}"
+          echo "================================================"
+
+          if [ "${{ steps.cache-toolchain.outputs.cache-hit }}" = "true" ]; then
+            if ls toolchain-*/bin/*gcc >/dev/null 2>&1; then
+              echo "✅ Toolchain binaries found, skip build"
+              ls -lh toolchain-*/bin | head -10
               exit 0
             else
-              echo "⚠️  Toolchain cache incomplete, rebuilding..."
+              echo "⚠️ Toolchain cache incomplete, rebuild required"
             fi
           fi
-          
-          # 如果缓存未命中或不完整，则构建 toolchain
+
           echo "🔨 Building toolchain from source..."
           ./clean_toolchain
           ./build_toolchain
           echo "✅ Toolchain build completed"
 
+      # ============================================================
+      # Optional tmate debug
+      # ============================================================
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled == 'yes' }}
         with:
           limit-access-to-actor: true
 
+      # ============================================================
+      # Build firmware
+      # ============================================================
       - name: Start build
         run: |
+          set -e
           cd trunk
-          mkdir -p ${images_dir}
-          
-          # ✅ 显示缓存状态
+          sudo mkdir -p ${images_dir}
+          sudo chown $USER:$USER ${images_dir}
+
           echo "================================================"
           echo "📦 Cache Status:"
           echo "   Toolchain cache hit: ${{ steps.cache-toolchain.outputs.cache-hit }}"
           echo "   Build variant: ${{ matrix.build_variant }}"
           echo "   Targets: ${{ matrix.targets }}"
-          echo "   Upload to Release: ${{ github.event.inputs.upload_release }}"
           echo "================================================"
-          
+
           for m in $targets; do
             echo "🔨 Building firmware for $m..."
-            fakeroot ./build_firmware_ci $m || exit 1
+            fakeroot ./build_firmware_ci $m
             cp -f images/*.trx ${images_dir}/$m.trx
             ./clear_tree_simple >/dev/null 2>&1
             echo "✅ $m build completed"
           done
 
+      # ============================================================
+      # Package images
+      # ============================================================
       - name: Create archive
         if: success()
         run: |
+          set -e
           ls -lh ${images_dir}
-          
-          # ✅ 更安全的方式获取 Git 版本，即使失败也不会导致脚本退出
-          GIT_VERSION=$(git rev-parse --short=7 HEAD 2>/dev/null || echo "")
-          
+
+          GIT_VERSION=$(git rev-parse --short=7 HEAD 2>/dev/null || true)
+
           if [ -n "$GIT_VERSION" ]; then
             image_name=images_${build_variant}_${GIT_VERSION}
           else
             image_name=images_${build_variant}
           fi
-          
+
           cd ${images_dir}
           md5sum *.trx | tee md5sum.txt
           7z a -mx=9 ${image_name}.7z ./*
           echo "image_name=${image_name}" >> $GITHUB_ENV
-          
-          echo "================================================"
-          echo "📦 Archive created: ${image_name}.7z"
-          echo "================================================"
 
-      # ✅ 上传到 Artifacts（总是执行，用于临时存储）
+      # ============================================================
+      # Upload artifact
+      # ============================================================
       - name: Upload images to Artifact
         if: success()
         uses: actions/upload-artifact@v4
@@ -204,7 +198,9 @@ jobs:
             ${{ env.images_dir }}/*.7z
             ${{ env.images_dir }}/*.trx
 
-      # ✅ 自动创建 Release 并上传（可选，默认开启）
+      # ============================================================
+      # Create Release (optional)
+      # ============================================================
       - name: Create Release and Upload
         if: github.event.inputs.upload_release == 'yes' && success()
         uses: softprops/action-gh-release@v1
@@ -213,25 +209,12 @@ jobs:
           name: Auto Build #${{ github.run_number }}
           body: |
             🤖 **Auto Build from Manual Trigger**
-            
-            **Build Information:**
-            - 🏷️ Build Number: #${{ github.run_number }}
-            - 📦 Variant: `${{ matrix.build_variant }}`
+
+            - 🏷️ Variant: `${{ matrix.build_variant }}`
             - 🎯 Targets: `${{ matrix.targets }}`
             - 🔖 Commit: `${{ github.sha }}`
-            - 📝 Message: ${{ github.event.head_commit.message }}
-            - 🕐 Build Time: ${{ github.event.repository.updated_at }}
-            
-            **Files Included:**
-            - 📦 Compressed Archive: `${{ env.image_name }}.7z` (with MD5)
-            - 📄 Raw Firmware: `*.trx`
-            
-            **Download:**
-            Click the files below to download the firmware.
           files: |
             ${{ env.images_dir }}/*.7z
             ${{ env.images_dir }}/*.trx
-          prerelease: false
-          draft: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
