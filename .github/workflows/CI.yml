@@ -160,24 +160,19 @@ jobs:
         with:
           limit-access-to-actor: true
 
-      - name: Show GCC versions
+      - name: Show GCC versions (toolchain real)
         run: |
-          echo "===== Host GCC ====="
-          gcc --version || true
+          echo "=== Host GCC ==="
+          gcc --version | head -n 1 || true
 
           echo
-          echo "===== Which gcc ====="
-          which gcc || true
+          echo "=== Cross GCC (Padavan toolchain) ==="
+          toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc --version | head -n 1
 
           echo
-          echo "===== Cross GCC (mipsel) ====="
-          which mipsel-linux-uclibc-gcc || true
-          mipsel-linux-uclibc-gcc --version || true
-
-          echo
-          echo "===== Toolchain gcc paths ====="
-          ls -l toolchain-mipsel/toolchain-3.4.x/bin/*gcc || true
+          echo "Stopping workflow here."
           exit 0
+
 
 
       # ============================================================
