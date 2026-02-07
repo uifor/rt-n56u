@@ -140,34 +140,6 @@ jobs:
           limit-access-to-actor: true
 
       # ============================================================
-      # Sync BusyBox1.37.0 board config
-      # ============================================================ 
-      - name: Sync BusyBox board config
-        run: |
-          set -e
-
-          BB_DIR=trunk/user/busybox/busybox-1.37.0
-          BB_BOARD_CFG=trunk/configs/boards/busybox.config
-
-          if [ ! -f "$BB_BOARD_CFG" ]; then
-            echo "❌ Board BusyBox config not found: $BB_BOARD_CFG"
-            exit 1
-          fi
-
-          cd $BB_DIR
-
-          if [ ! -f .config ]; then
-            echo "⚙️ Installing board BusyBox config"
-            cp "$GITHUB_WORKSPACE/$BB_BOARD_CFG" .config
-          else
-            echo "✅ BusyBox .config already exists"
-          fi
-
-          echo "🔄 Updating BusyBox config (oldconfig)"
-          make oldconfig
-
-
-      # ============================================================
       # Build firmware
       # ============================================================
       - name: Start build
