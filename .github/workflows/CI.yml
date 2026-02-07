@@ -74,7 +74,7 @@ jobs:
             gettext automake autopoint texinfo build-essential \
             help2man pkg-config zlib1g-dev libgmp3-dev libmpc-dev \
             libmpfr-dev libncurses5-dev libltdl-dev wget libc-dev-bin \
-            p7zip-full libtool jq
+            p7zip-full libtool jq zstd
           
           # ✅ 配置 Git safe.directory，解决 Docker container 中的权限问题
           git config --global --add safe.directory '*'
