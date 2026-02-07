@@ -90,12 +90,12 @@ jobs:
           cd toolchain-mipsel
 
           echo "📥 Attempting to download prebuilt toolchain..."
-          # 获取专用 Release 的资产 URL（固定资产名）
+          # 安全地处理 Release 不存在或无资产的情况
           ASSET_URL=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/releases/tags/prebuilt-toolchain-latest" \
-            | jq -r '.assets[] | select(.name == "prebuilt-toolchain.tar.bz2") | .url')
+            | jq -r '(.assets // []) | .[] | select(.name == "prebuilt-toolchain.tar.bz2") | .url')
 
-          if [ -n "$ASSET_URL" ] && [ "$ASSET_URL" != "null" ]; then
+          if [ -n "$ASSET_URL" ]; then
             echo "🔍 Found prebuilt toolchain, downloading..."
             curl -L -H "Accept: application/octet-stream" \
                  -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
@@ -107,9 +107,15 @@ jobs:
 
             echo "✅ Prebuilt toolchain restored successfully, skipping build"
           else
-            echo "🔄 No prebuilt toolchain available, building from source..."
+            echo "🔄 No prebuilt toolchain available (or Release not found), building from source..."
             ./clean_toolchain
             ./build_toolchain
+          fi
+
+          # 可选：额外验证工具链是否就绪（防止构建失败却继续）
+          if [ ! -f "mipsel-linux-uclibc-gcc" ] && [ ! -f "usr/bin/mipsel-linux-gcc" ]; then
+            echo "❌ Toolchain binary not found after preparation!"
+            exit 1
           fi
 
           echo "✅ Toolchain ready"
