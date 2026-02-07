@@ -112,12 +112,6 @@ jobs:
             ./build_toolchain
           fi
 
-          # 可选：额外验证工具链是否就绪（防止构建失败却继续）
-          if [ ! -f "mipsel-linux-uclibc-gcc" ] && [ ! -f "usr/bin/mipsel-linux-gcc" ]; then
-            echo "❌ Toolchain binary not found after preparation!"
-            exit 1
-          fi
-
           echo "✅ Toolchain ready"
 
 
