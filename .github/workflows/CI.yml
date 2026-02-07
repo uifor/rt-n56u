@@ -84,35 +84,42 @@ jobs:
       # =========================================================
       # 3️⃣ Prepare Padavan toolchain（关键步骤）
       # =========================================================
-      - name: Prepare Padavan toolchain
+      # - name: Prepare Padavan toolchain
+      #   run: |
+      #     set -e
+      #     cd toolchain-mipsel
+
+      #     echo "📥 Attempting to download prebuilt toolchain..."
+      #     # 安全地处理 Release 不存在或无资产的情况
+      #     ASSET_URL=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+      #       "https://api.github.com/repos/${{ github.repository }}/releases/tags/prebuilt-toolchain-latest" \
+      #       | jq -r '(.assets // []) | .[] | select(.name == "prebuilt-toolchain.tar.bz2") | .url')
+
+      #     if [ -n "$ASSET_URL" ]; then
+      #       echo "🔍 Found prebuilt toolchain, downloading..."
+      #       curl -L -H "Accept: application/octet-stream" \
+      #            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+      #            -o /tmp/prebuilt-toolchain.tar.bz2 "$ASSET_URL"
+
+      #       echo "📦 Extracting prebuilt toolchain..."
+      #       tar -xjf /tmp/prebuilt-toolchain.tar.bz2 -C .
+      #       rm -f /tmp/prebuilt-toolchain.tar.bz2
+
+      #       echo "✅ Prebuilt toolchain restored successfully, skipping build"
+      #     else
+      #       echo "🔄 No prebuilt toolchain available (or Release not found), building from source..."
+      #       ./clean_toolchain
+      #       ./build_toolchain
+      #     fi
+
+      #     echo "✅ Toolchain ready"
+      - name: Download prebuilt toolchain
         run: |
           set -e
-          cd toolchain-mipsel
-
-          echo "📥 Attempting to download prebuilt toolchain..."
-          # 安全地处理 Release 不存在或无资产的情况
-          ASSET_URL=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/tags/prebuilt-toolchain-latest" \
-            | jq -r '(.assets // []) | .[] | select(.name == "prebuilt-toolchain.tar.bz2") | .url')
-
-          if [ -n "$ASSET_URL" ]; then
-            echo "🔍 Found prebuilt toolchain, downloading..."
-            curl -L -H "Accept: application/octet-stream" \
-                 -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                 -o /tmp/prebuilt-toolchain.tar.bz2 "$ASSET_URL"
-
-            echo "📦 Extracting prebuilt toolchain..."
-            tar -xjf /tmp/prebuilt-toolchain.tar.bz2 -C .
-            rm -f /tmp/prebuilt-toolchain.tar.bz2
-
-            echo "✅ Prebuilt toolchain restored successfully, skipping build"
-          else
-            echo "🔄 No prebuilt toolchain available (or Release not found), building from source..."
-            ./clean_toolchain
-            ./build_toolchain
-          fi
-
-          echo "✅ Toolchain ready"
+          cd toolchain-mipsel  # 或你的源码目录
+          wget https://github.com/simonchen/padavan-4.4/releases/download/toolchain/mipsel-linux-uclibc-gcc10.tar.xz
+          tar -xJf mipsel-linux-uclibc-gcc10.tar.xz
+          echo "✅ Prebuilt toolchain ready"
 
 
       # ============================================================
@@ -192,54 +199,54 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # ============================================================
-      # Delete old prebuilt toolchain release (if exists)
-      # ============================================================
-      - name: Delete old prebuilt toolchain release
-        if: success()
-        run: |
-          set -e
-          echo "Checking for existing prebuilt-toolchain-latest release..."
-          RELEASE_ID=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/tags/prebuilt-toolchain-latest" \
-            | jq -r '.id')
+      # # ============================================================
+      # # Delete old prebuilt toolchain release (if exists)
+      # # ============================================================
+      # - name: Delete old prebuilt toolchain release
+      #   if: success()
+      #   run: |
+      #     set -e
+      #     echo "Checking for existing prebuilt-toolchain-latest release..."
+      #     RELEASE_ID=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+      #       "https://api.github.com/repos/${{ github.repository }}/releases/tags/prebuilt-toolchain-latest" \
+      #       | jq -r '.id')
 
-          if [ "$RELEASE_ID" != "null" ]; then
-            echo "Deleting old release (ID: $RELEASE_ID)..."
-            curl -X DELETE -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              "https://api.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID"
-          else
-            echo "No old release to delete"
-          fi
+      #     if [ "$RELEASE_ID" != "null" ]; then
+      #       echo "Deleting old release (ID: $RELEASE_ID)..."
+      #       curl -X DELETE -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+      #         "https://api.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID"
+      #     else
+      #       echo "No old release to delete"
+      #     fi
 
-      # ============================================================
-      # Package prebuilt toolchain
-      # ============================================================
-      - name: Package prebuilt toolchain
-        if: success()
-        run: |
-          set -e
-          cd toolchain-mipsel
-          echo "📦 Packaging toolchain..."
-          tar -cjf ${{ env.images_dir }}/prebuilt-toolchain.tar.bz2 .
+      # # ============================================================
+      # # Package prebuilt toolchain
+      # # ============================================================
+      # - name: Package prebuilt toolchain
+      #   if: success()
+      #   run: |
+      #     set -e
+      #     cd toolchain-mipsel
+      #     echo "📦 Packaging toolchain..."
+      #     tar -cjf ${{ env.images_dir }}/prebuilt-toolchain.tar.bz2 .
 
-      # ============================================================
-      # Create/Update prebuilt toolchain release
-      # ============================================================
-      - name: Create prebuilt toolchain release
-        if: success()
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: prebuilt-toolchain-latest
-          name: Prebuilt Toolchain Latest
-          body: |
-            🤖 Prebuilt MIPS toolchain for Padavan CI
+      # # ============================================================
+      # # Create/Update prebuilt toolchain release
+      # # ============================================================
+      # - name: Create prebuilt toolchain release
+      #   if: success()
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     tag_name: prebuilt-toolchain-latest
+      #     name: Prebuilt Toolchain Latest
+      #     body: |
+      #       🤖 Prebuilt MIPS toolchain for Padavan CI
 
-            - Commit: ${{ github.sha }}
-            - Run: #${{ github.run_number }}
-            - Date: ${{ steps.vars.outputs.date }}
-          files: ${{ env.images_dir }}/prebuilt-toolchain.tar.bz2
-          prerelease: false   # 可改为 true 如果不想让它显示为正式 release
-          fail_on_unmatched_files: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #       - Commit: ${{ github.sha }}
+      #       - Run: #${{ github.run_number }}
+      #       - Date: ${{ steps.vars.outputs.date }}
+      #     files: ${{ env.images_dir }}/prebuilt-toolchain.tar.bz2
+      #     prerelease: false   # 可改为 true 如果不想让它显示为正式 release
+      #     fail_on_unmatched_files: true
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
