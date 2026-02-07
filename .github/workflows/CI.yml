@@ -160,6 +160,26 @@ jobs:
         with:
           limit-access-to-actor: true
 
+      - name: Show GCC versions
+        run: |
+          echo "===== Host GCC ====="
+          gcc --version || true
+
+          echo
+          echo "===== Which gcc ====="
+          which gcc || true
+
+          echo
+          echo "===== Cross GCC (mipsel) ====="
+          which mipsel-linux-uclibc-gcc || true
+          mipsel-linux-uclibc-gcc --version || true
+
+          echo
+          echo "===== Toolchain gcc paths ====="
+          ls -l toolchain-mipsel/toolchain-3.4.x/bin/*gcc || true
+          exit 0
+
+
       # ============================================================
       # Build firmware
       # ============================================================
