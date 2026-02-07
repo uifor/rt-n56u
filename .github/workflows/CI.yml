@@ -118,7 +118,16 @@ jobs:
           set -e
           cd toolchain-mipsel  # 或你的源码目录
           wget -qO- https://gitlab.com/api/v4/projects/hadzhioglu%2Fpadavan-ng/packages/generic/toolchain/latest/toolchain.tzst | tar --zstd -xf -
-          echo "✅ Prebuilt toolchain ready"
+          if [ ! -e toolchain-3.4.x ]; then
+            echo "🔧 toolchain-3.4.x not exists, creating symlink"
+            ln -s toolchain/out toolchain-3.4.x
+          fi
+
+          # 生死校验
+          [ -x toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc ] \
+            || { echo "❌ gcc missing"; exit 1; }
+
+          echo "✅ Toolchain OK"
 
 
       # ============================================================
