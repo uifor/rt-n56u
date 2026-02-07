@@ -117,8 +117,7 @@ jobs:
         run: |
           set -e
           cd toolchain-mipsel  # 或你的源码目录
-          wget https://github.com/simonchen/padavan-4.4/releases/download/toolchain/mipsel-linux-uclibc-gcc10.tar.xz
-          tar -xJf mipsel-linux-uclibc-gcc10.tar.xz
+          wget -qO- https://gitlab.com/api/v4/projects/hadzhioglu%2Fpadavan-ng/packages/generic/toolchain/latest/toolchain.tzst | tar --zstd -xf -
           echo "✅ Prebuilt toolchain ready"
 
 
