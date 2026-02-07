@@ -19,10 +19,11 @@ on:
 jobs:
   build:
     name: Padavan Build (container)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     container:
-      image: registry.gitlab.com/hadzhioglu/padavan-ng
+      image: ubuntu:20.04
+      options: --user root
 
     env:
       build_variant: ${{ matrix.build_variant }}
@@ -54,33 +55,29 @@ jobs:
         with:
           fetch-depth: 0
 
-      # ============================================================
-      # Basic sanity check
-      # ============================================================
-      - name: Show build environment
-        run: |
-          uname -a
-          gcc --version
-          make --version
-
       # =========================================================
-      # 2️⃣ Prepare build environment（推荐但不重）
+      # 2️⃣ Prepare build environment
       # =========================================================
       - name: Prepare build environment
         run: |
-          set -e
+          export DEBIAN_FRONTEND=noninteractive
+          ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime
+          echo "Etc/UTC" > /etc/timezone
 
-          echo "🕒 Fix timezone"
-          ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-          echo "Asia/Shanghai" > /etc/timezone
-
-          echo "📦 Install minimal required tools"
           apt update
+          apt install -y tzdata
+
           apt install -y \
-            wget \
-            zstd \
-            xz-utils \
-            p7zip-full
+            unzip libtool-bin curl cmake gperf \
+            gawk flex bison nano xxd \
+            fakeroot kmod cpio git python3-docutils \
+            gettext automake autopoint texinfo build-essential \
+            help2man pkg-config zlib1g-dev libgmp3-dev libmpc-dev \
+            libmpfr-dev libncurses5-dev libltdl-dev wget libc-dev-bin \
+            p7zip-full libtool jq
+          
+          # ✅ 配置 Git safe.directory，解决 Docker container 中的权限问题
+          git config --global --add safe.directory '*'
 
           echo "✅ Build environment ready"
 
@@ -90,21 +87,30 @@ jobs:
       - name: Prepare Padavan toolchain
         run: |
           set -e
-
-          echo "📥 Prepare MIPS toolchain"
           cd toolchain-mipsel
-          ./clean_toolchain
-          ./build_toolchain
 
-          # if [ -x "./dl_toolchain.sh" ]; then
-          #   sh ./dl_toolchain.sh
-          # else
-          #   echo "❌ dl_toolchain.sh not found!"
-          #   exit 1
-          # fi
+          echo "📥 Attempting to download prebuilt toolchain..."
+          # 获取专用 Release 的资产 URL（固定资产名）
+          ASSET_URL=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/prebuilt-toolchain-latest" \
+            | jq -r '.assets[] | select(.name == "prebuilt-toolchain.tar.bz2") | .url')
 
-          # echo "🔍 Verify toolchain"
-          # find . -name "mipsel-linux-uclibc-gcc" -type f
+          if [ -n "$ASSET_URL" ] && [ "$ASSET_URL" != "null" ]; then
+            echo "🔍 Found prebuilt toolchain, downloading..."
+            curl -L -H "Accept: application/octet-stream" \
+                 -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                 -o /tmp/prebuilt-toolchain.tar.bz2 "$ASSET_URL"
+
+            echo "📦 Extracting prebuilt toolchain..."
+            tar -xjf /tmp/prebuilt-toolchain.tar.bz2 -C .
+            rm -f /tmp/prebuilt-toolchain.tar.bz2
+
+            echo "✅ Prebuilt toolchain restored successfully, skipping build"
+          else
+            echo "🔄 No prebuilt toolchain available, building from source..."
+            ./clean_toolchain
+            ./build_toolchain
+          fi
 
           echo "✅ Toolchain ready"
 
@@ -183,5 +189,57 @@ jobs:
           files: |
             ${{ env.images_dir }}/*.7z
             ${{ env.images_dir }}/*.trx
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ============================================================
+      # Delete old prebuilt toolchain release (if exists)
+      # ============================================================
+      - name: Delete old prebuilt toolchain release
+        if: success()
+        run: |
+          set -e
+          echo "Checking for existing prebuilt-toolchain-latest release..."
+          RELEASE_ID=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/prebuilt-toolchain-latest" \
+            | jq -r '.id')
+
+          if [ "$RELEASE_ID" != "null" ]; then
+            echo "Deleting old release (ID: $RELEASE_ID)..."
+            curl -X DELETE -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID"
+          else
+            echo "No old release to delete"
+          fi
+
+      # ============================================================
+      # Package prebuilt toolchain
+      # ============================================================
+      - name: Package prebuilt toolchain
+        if: success()
+        run: |
+          set -e
+          cd toolchain-mipsel
+          echo "📦 Packaging toolchain..."
+          tar -cjf ${{ env.images_dir }}/prebuilt-toolchain.tar.bz2 .
+
+      # ============================================================
+      # Create/Update prebuilt toolchain release
+      # ============================================================
+      - name: Create prebuilt toolchain release
+        if: success()
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: prebuilt-toolchain-latest
+          name: Prebuilt Toolchain Latest
+          body: |
+            🤖 Prebuilt MIPS toolchain for Padavan CI
+
+            - Commit: ${{ github.sha }}
+            - Run: #${{ github.run_number }}
+            - Date: ${{ steps.vars.outputs.date }}
+          files: ${{ env.images_dir }}/prebuilt-toolchain.tar.bz2
+          prerelease: false   # 可改为 true 如果不想让它显示为正式 release
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
