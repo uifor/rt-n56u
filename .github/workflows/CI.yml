@@ -66,6 +66,7 @@ jobs:
             bash -lc '
               set -euo pipefail
               mkdir -p /opt/images
+              ln -sfn /opt/rt-n56u/toolchain-mipsel/toolchain-3.4.x /workdir/toolchain-mipsel/toolchain-3.4.x
               for m in ${TARGETS}; do
                 fakeroot ./build_firmware_ci "${m}"
                 cp -f images/*.trx /opt/images/"${m}".trx
