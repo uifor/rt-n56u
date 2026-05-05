@@ -1,29 +1,29 @@
 name: CI
 
-# Controls when the action will run. 
-on: 
+on:
   push:
   pull_request:
   workflow_dispatch:
     inputs:
       debug_enabled:
-        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'     
+        description: "Run the build with tmate debugging enabled"
         required: false
-        default: 'no'
+        default: "no"
   release:
     types: [published]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build:
-    name: build
-    runs-on: ubuntu-20.04
+    name: ${{ matrix.build_variant }}
+    runs-on: ubuntu-22.04
     if: ${{ !(github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) }}
     env:
-      build_variant: ${{ matrix.build_variant }}
-      targets: ${{ matrix.targets }}
-      images_dir: /opt/images
+      BUILD_VARIANT: ${{ matrix.build_variant }}
+      TARGETS: ${{ matrix.targets }}
+      IMAGES_DIR: ${{ github.workspace }}/artifacts/${{ matrix.build_variant }}
+      BUILD_IMAGE: padavan-builder:${{ github.run_id }}-${{ matrix.build_variant }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - build_variant: "mt7620"
@@ -34,50 +34,86 @@ jobs:
             targets: "K2P_nano K2P DIR-878 RM2100 CR660x"
           - build_variant: "mt7621-usb"
             targets: "XY-C1 JCG-836PRO JCG-AC860M JCG-Y2 DIR-882 A3004NS MSG1500 WR1200JS MI-R3G NEWIFI3 B70"
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Prepare environment
-        run: |
-          sudo apt update
-          sudo apt install libtool-bin gperf python3-docutils autopoint gettext
+      - uses: actions/checkout@v4
+
+      - name: Build container image
+        run: docker build --pull -t "${BUILD_IMAGE}" .
+
+      - name: Prepare artifact directory
+        run: mkdir -p "${IMAGES_DIR}"
+
       - name: Run shellcheck
-        run: sh ./trunk/tools/shellcheck.sh
-      - name: Prepare toolchain
         run: |
-          cd toolchain-mipsel
-          sh dl_toolchain.sh
+          docker run --rm \
+            -v "${GITHUB_WORKSPACE}:/workdir" \
+            -w /workdir \
+            "${BUILD_IMAGE}" \
+            sh ./trunk/tools/shellcheck.sh
+
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled == 'yes' }}
         with:
           limit-access-to-actor: true
-      - name: Start build
+
+      - name: Build firmware
         run: |
-          cd trunk
-          mkdir -p ${images_dir}
-          for m in $targets; do fakeroot ./build_firmware_ci $m; \
-          if [ $? = 0 ]; then cp -f images/*.trx ${images_dir}/$m.trx; else exit 1; fi; \
-          ./clear_tree_simple >/dev/null 2>&1; done
+          docker run --rm \
+            -v "${GITHUB_WORKSPACE}:/workdir" \
+            -v "${IMAGES_DIR}:/opt/images" \
+            -w /workdir/trunk \
+            -e HOME=/tmp \
+            -e TARGETS="${TARGETS}" \
+            "${BUILD_IMAGE}" \
+            bash -lc '
+              set -euo pipefail
+              mkdir -p /opt/images
+              for m in ${TARGETS}; do
+                fakeroot ./build_firmware_ci "${m}"
+                cp -f images/*.trx /opt/images/"${m}".trx
+                ./clear_tree_simple >/dev/null 2>&1
+              done
+            '
+
       - name: Create archive
         if: ${{ github.event_name != 'release' && success() }}
         run: |
-          ls -lh ${images_dir}
-          GIT_VERSION=`git rev-parse --short=7 HEAD 2>/dev/null` && [ -n "$GIT_VERSION" ] && \
-          image_name=images_${build_variant}_${GIT_VERSION} || image_name=images_${build_variant}
-          cd ${images_dir}; md5sum *.trx |tee md5sum.txt; 7z a -mx=9 ${image_name}.7z ./*
-          echo "image_name=${image_name}" >> $GITHUB_ENV
+          set -euo pipefail
+          ls -lh "${IMAGES_DIR}"
+          GIT_VERSION="$(git rev-parse --short=7 HEAD 2>/dev/null || true)"
+          if [ -n "${GIT_VERSION}" ]; then
+            IMAGE_NAME="images_${BUILD_VARIANT}_${GIT_VERSION}"
+          else
+            IMAGE_NAME="images_${BUILD_VARIANT}"
+          fi
+          docker run --rm \
+            -v "${IMAGES_DIR}:/opt/images" \
+            -e IMAGE_NAME="${IMAGE_NAME}" \
+            "${BUILD_IMAGE}" \
+            bash -lc '
+              set -euo pipefail
+              7z a -mx=9 "/opt/images/${IMAGE_NAME}.7z" /opt/images/*.trx
+              md5sum /opt/images/*.trx | tee /opt/images/md5sum.txt
+            '
+          echo "IMAGE_NAME=${IMAGE_NAME}" >> "${GITHUB_ENV}"
+
       - name: Upload images to Artifact
         if: ${{ github.event_name != 'release' && success() }}
-        uses: actions/upload-artifact@v2.2.1
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.image_name }}
-          path: ${{ env.images_dir }}/*.7z
+          name: ${{ env.IMAGE_NAME }}
+          path: |
+            ${{ env.IMAGES_DIR }}/*.7z
+            ${{ env.IMAGES_DIR }}/md5sum.txt
+
       - name: Upload images to Releases
         if: ${{ github.event_name == 'release' && success() }}
-        uses: svenstaro/upload-release-action@2.2.0
+        uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ env.images_dir }}/*.trx
+          file: ${{ env.IMAGES_DIR }}/*.trx
           tag: ${{ github.ref }}
           overwrite: true
           file_glob: true
