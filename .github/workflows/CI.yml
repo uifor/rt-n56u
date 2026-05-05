@@ -1,38 +1,104 @@
 name: CI
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
     inputs:
+      target:
+        description: "Select a preset model or choose custom"
+        required: true
+        default: "K2P"
+        type: choice
+        options:
+          - K2P
+          - K2P_nano
+          - MI-3C
+          - custom
+      custom_target:
+        description: "Custom model name from trunk/configs/templates, used when target=custom"
+        required: false
+        type: string
+      upload_to_release:
+        description: "Upload build output to GitHub Releases"
+        required: false
+        default: false
+        type: boolean
+      release_tag:
+        description: "Release tag to create/update, leave blank to auto-generate"
+        required: false
+        type: string
       debug_enabled:
         description: "Run the build with tmate debugging enabled"
         required: false
-        default: "no"
-  release:
-    types: [published]
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
 
 jobs:
   build:
-    name: ${{ matrix.build_variant }}
+    name: Build ${{ github.event.inputs.target }}
     runs-on: ubuntu-22.04
-    if: ${{ !(github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) }}
-    env:
-      BUILD_VARIANT: ${{ matrix.build_variant }}
-      TARGETS: ${{ matrix.targets }}
-      IMAGES_DIR: ${{ github.workspace }}/artifacts/${{ matrix.build_variant }}
-      BUILD_IMAGE: padavan-builder:${{ github.run_id }}-${{ matrix.build_variant }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - build_variant: "mt7628"
-            targets: "MI-3C"
-          - build_variant: "mt7621"
-            targets: "K2P_nano K2P"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+
+      - name: Resolve build target
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event.inputs.target }}" = "custom" ]; then
+            TARGET_NAME="${{ github.event.inputs.custom_target }}"
+          else
+            TARGET_NAME="${{ github.event.inputs.target }}"
+          fi
+
+          if [ -z "${TARGET_NAME}" ]; then
+            echo "Target name is empty."
+            exit 1
+          fi
+
+          CONFIG_FILE="trunk/configs/templates/${TARGET_NAME}.config"
+          if [ ! -f "${CONFIG_FILE}" ]; then
+            echo "Config not found: ${CONFIG_FILE}"
+            exit 1
+          fi
+
+          CONFIG_PRODUCT="$(sed -n 's/^CONFIG_PRODUCT=//p' "${CONFIG_FILE}" | head -n1)"
+          case "${CONFIG_PRODUCT}" in
+            MT7620)
+              BUILD_VARIANT="mt7620"
+              ;;
+            MT7621)
+              BUILD_VARIANT="mt7621"
+              ;;
+            MT7628)
+              BUILD_VARIANT="mt7628"
+              ;;
+            *)
+              echo "Unsupported CONFIG_PRODUCT '${CONFIG_PRODUCT}' in ${CONFIG_FILE}"
+              exit 1
+              ;;
+          esac
+
+          SAFE_TARGET="$(printf '%s' "${TARGET_NAME}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9._-' '-')"
+          IMAGES_DIR="${GITHUB_WORKSPACE}/artifacts/${SAFE_TARGET}"
+          BUILD_IMAGE="padavan-builder:${GITHUB_RUN_ID}-${SAFE_TARGET}"
+
+          if [ "${{ github.event.inputs.upload_to_release }}" = "true" ]; then
+            RELEASE_TAG_INPUT="${{ github.event.inputs.release_tag }}"
+            if [ -n "${RELEASE_TAG_INPUT}" ]; then
+              RELEASE_TAG="${RELEASE_TAG_INPUT}"
+            else
+              RELEASE_TAG="manual-${SAFE_TARGET}-${GITHUB_RUN_NUMBER}"
+            fi
+            echo "RELEASE_TAG=${RELEASE_TAG}" >> "${GITHUB_ENV}"
+          fi
+
+          echo "TARGET_NAME=${TARGET_NAME}" >> "${GITHUB_ENV}"
+          echo "BUILD_VARIANT=${BUILD_VARIANT}" >> "${GITHUB_ENV}"
+          echo "IMAGES_DIR=${IMAGES_DIR}" >> "${GITHUB_ENV}"
+          echo "BUILD_IMAGE=${BUILD_IMAGE}" >> "${GITHUB_ENV}"
 
       - name: Build container image
         run: docker build --pull -t "${BUILD_IMAGE}" .
@@ -50,7 +116,7 @@ jobs:
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled == 'yes' }}
+        if: ${{ github.event.inputs.debug_enabled == 'true' }}
         with:
           limit-access-to-actor: true
 
@@ -61,29 +127,25 @@ jobs:
             -v "${IMAGES_DIR}:/opt/images" \
             -w /workdir/trunk \
             -e HOME=/tmp \
-            -e TARGETS="${TARGETS}" \
+            -e TARGET_NAME="${TARGET_NAME}" \
             "${BUILD_IMAGE}" \
             bash -lc '
               set -euo pipefail
               mkdir -p /opt/images
               ln -sfn /opt/rt-n56u/toolchain-mipsel/toolchain-3.4.x /workdir/toolchain-mipsel/toolchain-3.4.x
-              for m in ${TARGETS}; do
-                fakeroot ./build_firmware_ci "${m}"
-                cp -f images/*.trx /opt/images/"${m}".trx
-                ./clear_tree_simple >/dev/null 2>&1
-              done
+              fakeroot ./build_firmware_ci "${TARGET_NAME}"
+              cp -f images/*.trx /opt/images/"${TARGET_NAME}".trx
             '
 
       - name: Create archive
-        if: ${{ github.event_name != 'release' && success() }}
         run: |
           set -euo pipefail
           ls -lh "${IMAGES_DIR}"
           GIT_VERSION="$(git rev-parse --short=7 HEAD 2>/dev/null || true)"
           if [ -n "${GIT_VERSION}" ]; then
-            IMAGE_NAME="images_${BUILD_VARIANT}_${GIT_VERSION}"
+            IMAGE_NAME="images_${TARGET_NAME}_${GIT_VERSION}"
           else
-            IMAGE_NAME="images_${BUILD_VARIANT}"
+            IMAGE_NAME="images_${TARGET_NAME}"
           fi
           docker run --rm \
             -v "${IMAGES_DIR}:/opt/images" \
@@ -97,20 +159,22 @@ jobs:
           echo "IMAGE_NAME=${IMAGE_NAME}" >> "${GITHUB_ENV}"
 
       - name: Upload images to Artifact
-        if: ${{ github.event_name != 'release' && success() }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.IMAGE_NAME }}
           path: |
             ${{ env.IMAGES_DIR }}/*.7z
+            ${{ env.IMAGES_DIR }}/*.trx
             ${{ env.IMAGES_DIR }}/md5sum.txt
 
       - name: Upload images to Releases
-        if: ${{ github.event_name == 'release' && success() }}
-        uses: svenstaro/upload-release-action@v2
+        if: ${{ github.event.inputs.upload_to_release == 'true' }}
+        uses: softprops/action-gh-release@v2
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ env.IMAGES_DIR }}/*.trx
-          tag: ${{ github.ref }}
-          overwrite: true
-          file_glob: true
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: ${{ env.RELEASE_TAG }}
+          generate_release_notes: true
+          files: |
+            ${{ env.IMAGES_DIR }}/*.7z
+            ${{ env.IMAGES_DIR }}/*.trx
+            ${{ env.IMAGES_DIR }}/md5sum.txt
