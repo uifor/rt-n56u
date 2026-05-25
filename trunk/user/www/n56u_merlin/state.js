@@ -11,6 +11,11 @@ var newformat_systime = uptimeStr.substring(8,11) + " " + uptimeStr.substring(5,
 var systime_millsec = Date.parse(newformat_systime); // millsec from system
 var JS_timeObj = new Date(); // 1970.1.1
 var cookie_pref = 'n56u_cookie_';
+var merlin_productid = '<% nvram_get_x("", "productid"); %>';
+var merlin_firmver = '<% nvram_get_x("", "firmver_sub"); %>';
+var merlin_preferred_lang = '<% nvram_get_x("", "preferred_lang"); %>';
+var merlin_ssid_2g = '<% nvram_char_to_ascii("", "rt_ssid"); %>';
+var merlin_ssid_5g = '<% nvram_char_to_ascii("", "wl_ssid"); %>';
 
 var uagent = navigator.userAgent.toLowerCase();
 var is_ie11p = (/trident\/7\./).test(uagent);
@@ -624,6 +629,8 @@ function show_footer(){
 
 function show_top_status(){
 	var $j = jQuery.noConflict();
+	var wifi2Guest = (sysinfo && sysinfo.wifi2) ? parseInt(sysinfo.wifi2.guest) : 0;
+	var wifi5Guest = (sysinfo && sysinfo.wifi5) ? parseInt(sysinfo.wifi5.guest) : 0;
 
 	$j("#cpu_info").click(function(){
 		$j("#main_info").hide();
@@ -637,12 +644,48 @@ function show_top_status(){
 	id_system_info = setTimeout('get_system_info()', 2000);
 	showSystemInfo({busy: 0, user: 0, nice: 0, system: 0, idle: 0, iowait: 0, irq: 0, sirq: 0}, 0);
 
-	showtext($("firmver"), '<% nvram_get_x("",  "firmver_sub"); %>');
+	showtext($("firmver"), merlin_firmver);
+	showtext($("modelName_top"), merlin_productid || '<#Web_Title#>');
+
+	if($("sw_mode_span"))
+		$("sw_mode_span").innerHTML = (sw_mode == "3") ? "AP" : "Router";
+
+	if($("elliptic_ssid_2g"))
+		$("elliptic_ssid_2g").innerHTML = decodeSSID(merlin_ssid_2g);
+	if($("elliptic_ssid_5g"))
+		$("elliptic_ssid_5g").innerHTML = decodeSSID(merlin_ssid_5g);
+
+	if($("select_lang"))
+		$("select_lang").value = merlin_preferred_lang;
+
+	$j("#connect_status")
+		.removeClass("connectstatuson connectstatusoff")
+		.addClass(new_wan_internet == "1" ? "connectstatuson" : "connectstatusoff");
+	$j("#wifi_hw_sw_status")
+		.removeClass("wifihwswstatuson wifihwswstatuspartial wifihwswstatusoff")
+		.addClass((support_2g_radio() || support_5g_radio()) ? "wifihwswstatuson" : "wifihwswstatusoff");
+	$j("#guestnetwork_status")
+		.removeClass("guestnetworkstatuson guestnetworkstatusoff")
+		.addClass((wifi2Guest > 0 || wifi5Guest > 0) ? "guestnetworkstatuson" : "guestnetworkstatusoff");
+	$j("#usb_status")
+		.removeClass("usbstatuson usbstatusoff")
+		.addClass(support_usb() ? "usbstatuson" : "usbstatusoff");
 
 	/*if(sw_mode == "3")
 		$("sw_mode_span").innerHTML = "AP";
 	else
 		$("sw_mode_span").innerHTML = "Router";*/
+}
+
+function decodeSSID(value){
+	if(value == null || value == "")
+		return "";
+	try{
+		return decodeURIComponent(value);
+	}
+	catch(e){
+		return value;
+	}
 }
 
 function go_setting(band){
@@ -693,7 +736,8 @@ function show_loading_obj(){
 }
 
 function submit_language(){
-	if($("select_lang").value != $("preferred_lang").value){
+	var preferredObj = $("preferred_lang") || (document.titleForm ? document.titleForm.preferred_lang : null);
+	if($("select_lang").value != preferredObj.value){
 		showLoading();
 		
 		with(document.titleForm){
@@ -704,7 +748,7 @@ function submit_language(){
 			else
 				current_page.value = location.pathname;
 			
-			preferred_lang.value = $("select_lang").value;
+			preferredObj.value = $("select_lang").value;
 			flag.value = "set_language";
 			
 			submit();

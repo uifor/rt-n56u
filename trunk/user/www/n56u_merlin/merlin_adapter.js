@@ -38,6 +38,14 @@
 		return String(value || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;");
 	}
 
+	function escapeHtml(value){
+		return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+	}
+
+	function hasPage(url){
+		return !!url;
+	}
+
 	function renderMenuItem(title, url, iconClass, selected, idPrefix){
 		var klass = selected ? "menu menuClicked" : "menu";
 		var target = url || "javascript:void(0)";
@@ -47,6 +55,13 @@
 		code += ' id="' + idPrefix + '_menu">';
 		code += '<table><tr><td><div class="menu_Icon ' + iconClass + '"></div></td>';
 		code += '<td class="menu_Desc"><a href="' + target + '">' + title + '</a></td></tr></table></div>\n';
+		return code;
+	}
+
+	function renderQisMenu(){
+		var code = '<div class="menu menu_QIS_title" id="QIS_wizard_menu" onclick="location.href=\'/index.asp\'" title="/index.asp">';
+		code += '<table><tr><td><div class="menu_Icon menu_QIS"></div></td>';
+		code += '<td class="menu_Desc"><a href="/index.asp"><#QIS#></a></td></tr></table></div>\n';
 		return code;
 	}
 
@@ -149,13 +164,16 @@
 	}
 
 	function renderMainMenu(L1, L2){
-		var code = '<div style="margin-top:-172px">';
+		var code = '<div class="merlin-leftnav">';
+		code += renderQisMenu();
+		code += '<div class="menu_Split menu_Split_general"><table width="192px" height="30px"><tbody><tr><td>General</td></tr></tbody></table></div>';
 		for(var i = 1; i < menuL1_title.length; i++){
 			if(menuL1_title[i] == "")
 				continue;
 			var selected = (L1 == i && L2 <= 0);
 			var icon = menuIconMap[i] || "menu_Setting";
-			code += renderMenuItem(menuL1_title[i], selected ? "" : menuL1_link[i], icon, selected, "level1_" + i);
+			if(hasPage(menuL1_link[i]))
+				code += renderMenuItem(menuL1_title[i], selected ? "" : menuL1_link[i], icon, selected, "level1_" + i);
 		}
 		code += '<div class="menu_Split"><table width="192px" height="30px"><tbody><tr><td><#menu5#></td></tr></tbody></table></div>';
 		return code + "</div>";
@@ -193,17 +211,39 @@
 
 	window.show_banner = function(){
 		var code = '';
-		code += '<div class="banner1">';
-		code += '<table width="998" border="0" align="center" cellpadding="0" cellspacing="0"><tr>';
-		code += '<td class="top-logo"><a href="/index.asp"><div><#Web_Title#></div></a></td>';
-		code += '<td align="right" valign="top">';
-		code += '<table border="0" cellpadding="0" cellspacing="0" style="margin-top:8px;margin-right:16px;">';
-		code += '<tr><td align="right" class="top-messagebold"><#General_x_FirmwareVersion_itemname#>: <a href="/Advanced_FirmwareUpgrade_Content.asp"><span id="firmver" class="time"></span></a></td></tr>';
-		code += '<tr><td align="right" style="padding-top:6px;">';
-		code += '<input class="button_gen" type="button" value="<#CTL_Commit#>" onclick="commit();" style="min-width:88px;height:26px;"> ';
-		code += '<input class="button_gen" type="button" value="<#t1Logout#>" onclick="logout();" style="min-width:72px;height:26px;"> ';
-		code += '<input class="button_gen" type="button" value="<#BTN_REBOOT#>" onclick="reboot();" style="min-width:72px;height:26px;">';
-		code += '</td></tr></table></td></tr></table></div>';
+		var product = escapeHtml(window.merlin_productid || "<#Web_Title#>");
+		code += '<form method="post" name="titleForm" id="titleForm" action="/start_apply.htm" target="hidden_frame">';
+		code += '<input type="hidden" name="current_page" value="">';
+		code += '<input type="hidden" name="sid_list" value="LANGUAGE;">';
+		code += '<input type="hidden" name="action_mode" value=" Apply ">';
+		code += '<input type="hidden" name="preferred_lang" id="preferred_lang" value="' + escapeAttr(window.merlin_preferred_lang || "") + '">';
+		code += '<input type="hidden" name="flag" value="">';
+		code += '</form>';
+		code += '<div class="banner1 merlin-banner" align="center">';
+		code += '<img src="images/New_ui/asustitle.png" width="218" height="54" align="left" alt="ASUS">';
+		code += '<div class="merlin-model-wrap" align="center"><span id="modelName_top" onclick="this.focus();" class="modelName_top">' + product + '</span></div>';
+		code += '<div class="merlin-powered" align="left"><span><a href="https://www.asuswrt-merlin.net/" target="_blank" rel="noreferrer"><img src="images/merlin-logo.png" alt="Powered by Asuswrt-Merlin"></a></span></div>';
+		code += '<a href="javascript:logout();"><div class="titlebtn merlin-titlebtn" align="center"><span><#t1Logout#></span></div></a>';
+		code += '<a href="javascript:reboot();"><div class="titlebtn merlin-titlebtn merlin-rebootbtn" align="center"><span><#BTN_REBOOT#></span></div></a>';
+		code += '<div class="merlin-commit"><input class="button_gen" type="button" id="commit_btn" value="<#CTL_Commit#>" onclick="commit();"></div>';
+		code += '<div class="merlin-language"><select id="select_lang" name="select_lang" onchange="submit_language();">';
+		code += '<option value="EN">English</option><option value="CN">Chinese</option><option value="TW">Traditional</option><option value="JP">Japanese</option><option value="RU">Russian</option>';
+		code += '</select></div>';
+		code += '</div>';
+		code += '<div class="statusBar minup_bg merlin-statusbar">';
+		code += '<div class="merlin-status-inner">';
+		code += '<div class="merlin-status-text">';
+		code += '<div class="titledown"><span><#menu5_6_1_title#>:</span><span class="title_link" style="text-decoration:none;" id="op_link"><a href="/Advanced_OperationMode_Content.asp" style="color:white"><span id="sw_mode_span" style="text-decoration:underline;"></span></a></span>';
+		code += '<span>Firmware:</span><a href="/Advanced_FirmwareUpgrade_Content.asp" style="color:white;"><span id="firmver" class="title_link"></span></a></div>';
+		code += '<div id="ssidTitle" class="titledown">SSID:<span onclick="go_setting(2)" title="2.4GHz" id="elliptic_ssid_2g" class="title_link"></span><span onclick="go_setting(5)" title="5GHz" id="elliptic_ssid_5g" class="title_link"></span></div>';
+		code += '</div>';
+		code += '<div id="status_block" class="merlin-status-icons">';
+		code += '<div id="wifi_hw_sw_status" class="wifihwswstatusoff"></div>';
+		code += '<div id="guestnetwork_status" class="guestnetworkstatusoff"></div>';
+		code += '<div id="connect_status" class="connectstatusoff"></div>';
+		code += '<div id="usb_status" class="usbstatusoff"></div>';
+		code += '</div>';
+		code += '</div></div>';
 		byId("TopBanner").innerHTML = code;
 
 		show_loading_obj();
