@@ -54,24 +54,7 @@ function clearLog(){
 }
 </script>
 <style>
-.status_log_area {
-	width: 100%;
-	height: 377px;
-	box-sizing: border-box;
-	font-family: "Courier New", Courier, mono;
-	font-size: 13px;
-	background: #111;
-	color: #EEE;
-	border: 1px solid #6b8fa3;
-}
-.status_time {
-	display: inline-block;
-	margin-left: 10px;
-	padding: 4px 8px;
-	color: #FFF;
-	background: #2f3d42;
-	border: 1px solid #6b8fa3;
-}
+.status_log_area {height:377px;}
 </style>
 </head>
 

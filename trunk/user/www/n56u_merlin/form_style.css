@@ -93,6 +93,15 @@ html::-webkit-scrollbar-track{
 .FormTitle tbody{
 	line-height:180%;
 }
+.FormTitle .container{
+	box-sizing:border-box;
+	width:100%;
+	padding:0 10px 16px 10px;
+}
+.FormTitle .container > div:first-child{
+	height:9px;
+	line-height:9px;
+}
 .FormTable{
 	font-size:12px;
 	font-family:Arial, Helvetica, MS UI Gothic, MS P Gothic, Microsoft Yahei UI, sans-serif;
@@ -298,6 +307,23 @@ html::-webkit-scrollbar-track{
 	position:absolute;
 	z-index:50;
 }
+.status_log_area{
+	box-sizing:border-box;
+	width:100%;
+	font-family:"Courier New", Courier, mono;
+	font-size:13px;
+	color:#EEEEEE;
+	background:#111819;
+	border:1px solid #6b8fa3;
+}
+.status_time{
+	display:inline-block;
+	margin-left:10px;
+	padding:4px 8px;
+	color:#FFFFFF;
+	background:#2f3d42;
+	border:1px solid #6b8fa3;
+}
 
 /* for Table (for Add List) */
 .FormTable_table{
@@ -450,6 +476,42 @@ html::-webkit-scrollbar-track{
 	font-family: Arial, Helvetica, MS UI Gothic, MS P Gothic, Microsoft Yahei UI, sans-serif;
 	font-size:12px;
 	padding-left:2px;
+}
+.FormTable input[type="text"],
+.FormTable input[type="password"],
+.FormTable select,
+.FormTable textarea,
+.FormTable_table input[type="text"],
+.FormTable_table input[type="password"],
+.FormTable_table select,
+.FormTable_table textarea{
+	box-sizing:border-box;
+	min-height:23px;
+	color:#FFFFFF;
+	background:#596E74;
+	border:1px solid #929EA1;
+	font-family:Arial, Helvetica, MS UI Gothic, MS P Gothic, Microsoft Yahei UI, sans-serif;
+	font-size:12px;
+}
+.FormTable input[type="text"],
+.FormTable input[type="password"],
+.FormTable_table input[type="text"],
+.FormTable_table input[type="password"]{
+	padding-left:5px;
+}
+.FormTable select,
+.FormTable_table select{
+	padding-left:2px;
+}
+.FormTable textarea,
+.FormTable_table textarea{
+	line-height:140%;
+}
+.FormTable input[disabled],
+.FormTable select[disabled],
+.FormTable textarea[disabled]{
+	color:#AAAAAA;
+	background:#3f4f54;
 }
 
 .input_option{
@@ -1267,7 +1329,7 @@ font-family:Arial, Helvetica, MS UI Gothic, MS P Gothic, Microsoft Yahei UI, san
 font-size:16px;
 color:#FFFFFF;
 margin-left:5px;
-margin-bottom:10px;
+margin-bottom:8px;
 font-weight: bolder;
 }
 .formfonttitle_nwm{
@@ -1291,7 +1353,8 @@ padding-top:1px;
 	font-size:13px;
 	color:#FFFFFF;
 	margin-left:5px;
-	margin-bottom:10px;
+	margin-bottom:12px;
+	line-height:160%;
 }
 
 .formlinkfont{
@@ -2305,7 +2368,7 @@ padding-top:1px;
 	background: -o-linear-gradient(#32393B 0%, #32393B 20%, #667881 80%, #667881 100%);
 	background: linear-gradient(#32393B 0%, #32393B 20%, #667881 80%,#667881 100%);
 	height: 2px;
-	width: 740px;
+	width: 100%;
 	margin: 1px 0;
 }
 

@@ -86,16 +86,7 @@ function set_mib_data(){
 }
 </script>
 <style>
-.status_log_area {
-	width: 100%;
-	height: 403px;
-	box-sizing: border-box;
-	font-family: "Courier New", Courier, mono;
-	font-size: 13px;
-	background: #111;
-	color: #EEE;
-	border: 1px solid #6b8fa3;
-}
+.status_log_area {height:403px;}
 </style>
 </head>
 

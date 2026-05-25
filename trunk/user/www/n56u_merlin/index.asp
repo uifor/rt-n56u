@@ -560,84 +560,6 @@ $j(document).ready(function(){
 	}
 		.progress-warning .bar{ background: #F89406; }
 		.progress-danger .bar{ background: #B94A48; }
-		.index_status{
-			font-family: Verdana, Arial, Helvetica, MS UI Gothic, MS P Gothic, Microsoft Yahei UI, sans-serif;
-			font-weight: bold;
-		}
-		.NM_table{
-			width: 740px;
-			min-height: 820px;
-		}
-		.mapNode{
-			cursor: pointer;
-			transition: filter .15s ease-out, outline-color .15s ease-out;
-		}
-		.mapNode-active{
-			outline: 2px solid #9fd8ff;
-			outline-offset: -2px;
-			filter: brightness(1.08);
-		}
-		.mapStatus-on,
-		.mapStatus-warn,
-		.mapStatus-off{
-			display: inline-block;
-			min-width: 52px;
-			padding: 3px 8px;
-			border-radius: 10px;
-			font-size: 11px;
-			font-weight: bold;
-			line-height: 14px;
-			color: #FFF;
-		}
-		.mapStatus-on{ background-color: #2f855a; }
-		.mapStatus-warn{ background-color: #b7791f; }
-		.mapStatus-off{ background-color: #b94a48; }
-		.mapText-on{ color: #9fd8ff; }
-		.mapText-warn{ color: #ffd36a; }
-		.mapText-off{ color: #ff8f8f; }
-		.mapLine-on{
-			width: 3px;
-			height: 35px;
-			margin: 0 auto;
-			background: #76b900;
-			box-shadow: 0 0 8px #76b900;
-		}
-		.mapLine-warn{
-			width: 3px;
-			height: 35px;
-			margin: 0 auto;
-			background: #ffcc00;
-			box-shadow: 0 0 8px #ffcc00;
-		}
-		.mapLine-off{
-			width: 3px;
-			height: 35px;
-			margin: 0 auto;
-			background: #9b2c2c;
-		}
-		.mapDeviceCell{
-			width: 160px;
-			padding-bottom: 14px;
-		}
-		.mapDeviceIcon{
-			margin: 18px auto 6px auto;
-		}
-		.mapDeviceTitle{
-			font: bold 13px Verdana, Arial, Helvetica, MS UI Gothic, MS P Gothic, Microsoft Yahei UI, sans-serif;
-			color: #FFF;
-			margin-top: 4px;
-		}
-		.mapDeviceStatus{
-			min-height: 22px;
-			margin-top: 8px;
-		}
-		#statusframe{
-			display: block;
-			margin-left: 0;
-			height: 760px;
-			width: 320px;
-			background-color: #2A3539;
-		}
 	</style>
 </head>
 
@@ -710,6 +632,7 @@ $j(document).ready(function(){
             </td>
             <td valign="top">
                 <div id="tabMenu"></div>
+                <div id="NM_shift"></div>
                 <div id="NM_table" class="NM_table">
                     <div id="NM_table_div">
                         <div style="width:50%;float:left;">
