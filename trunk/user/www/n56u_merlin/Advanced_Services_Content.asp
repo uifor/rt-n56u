@@ -8,14 +8,15 @@
 
 <link rel="shortcut icon" href="images/favicon.ico">
 <link rel="icon" href="images/favicon.png">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/main.css">
+<link rel="stylesheet" type="text/css" href="/index_style.css">
+<link rel="stylesheet" type="text/css" href="/form_style.css">
+<link rel="stylesheet" type="text/css" href="/other.css">
 <link rel="stylesheet" type="text/css" href="/bootstrap/css/engage.itoggle.css">
 
 <script type="text/javascript" src="/jquery.js"></script>
-<script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="/bootstrap/js/engage.itoggle.min.js"></script>
 <script type="text/javascript" src="/state.js"></script>
+<script type="text/javascript" src="/merlin_adapter.js"></script>
 <script type="text/javascript" src="/general.js"></script>
 <script type="text/javascript" src="/itoggle.js"></script>
 <script type="text/javascript" src="/popup.js"></script>
@@ -269,21 +270,33 @@ function on_ttyd_link(){
     .caption-bold {
         font-weight: bold;
     }
+	.service_textarea {
+		width: 100%;
+		box-sizing: border-box;
+		font-family: "Courier New";
+		font-size: 12px;
+	}
+	.service_button {
+		display: inline-block;
+		padding: 3px 8px;
+		color: #FFFFFF;
+		background: #596e74;
+		border: 1px solid #6b8fa3;
+		cursor: pointer;
+	}
+	.service_button.alert-error {
+		background: #8a3b3b;
+		border-color: #b94a48;
+	}
+	.service_button.alert-success {
+		background: #2f855a;
+		border-color: #48a477;
+	}
 </style>
 </head>
 
-<body onload="initial();" onunLoad="return unload_body();">
-
-<div class="wrapper">
-    <div class="container-fluid" style="padding-right: 0px">
-        <div class="row-fluid">
-            <div class="span3"><center><div id="logo"></div></center></div>
-            <div class="span9" >
-                <div id="TopBanner"></div>
-            </div>
-        </div>
-    </div>
-
+<body onload="initial();" onunLoad="return unload_body();" class="bg">
+    <div id="TopBanner"></div>
     <div id="Loading" class="popup_bg"></div>
 
     <iframe name="hidden_frame" id="hidden_frame" src="" width="0" height="0" frameborder="0"></iframe>
@@ -296,33 +309,29 @@ function on_ttyd_link(){
     <input type="hidden" name="action_mode" value="">
     <input type="hidden" name="action_script" value="">
 
-    <div class="container-fluid">
-        <div class="row-fluid">
-            <div class="span3">
-                <!--Sidebar content-->
-                <!--=====Beginning of Main Menu=====-->
-                <div class="well sidebar-nav side_nav" style="padding: 0px;">
-                    <ul id="mainMenu" class="clearfix"></ul>
-                    <ul class="clearfix">
-                        <li>
-                            <div id="subMenu" class="accordion"></div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+<table class="content" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+        <td width="17">&nbsp;</td>
+        <td valign="top" width="202">
+            <div id="mainMenu"></div>
+            <div id="subMenu"></div>
+        </td>
+        <td valign="top">
+            <div id="tabMenu" class="submenuBlock"></div>
+            <table width="98%" border="0" align="left" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td align="left" valign="top">
+                        <table width="760px" border="0" cellpadding="5" cellspacing="0" class="FormTitle" id="FormTitle">
+                            <tbody>
+                                <tr>
+                                    <td bgcolor="#4D595D" valign="top">
+                                        <div class="container">
+                                            <div>&nbsp;</div>
+                                            <div class="formfonttitle"><#menu5_6#> - <#menu5_6_5#></div>
+                                            <div style="margin:10px 0 10px 5px;" class="splitLine"></div>
+                                            <div class="formfontdesc"><#Adm_Svc_desc#></div>
 
-            <div class="span9">
-                <!--Body content-->
-                <div class="row-fluid">
-                    <div class="span12">
-                        <div class="box well grad_colour_dark_blue">
-                            <h2 class="box_head round_top"><#menu5_6#> - <#menu5_6_5#></h2>
-                            <div class="round_bottom">
-                                <div class="row-fluid">
-                                    <div id="tabMenu" class="submenuBlock"></div>
-                                    <div class="alert alert-info" style="margin: 10px;"><#Adm_Svc_desc#></div>
-
-                                    <table width="100%" cellpadding="4" cellspacing="0" class="table">
+                                    <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">
                                         <tr>
                                             <th colspan="2" style="background-color: #E3E3E3;"><#Adm_System_webs#></th>
                                         </tr>
@@ -368,7 +377,7 @@ function on_ttyd_link(){
                                         </tr>
                                     </table>
 
-                                    <table width="100%" cellpadding="4" cellspacing="0" class="table" id="tbl_https_certs" style="display:none">
+                                    <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" id="tbl_https_certs" style="display:none; margin-top:10px;">
                                         <tr>
                                             <th colspan="4" style="background-color: #E3E3E3;"><#Adm_System_https_certs#></th>
                                         </tr>
@@ -393,14 +402,14 @@ function on_ttyd_link(){
                                                 <input id="https_gen_dv" type="text" maxlength="5" size="10" style="width: 35px;" value="365" onKeyPress="return is_number(this,event);"/>
                                             </td>
                                             <td align="left">
-                                                <input id="https_gen_bn" type="button" class="btn" style="width: 145px; outline:0" onclick="create_server_cert();" value="<#VPNS_GenNew#>"/>
+                                                <input id="https_gen_bn" type="button" class="service_button" style="width: 145px; outline:0" onclick="create_server_cert();" value="<#VPNS_GenNew#>"/>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td colspan="4" style="padding-bottom: 0px;">
                                                 <a href="javascript:spoiler_toggle('ca.crt')"><span>Root CA Certificate (optional)</span></a>
                                                 <div id="ca.crt" style="display:none;">
-                                                    <textarea rows="8" wrap="off" spellcheck="false" maxlength="8192" class="span12" name="httpssl.ca.crt" style="font-family:'Courier New'; font-size:12px;"><% nvram_dump("httpssl.ca.crt",""); %></textarea>
+                                                    <textarea rows="8" wrap="off" spellcheck="false" maxlength="8192" class="service_textarea" name="httpssl.ca.crt"><% nvram_dump("httpssl.ca.crt",""); %></textarea>
                                                 </div>
                                             </td>
                                         </tr>
@@ -408,7 +417,7 @@ function on_ttyd_link(){
                                             <td colspan="4" style="padding-bottom: 0px; border-top: 0 none;">
                                                 <a href="javascript:spoiler_toggle('dh1024.pem')"><span>Diffie-Hellman PEM (optional)</span></a>
                                                 <div id="dh1024.pem" style="display:none;">
-                                                    <textarea rows="8" wrap="off" spellcheck="false" maxlength="8192" class="span12" name="httpssl.dh1024.pem" style="font-family:'Courier New'; font-size:12px;"><% nvram_dump("httpssl.dh1024.pem",""); %></textarea>
+                                                    <textarea rows="8" wrap="off" spellcheck="false" maxlength="8192" class="service_textarea" name="httpssl.dh1024.pem"><% nvram_dump("httpssl.dh1024.pem",""); %></textarea>
                                                 </div>
                                             </td>
                                         </tr>
@@ -416,7 +425,7 @@ function on_ttyd_link(){
                                             <td colspan="4" style="padding-bottom: 0px; border-top: 0 none;">
                                                 <a href="javascript:spoiler_toggle('server.crt')"><span>Server Certificate (required)</span></a>
                                                 <div id="server.crt" style="display:none;">
-                                                    <textarea rows="8" wrap="off" spellcheck="false" maxlength="8192" class="span12" name="httpssl.server.crt" style="font-family:'Courier New'; font-size:12px;"><% nvram_dump("httpssl.server.crt",""); %></textarea>
+                                                    <textarea rows="8" wrap="off" spellcheck="false" maxlength="8192" class="service_textarea" name="httpssl.server.crt"><% nvram_dump("httpssl.server.crt",""); %></textarea>
                                                 </div>
                                             </td>
                                         </tr>
@@ -424,13 +433,13 @@ function on_ttyd_link(){
                                             <td colspan="4" style="padding-bottom: 0px; border-top: 0 none;">
                                                 <a href="javascript:spoiler_toggle('server.key')"><span>Server Private Key (required)</span></a>
                                                 <div id="server.key" style="display:none;">
-                                                    <textarea rows="8" wrap="off" spellcheck="false" maxlength="8192" class="span12" name="httpssl.server.key" style="font-family:'Courier New'; font-size:12px;"><% nvram_dump("httpssl.server.key",""); %></textarea>
+                                                    <textarea rows="8" wrap="off" spellcheck="false" maxlength="8192" class="service_textarea" name="httpssl.server.key"><% nvram_dump("httpssl.server.key",""); %></textarea>
                                                 </div>
                                             </td>
                                         </tr>
                                     </table>
 
-                                    <table width="100%" cellpadding="4" cellspacing="0" class="table">
+                                    <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" style="margin-top:10px;">
                                         <tr>
                                             <th colspan="2" style="background-color: #E3E3E3;"><#Adm_System_term#></th>
                                         </tr>
@@ -462,13 +471,13 @@ function on_ttyd_link(){
                                             <td colspan="2" style="padding-bottom: 0px;">
                                                 <a href="javascript:spoiler_toggle('authorized_keys')"><span><#Adm_System_sshd_keys#> (authorized_keys)</span></a>
                                                 <div id="authorized_keys" style="display:none;">
-                                                    <textarea rows="8" wrap="off" spellcheck="false" maxlength="8192" class="span12" name="scripts.authorized_keys" style="font-family:'Courier New'; font-size:12px;"><% nvram_dump("scripts.authorized_keys",""); %></textarea>
+                                                    <textarea rows="8" wrap="off" spellcheck="false" maxlength="8192" class="service_textarea" name="scripts.authorized_keys"><% nvram_dump("scripts.authorized_keys",""); %></textarea>
                                                 </div>
                                             </td>
                                         </tr>
                                     </table>
 
-                                    <table width="100%" cellpadding="4" cellspacing="0" class="table" id="tbl_wins" style="display:none">
+                                    <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" id="tbl_wins" style="display:none; margin-top:10px;">
                                         <tr>
                                             <th colspan="2" style="background-color: #E3E3E3;">Windows Internet Name Service (WINS)</th>
                                         </tr>
@@ -508,7 +517,7 @@ function on_ttyd_link(){
                                         </tr>
                                     </table>
 
-                                    <table width="100%" id="tbl_ttyd" cellpadding="4" cellspacing="0" class="table" style="display:none;">
+                                    <table width="100%" id="tbl_ttyd" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" style="display:none; margin-top:10px;">
                                         <tr>
                                             <th colspan="2" style="background-color: #E3E3E3;"><#Adm_Svc_ttyd_setup#></th>
                                         </tr>
@@ -538,7 +547,7 @@ function on_ttyd_link(){
                                         </tr>
                                     </table>
 
-                                    <table width="100%" cellpadding="4" cellspacing="0" class="table">
+                                    <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" style="margin-top:10px;">
                                         <tr>
                                             <th colspan="2" style="background-color: #E3E3E3;"><#Adm_System_misc#></th>
                                         </tr>
@@ -619,7 +628,7 @@ function on_ttyd_link(){
                                             <td colspan="2">
                                                 <a href="javascript:spoiler_toggle('crond_crontabs')"><span><#Adm_Svc_crontabs#></span></a>
                                                 <div id="crond_crontabs" style="display:none;">
-                                                    <textarea rows="8" wrap="off" spellcheck="false" maxlength="8192" class="span12" name="crontab.login" style="font-family:'Courier New'; font-size:12px;"><% nvram_dump("crontab.login",""); %></textarea>
+                                                    <textarea rows="8" wrap="off" spellcheck="false" maxlength="8192" class="service_textarea" name="crontab.login"><% nvram_dump("crontab.login",""); %></textarea>
                                                 </div>
                                             </td>
                                         </tr>
@@ -639,25 +648,25 @@ function on_ttyd_link(){
                                         </tr>
                                     </table>
 
-                                    <table class="table">
-                                        <tr>
-                                            <td style="border: 0 none;">
-                                                <center><input class="btn btn-primary" style="width: 219px" onclick="applyRule();" type="button" value="<#CTL_apply#>" /></center>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                                            <div class="apply_gen">
+                                                <input class="button_gen" onclick="applyRule();" type="button" value="<#CTL_apply#>">
+                                            </div>
+                                        </div>
+                                        <div class="popup_container popup_element_second"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td width="10" align="center" valign="top">&nbsp;</td>
+    </tr>
+</table>
 
     </form>
 
     <div id="footer"></div>
-</div>
 </body>
 </html>

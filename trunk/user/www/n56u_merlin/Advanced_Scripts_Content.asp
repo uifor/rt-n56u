@@ -8,11 +8,13 @@
 
 <link rel="shortcut icon" href="images/favicon.ico">
 <link rel="icon" href="images/favicon.png">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/main.css">
+<link rel="stylesheet" type="text/css" href="/index_style.css">
+<link rel="stylesheet" type="text/css" href="/form_style.css">
+<link rel="stylesheet" type="text/css" href="/other.css">
 
 <script type="text/javascript" src="/jquery.js"></script>
 <script type="text/javascript" src="/state.js"></script>
+<script type="text/javascript" src="/merlin_adapter.js"></script>
 <script type="text/javascript" src="/general.js"></script>
 <script type="text/javascript" src="/popup.js"></script>
 <script>
@@ -63,20 +65,18 @@ function done_validating(action){
 }
 
 </script>
+<style>
+	.script_textarea {
+		width: 100%;
+		box-sizing: border-box;
+		font-family: "Courier New";
+		font-size: 12px;
+	}
+</style>
 </head>
 
-<body onload="initial();" onunLoad="return unload_body();">
-
-<div class="wrapper">
-    <div class="container-fluid" style="padding-right: 0px">
-        <div class="row-fluid">
-            <div class="span3"><center><div id="logo"></div></center></div>
-            <div class="span9" >
-                <div id="TopBanner"></div>
-            </div>
-        </div>
-    </div>
-
+<body onload="initial();" onunLoad="return unload_body();" class="bg">
+    <div id="TopBanner"></div>
     <div id="Loading" class="popup_bg"></div>
 
     <iframe name="hidden_frame" id="hidden_frame" src="" width="0" height="0" frameborder="0"></iframe>
@@ -90,33 +90,29 @@ function done_validating(action){
     <input type="hidden" name="action_mode" value="">
     <input type="hidden" name="action_script" value="">
 
-    <div class="container-fluid">
-        <div class="row-fluid">
-            <div class="span3">
-                <!--Sidebar content-->
-                <!--=====Beginning of Main Menu=====-->
-                <div class="well sidebar-nav side_nav" style="padding: 0px;">
-                    <ul id="mainMenu" class="clearfix"></ul>
-                    <ul class="clearfix">
-                        <li>
-                            <div id="subMenu" class="accordion"></div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+<table class="content" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+        <td width="17">&nbsp;</td>
+        <td valign="top" width="202">
+            <div id="mainMenu"></div>
+            <div id="subMenu"></div>
+        </td>
+        <td valign="top">
+            <div id="tabMenu" class="submenuBlock"></div>
+            <table width="98%" border="0" align="left" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td align="left" valign="top">
+                        <table width="760px" border="0" cellpadding="5" cellspacing="0" class="FormTitle" id="FormTitle">
+                            <tbody>
+                                <tr>
+                                    <td bgcolor="#4D595D" valign="top">
+                                        <div class="container">
+                                            <div>&nbsp;</div>
+                                            <div class="formfonttitle"><#menu5_10#> - <#menu5_10_2#></div>
+                                            <div style="margin:10px 0 10px 5px;" class="splitLine"></div>
+                                            <div class="formfontdesc"><#Scripts_desc#></div>
 
-            <div class="span9">
-                <!--Body content-->
-                <div class="row-fluid">
-                    <div class="span12">
-                        <div class="box well grad_colour_dark_blue">
-                            <h2 class="box_head round_top"><#menu5_10#> - <#menu5_10_2#></h2>
-                            <div class="round_bottom">
-                                <div class="row-fluid">
-                                    <div id="tabMenu" class="submenuBlock"></div>
-                                    <div class="alert alert-info" style="margin: 10px;"><#Scripts_desc#></div>
-
-                                    <table  width="100%" cellpadding="4" cellspacing="0" class="table">
+                                    <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">
                                         <tr>
                                             <th style="background-color: #E3E3E3;"><#UserScripts#></th>
                                         </tr>
@@ -124,7 +120,7 @@ function done_validating(action){
                                             <td>
                                                 <a href="javascript:spoiler_toggle('script0')"><span><#RunPreStart#></span></a>
                                                 <div id="script0" style="display:none;">
-                                                    <textarea rows="24" wrap="off" spellcheck="false" maxlength="4096" class="span12" name="scripts.start_script.sh" style="font-family:'Courier New'; font-size:12px;"><% nvram_dump("scripts.start_script.sh",""); %></textarea>
+                                                    <textarea rows="24" wrap="off" spellcheck="false" maxlength="4096" class="script_textarea" name="scripts.start_script.sh"><% nvram_dump("scripts.start_script.sh",""); %></textarea>
                                                 </div>
                                             </td>
                                         </tr>
@@ -132,7 +128,7 @@ function done_validating(action){
                                             <td>
                                                 <a href="javascript:spoiler_toggle('script1')"><span><#RunPostStart#></span></a>
                                                 <div id="script1" style="display:none;">
-                                                    <textarea rows="24" wrap="off" spellcheck="false" maxlength="8192" class="span12" name="scripts.started_script.sh" style="font-family:'Courier New'; font-size:12px;"><% nvram_dump("scripts.started_script.sh",""); %></textarea>
+                                                    <textarea rows="24" wrap="off" spellcheck="false" maxlength="8192" class="script_textarea" name="scripts.started_script.sh"><% nvram_dump("scripts.started_script.sh",""); %></textarea>
                                                 </div>
                                             </td>
                                         </tr>
@@ -140,7 +136,7 @@ function done_validating(action){
                                             <td>
                                                 <a href="javascript:spoiler_toggle('script5')"><span><#RunShutdown#></span></a>
                                                 <div id="script5" style="display:none;">
-                                                    <textarea rows="24" wrap="off" spellcheck="false" maxlength="4096" class="span12" name="scripts.shutdown_script.sh" style="font-family:'Courier New'; font-size:12px;"><% nvram_dump("scripts.shutdown_script.sh",""); %></textarea>
+                                                    <textarea rows="24" wrap="off" spellcheck="false" maxlength="4096" class="script_textarea" name="scripts.shutdown_script.sh"><% nvram_dump("scripts.shutdown_script.sh",""); %></textarea>
                                                 </div>
                                             </td>
                                         </tr>
@@ -148,7 +144,7 @@ function done_validating(action){
                                             <td>
                                                 <a href="javascript:spoiler_toggle('script2')"><span><#RunPostWAN#></span></a>
                                                 <div id="script2" style="display:none;">
-                                                    <textarea rows="24" wrap="off" spellcheck="false" maxlength="8192" class="span12" name="scripts.post_wan_script.sh" style="font-family:'Courier New'; font-size:12px;"><% nvram_dump("scripts.post_wan_script.sh",""); %></textarea>
+                                                    <textarea rows="24" wrap="off" spellcheck="false" maxlength="8192" class="script_textarea" name="scripts.post_wan_script.sh"><% nvram_dump("scripts.post_wan_script.sh",""); %></textarea>
                                                 </div>
                                             </td>
                                         </tr>
@@ -156,7 +152,7 @@ function done_validating(action){
                                             <td>
                                                 <a href="javascript:spoiler_toggle('script3')"><span><#RunPostFWL#></span></a>
                                                 <div id="script3" style="display:none;">
-                                                    <textarea rows="24" wrap="off" spellcheck="false" maxlength="8192" class="span12" name="scripts.post_iptables_script.sh" style="font-family:'Courier New'; font-size:12px;"><% nvram_dump("scripts.post_iptables_script.sh",""); %></textarea>
+                                                    <textarea rows="24" wrap="off" spellcheck="false" maxlength="8192" class="script_textarea" name="scripts.post_iptables_script.sh"><% nvram_dump("scripts.post_iptables_script.sh",""); %></textarea>
                                                 </div>
                                             </td>
                                         </tr>
@@ -164,31 +160,31 @@ function done_validating(action){
                                             <td style="padding-bottom: 0px;">
                                                 <a href="javascript:spoiler_toggle('script4')"><span><#RunEzBtns#></span></a>
                                                 <div id="script4" style="display:none;">
-                                                    <textarea rows="24" wrap="off" spellcheck="false" maxlength="4096" class="span12" name="scripts.ez_buttons_script.sh" style="font-family:'Courier New'; font-size:12px;"><% nvram_dump("scripts.ez_buttons_script.sh",""); %></textarea>
+                                                    <textarea rows="24" wrap="off" spellcheck="false" maxlength="4096" class="script_textarea" name="scripts.ez_buttons_script.sh"><% nvram_dump("scripts.ez_buttons_script.sh",""); %></textarea>
                                                 </div>
                                             </td>
                                         </tr>
                                     </table>
 
-                                    <table width="100%" cellpadding="4" cellspacing="0" class="table">
-                                        <tr>
-                                            <td style="border: 0 none;">
-                                                <center><input type="button" class="btn btn-primary" style="width: 219px" onclick="applyRule();" value="<#CTL_apply#>"/></center>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                                            <div class="apply_gen">
+                                                <input class="button_gen" onclick="applyRule();" type="button" value="<#CTL_apply#>">
+                                            </div>
+                                        </div>
+                                        <div class="popup_container popup_element_second"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td width="10" align="center" valign="top">&nbsp;</td>
+    </tr>
+</table>
 
     </form>
 
     <div id="footer"></div>
-</div>
 </body>
 </html>
