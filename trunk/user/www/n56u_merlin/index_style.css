@@ -167,18 +167,72 @@ body {
 .merlin-status-icons{
 	display: flex;
 	align-items: center;
-	gap: 3px;
-	min-width: 128px;
-	height: 32px;
+	gap: 0;
+	min-width: 124px;
+	height: 30px;
 	margin-top: -1px;
+}
+
+.merlin-status-icon{
+	display: block;
+	position: relative;
+	width: 30px;
+	height: 30px;
+	margin-left: 1px;
+	background-repeat: no-repeat;
+	transition: filter .12s ease-out, opacity .12s ease-out;
+}
+
+.merlin-status-icon:hover{
+	filter: brightness(1.22);
+	opacity: .98;
+}
+
+.merlin-status-icon:active{
+	filter: brightness(.92);
+}
+
+.merlin-status-icons .wifihwswstatuson,
+.merlin-status-icons .wifihwswstatuspartial,
+.merlin-status-icons .wifihwswstatusoff,
+.merlin-status-icons .guestnetworkstatuson,
+.merlin-status-icons .guestnetworkstatusoff,
+.merlin-status-icons .connectstatuson,
+.merlin-status-icons .connectstatusoff,
+.merlin-status-icons .usbstatuson,
+.merlin-status-icons .usbstatusoff{
+	width: 30px;
+	height: 30px;
+	background-repeat: no-repeat;
+	cursor: pointer;
+}
+
+.merlin-status-icons .wifihwswstatuson{
+	background-position: 2px 2px;
+}
+
+.merlin-status-icons .wifihwswstatuspartial{
+	background-position: 2px -73px;
+}
+
+.merlin-status-icons .wifihwswstatusoff{
+	background-position: 2px -48px;
+}
+
+.merlin-status-icons .guestnetworkstatuson,
+.merlin-status-icons .connectstatuson,
+.merlin-status-icons .usbstatuson{
+	background-position: 2px 2px;
+}
+
+.merlin-status-icons .guestnetworkstatusoff,
+.merlin-status-icons .usbstatusoff{
+	background-position: 2px -48px;
 }
 
 .merlin-status-icons .connectstatusoff{
 	background-image: url(images/New_ui/connectstatus.png);
-	background-repeat: no-repeat;
 	background-position: 2px -48px;
-	height: 30px;
-	width: 30px;
 }
 
 .merlin-leftnav{

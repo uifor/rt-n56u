@@ -660,16 +660,16 @@ function show_top_status(){
 
 	$j("#connect_status")
 		.removeClass("connectstatuson connectstatusoff")
-		.addClass(new_wan_internet == "1" ? "connectstatuson" : "connectstatusoff");
+		.addClass((new_wan_internet == "1" ? "connectstatuson" : "connectstatusoff") + " merlin-status-icon");
 	$j("#wifi_hw_sw_status")
 		.removeClass("wifihwswstatuson wifihwswstatuspartial wifihwswstatusoff")
-		.addClass((support_2g_radio() || support_5g_radio()) ? "wifihwswstatuson" : "wifihwswstatusoff");
+		.addClass(((support_2g_radio() || support_5g_radio()) ? "wifihwswstatuson" : "wifihwswstatusoff") + " merlin-status-icon");
 	$j("#guestnetwork_status")
 		.removeClass("guestnetworkstatuson guestnetworkstatusoff")
-		.addClass((wifi2Guest > 0 || wifi5Guest > 0) ? "guestnetworkstatuson" : "guestnetworkstatusoff");
+		.addClass(((wifi2Guest > 0 || wifi5Guest > 0) ? "guestnetworkstatuson" : "guestnetworkstatusoff") + " merlin-status-icon");
 	$j("#usb_status")
 		.removeClass("usbstatuson usbstatusoff")
-		.addClass(support_usb() ? "usbstatuson" : "usbstatusoff");
+		.addClass((support_usb() ? "usbstatuson" : "usbstatusoff") + " merlin-status-icon");
 
 	/*if(sw_mode == "3")
 		$("sw_mode_span").innerHTML = "AP";

@@ -238,10 +238,10 @@
 		code += '<div id="ssidTitle" class="titledown">SSID:<span onclick="go_setting(2)" title="2.4GHz" id="elliptic_ssid_2g" class="title_link"></span><span onclick="go_setting(5)" title="5GHz" id="elliptic_ssid_5g" class="title_link"></span></div>';
 		code += '</div>';
 		code += '<div id="status_block" class="merlin-status-icons">';
-		code += '<div id="wifi_hw_sw_status" class="wifihwswstatusoff"></div>';
-		code += '<div id="guestnetwork_status" class="guestnetworkstatusoff"></div>';
-		code += '<div id="connect_status" class="connectstatusoff"></div>';
-		code += '<div id="usb_status" class="usbstatusoff"></div>';
+		code += '<div id="wifi_hw_sw_status" class="wifihwswstatusoff merlin-status-icon" title="<#menu5_1#>" onclick="location.href=\'Advanced_Wireless2g_Content.asp\'"></div>';
+		code += '<div id="guestnetwork_status" class="guestnetworkstatusoff merlin-status-icon" title="<#menu5_1_2#>" onclick="location.href=\'Advanced_WGuest2g_Content.asp\'"></div>';
+		code += '<div id="connect_status" class="connectstatusoff merlin-status-icon" title="<#statusTitle_Internet#>" onclick="location.href=\'/index.asp?flag=Internet\'"></div>';
+		code += '<div id="usb_status" class="usbstatusoff merlin-status-icon" title="<#menu5_4#>" onclick="location.href=\'Advanced_AiDisk_others.asp\'"></div>';
 		code += '</div>';
 		code += '</div></div>';
 		byId("TopBanner").innerHTML = code;
