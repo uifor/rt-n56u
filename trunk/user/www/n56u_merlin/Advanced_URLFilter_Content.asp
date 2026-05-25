@@ -8,14 +8,15 @@
 
 <link rel="shortcut icon" href="images/favicon.ico">
 <link rel="icon" href="images/favicon.png">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/main.css">
+<link rel="stylesheet" type="text/css" href="/index_style.css">
+<link rel="stylesheet" type="text/css" href="/form_style.css">
+<link rel="stylesheet" type="text/css" href="/other.css">
 <link rel="stylesheet" type="text/css" href="/bootstrap/css/engage.itoggle.css">
 
 <script type="text/javascript" src="/jquery.js"></script>
-<script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="/bootstrap/js/engage.itoggle.min.js"></script>
 <script type="text/javascript" src="/state.js"></script>
+<script type="text/javascript" src="/merlin_adapter.js"></script>
 <script type="text/javascript" src="/general.js"></script>
 <script type="text/javascript" src="/itoggle.js"></script>
 <script type="text/javascript" src="/popup.js"></script>
@@ -192,69 +193,83 @@ function done_validating(action){
           padding-left: 6px;
     }
     .radio.inline + .radio.inline,
-    .checkbox.inline + .checkbox.inline {
-      margin-left: 3px;
-    }
-</style>
-</head>
+	    .checkbox.inline + .checkbox.inline {
+	      margin-left: 3px;
+	    }
+	    .alert {
+	        padding: 8px 10px;
+	        margin: 10px 0;
+	        border: 1px solid #6b8fa3;
+	        color: #FFFFFF;
+	        background: #596e74;
+	    }
+	    .btn {
+	        display: inline-block;
+	        padding: 3px 8px;
+	        color: #FFFFFF;
+	        background: #596e74;
+	        border: 1px solid #6b8fa3;
+	        cursor: pointer;
+	    }
+	    .span12 {
+	        box-sizing: border-box;
+	        width: 100%;
+	    }
+	    .input-append {
+	        display: flex;
+	        align-items: center;
+	    }
+	    .ddown-list {
+	        position: absolute;
+	        z-index: 50;
+	    }
+	</style>
+	</head>
 
-<body onload="initial();" onunLoad="return unload_body();">
+	<body onload="initial();" onunLoad="return unload_body();" class="bg">
+	<div id="TopBanner"></div>
 
-<div class="wrapper">
-    <div class="container-fluid" style="padding-right: 0px">
-        <div class="row-fluid">
-            <div class="span3"><center><div id="logo"></div></center></div>
-            <div class="span9" >
-                <div id="TopBanner"></div>
-            </div>
-        </div>
-    </div>
+	<div id="Loading" class="popup_bg"></div>
 
-    <div id="Loading" class="popup_bg"></div>
+	<iframe name="hidden_frame" id="hidden_frame" src="" width="0" height="0" frameborder="0"></iframe>
 
-    <iframe name="hidden_frame" id="hidden_frame" src="" width="0" height="0" frameborder="0"></iframe>
+	<form method="post" name="form" id="ruleForm" action="/start_apply.htm" target="hidden_frame">
+	<input type="hidden" name="current_page" value="Advanced_URLFilter_Content.asp">
+	<input type="hidden" name="next_page" value="Advanced_URLFilter_Content.asp">
+	<input type="hidden" name="next_host" value="">
+	<input type="hidden" name="sid_list" value="FirewallConfig;">
+	<input type="hidden" name="group_id" value="UrlList">
+	<input type="hidden" name="action_mode" value="">
+	<input type="hidden" name="action_script" value="">
 
-    <form method="post" name="form" id="ruleForm" action="/start_apply.htm" target="hidden_frame">
-    <input type="hidden" name="current_page" value="Advanced_URLFilter_Content.asp">
-    <input type="hidden" name="next_page" value="Advanced_URLFilter_Content.asp">
-    <input type="hidden" name="next_host" value="">
-    <input type="hidden" name="sid_list" value="FirewallConfig;">
-    <input type="hidden" name="group_id" value="UrlList">
-    <input type="hidden" name="action_mode" value="">
-    <input type="hidden" name="action_script" value="">
+	<input type="hidden" name="url_date_x" value="<% nvram_get_x("","url_date_x"); %>">
+	<input type="hidden" name="url_time_x" value="<% nvram_get_x("","url_time_x"); %>">
+	<input type="hidden" name="url_inv_x" value="<% nvram_get_x("", "url_inv_x"); %>" />
+	<input type="hidden" name="url_num_x_0" value="<% nvram_get_x("","url_num_x"); %>" readonly="1">
 
-    <input type="hidden" name="url_date_x" value="<% nvram_get_x("","url_date_x"); %>">
-    <input type="hidden" name="url_time_x" value="<% nvram_get_x("","url_time_x"); %>">
-    <input type="hidden" name="url_inv_x" value="<% nvram_get_x("", "url_inv_x"); %>" />
-    <input type="hidden" name="url_num_x_0" value="<% nvram_get_x("","url_num_x"); %>" readonly="1">
+	<table class="content" align="center" cellpadding="0" cellspacing="0">
+	    <tr>
+	        <td width="17">&nbsp;</td>
+	        <td valign="top" width="202">
+	            <div id="mainMenu"></div>
+	            <div id="subMenu"></div>
+	        </td>
+	        <td valign="top">
+	            <div id="tabMenu" class="submenuBlock"></div>
+	            <table width="98%" border="0" align="left" cellpadding="0" cellspacing="0">
+	                <tr>
+	                    <td align="left" valign="top">
+	                        <table width="760px" border="0" cellpadding="5" cellspacing="0" class="FormTitle" id="FormTitle">
+	                            <tbody>
+	                                <tr>
+	                                    <td bgcolor="#4D595D" valign="top">
+	                                        <div class="container">
+	                                            <div>&nbsp;</div>
+	                                            <div class="formfonttitle"><#menu5_5#> - <#menu5_5_2#></div>
+	                                            <div style="margin:10px 0 10px 5px;" class="splitLine"></div>
+	                                            <div class="formfontdesc"><#FirewallConfig_UrlFilterEnable_sectiondesc#></div>
 
-    <div class="container-fluid">
-        <div class="row-fluid">
-            <div class="span3">
-                <!--Sidebar content-->
-                <!--=====Beginning of Main Menu=====-->
-                <div class="well sidebar-nav side_nav" style="padding: 0px;">
-                    <ul id="mainMenu" class="clearfix"></ul>
-                    <ul class="clearfix">
-                        <li>
-                            <div id="subMenu" class="accordion"></div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="span9">
-                <!--Body content-->
-                <div class="row-fluid">
-                    <div class="span12">
-                        <div class="box well grad_colour_dark_blue">
-                            <h2 class="box_head round_top"><#menu5_5#> - <#menu5_5_2#></h2>
-                            <div class="round_bottom">
-                                <div class="row-fluid">
-                                    <div id="tabMenu" class="submenuBlock"></div>
-                                    <div class="alert alert-info" style="margin: 10px;"><#FirewallConfig_UrlFilterEnable_sectiondesc#></div>
-
-                                    <table width="100%" cellpadding="4" cellspacing="0" class="table">
+	                                            <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">
                                         <tr>
                                             <th width="50%" style="padding-bottom: 0px; border-top: 0 none;"><#FirewallConfig_UrlFilterEnable_itemname#>?</th>
                                             <td style="padding-bottom: 0px; border-top: 0 none;">
@@ -271,7 +286,7 @@ function done_validating(action){
                                         </tr>
                                     </table>
 
-                                    <table width="100%" cellpadding="4" cellspacing="0" class="table" id="tbl_urlf_main" style="display:none">
+	                                            <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" id="tbl_urlf_main" style="display:none; margin-top:10px;">
                                         <tr>
                                             <th colspan="3" style="background-color: #E3E3E3;"><#menu5_5_2#></th>
                                         </tr>
@@ -315,7 +330,7 @@ function done_validating(action){
                                                 <input type="text" class="span12" maxlength="96" size="36" name="url_keyword_x_0" value="<% nvram_get_x("", "url_keyword_x_0"); %>" onKeyPress="return is_string(this,event);">
                                             </td>
                                             <td align="left">
-                                                <button class="btn" type="submit" onClick="if(validForm()){return markGroup(this, 'UrlList', 128, ' Add ');}" name="UrlList"><i class="icon icon-plus"></i></button>
+	                                                <button class="add_btn" type="submit" onClick="if(validForm()){return markGroup(this, 'UrlList', 128, ' Add ');}" name="UrlList" title="<#CTL_add#>"></button>
                                             </td>
                                         </tr>
                                         <tr>
@@ -326,28 +341,29 @@ function done_validating(action){
                                                 </select>
                                             </td>
                                             <td style="vertical-align:top">
-                                                <button class="btn btn-danger" type="submit" onClick="return markGroup(this, 'UrlList', 128, ' Del ');" name="UrlList"><i class="icon icon-minus icon-white"></i></button>
+	                                                <button class="remove_btn" type="submit" onClick="return markGroup(this, 'UrlList', 128, ' Del ');" name="UrlList" title="<#CTL_del#>"></button>
                                             </td>
                                         </tr>
                                     </table>
 
-                                    <table class="table">
-                                        <tr>
-                                            <td style="border: 0 none;"><center><input name="button" type="button" class="btn btn-primary" style="width: 219px" onclick="applyRule();" value="<#CTL_apply#>"/></center></td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+	                                            <div class="apply_gen">
+	                                                <input name="button" type="button" class="button_gen" onclick="applyRule();" value="<#CTL_apply#>">
+	                                            </div>
+	                                        </div>
+	                                        <div class="popup_container popup_element_second"></div>
+	                                    </td>
+	                                </tr>
+	                            </tbody>
+	                        </table>
+	                    </td>
+	                </tr>
+	            </table>
+	        </td>
+	        <td width="10" align="center" valign="top">&nbsp;</td>
+	    </tr>
+	</table>
+	</form>
 
-    </form>
-
-    <div id="footer"></div>
-</div>
-</body>
-</html>
+	<div id="footer"></div>
+	</body>
+	</html>

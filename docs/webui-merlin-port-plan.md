@@ -34,7 +34,7 @@ sh tools/webui_merlin_inventory.sh
 - Core Merlin CSS copied into the prototype: `index_style.css`, `form_style.css`, `NM_style.css`, `other.css`.
 - Slim shell assets copied into `images/` and `images/New_ui/`; the prototype is about 3.3M rather than Merlin's 83M web tree.
 - `merlin_adapter.js` overrides `show_banner()`, `show_menu(L1, L2, L3)`, and `show_footer()` for migrated pages while preserving Padavan menu arrays and feature pruning.
-- Migrated form pages: `Advanced_LAN_Content.asp`, `Advanced_DHCP_Content.asp`, `Advanced_Wireless_Content.asp`, `Advanced_WAN_Content.asp`, `Advanced_DDNS_Content.asp`, `Advanced_System_Content.asp`, `Advanced_GWStaticRoute_Content.asp`, `Advanced_VirtualServer_Content.asp`, and `Advanced_Firewall_Content.asp`. They now use the Merlin page shell and `FormTable`, but still submit the original Padavan fields to `/start_apply.htm`.
+- Migrated form pages: `Advanced_LAN_Content.asp`, `Advanced_DHCP_Content.asp`, `Advanced_Wireless_Content.asp`, `Advanced_WAN_Content.asp`, `Advanced_DDNS_Content.asp`, `Advanced_System_Content.asp`, `Advanced_GWStaticRoute_Content.asp`, `Advanced_VirtualServer_Content.asp`, `Advanced_Exposed_Content.asp`, `Advanced_BasicFirewall_Content.asp`, `Advanced_Firewall_Content.asp`, `Advanced_Netfilter_Content.asp`, `Advanced_URLFilter_Content.asp`, and `Advanced_MACFilter_Content.asp`. They now use the Merlin page shell and `FormTable`, but still submit the original Padavan fields to `/start_apply.htm`.
 - `index.asp` now uses a lightweight Merlin Network Map layout (`NM_table`, `NM_radius_*`, Merlin network-map icons) instead of the old Padavan `big-icons` column. The status iframe and device data still use the current rt-n56u `device-map/*.asp` pages, so visual migration can continue without requiring Merlin's `httpApi.js`, `networkmapd`, AiMesh, dual-WAN, or client-edit backend stack.
 - The Network Map iframe pages now use a shared lightweight `device-map/merlin-status.css` style layer. This covers `router.asp`, `router2g.asp`, `internet.asp`, `intranet.asp`, `clients.asp`, `disk.asp`, `hub.asp`, `sata.asp`, `printer.asp`, and `modem.asp`, removing Bootstrap's main CSS/JS from their visible panel chrome while preserving existing rt-n56u status, apply, refresh, USB, printer, modem, and block/unblock logic.
 
@@ -60,7 +60,11 @@ Convert these pages first:
 - `Advanced_System_Content.asp` (Merlin shell/FormTable, original admin/time/log/help controls retained)
 - `Advanced_GWStaticRoute_Content.asp` (Merlin shell/FormTable, original static route validation and list management retained)
 - `Advanced_VirtualServer_Content.asp` (Merlin shell/FormTable, original port-forwarding presets, client picker, rule splitting, and list management retained)
+- `Advanced_Exposed_Content.asp` (Merlin shell/FormTable, original DMZ client picker and BattleNet passthrough switch retained)
 - `Advanced_Firewall_Content.asp` (Merlin shell/FormTable, original LAN/WAN filter schedule, protocol wizard, and list management retained)
+- `Advanced_Netfilter_Content.asp` (Merlin shell/FormTable, original NAT, conntrack, passthrough, and ALG controls retained)
+- `Advanced_URLFilter_Content.asp` (Merlin shell/FormTable, original schedule, client MAC picker, URL keyword list, and invert option retained)
+- `Advanced_MACFilter_Content.asp` (Merlin shell/FormTable, original MAC client picker, schedule controls, drop mode, and list management retained)
 - Network Map iframe panels (shared Merlin-style status chrome, original rt-n56u device-map backend retained)
 
 The conversion should retain current JavaScript validation and hidden form fields while changing markup toward Merlin's `FormTitle`, `FormTable`, `button_gen`, `submenuBlock`, and network map visual language.
