@@ -8,15 +8,16 @@
 
 <link rel="shortcut icon" href="images/favicon.ico">
 <link rel="icon" href="images/favicon.png">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/main.css">
+<link rel="stylesheet" type="text/css" href="/index_style.css">
+<link rel="stylesheet" type="text/css" href="/form_style.css">
+<link rel="stylesheet" type="text/css" href="/other.css">
 
 <script type="text/javascript" src="/jquery.js"></script>
-<script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="/bootstrap/js/highcharts.js"></script>
 <script type="text/javascript" src="/bootstrap/js/highcharts_theme.js"></script>
 <script type="text/javascript" src="/net_speed_tabs.js"></script>
 <script type="text/javascript" src="/state.js"></script>
+<script type="text/javascript" src="/merlin_adapter.js"></script>
 <script type="text/javascript" src="/popup.js"></script>
 <script>
 var $j = jQuery.noConflict();
@@ -379,51 +380,50 @@ function switchPage(id){
 
 </script>
 <style>
-#tabs {margin-bottom: 0px;}
+#tabs {margin: 0 0 8px 0; padding: 0; list-style: none;}
+.traffic_tabs li {display: inline-block; margin-right: 4px;}
+.traffic_tabs a {
+	display: inline-block;
+	padding: 6px 13px;
+	color: #c9d6dc;
+	background: #2f3d42;
+	border: 1px solid #6b8fa3;
+	text-decoration: none;
+}
+.traffic_tabs li.active a {color: #FFFFFF; background: #596e74;}
 .table-stat td {padding: 4px 8px;}
+.traffic_chart {width: 670px; padding-left: 5px;}
+.traffic_swatch {height: 16px; border-radius: 5px;}
 </style>
 </head>
 
-<body onload="initial();" >
-
-<div class="wrapper">
-    <div class="container-fluid" style="padding-right: 0px">
-        <div class="row-fluid">
-            <div class="span3"><center><div id="logo"></div></center></div>
-            <div class="span9">
-                <div id="TopBanner"></div>
-            </div>
-        </div>
-    </div>
+<body onload="initial();" class="bg">
+    <div id="TopBanner"></div>
 
     <div id="Loading" class="popup_bg"></div>
 
     <iframe name="hidden_frame" id="hidden_frame" src="" width="0" height="0" frameborder="0"></iframe>
 
-    <div class="container-fluid">
-        <div class="row-fluid">
-            <div class="span3">
-                <!--Sidebar content-->
-                <!--=====Beginning of Main Menu=====-->
-                <div class="well sidebar-nav side_nav" style="padding: 0px;">
-                    <ul id="mainMenu" class="clearfix"></ul>
-                    <ul class="clearfix">
-                        <li>
-                            <div id="subMenu" class="accordion"></div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="span9">
-                <!--Body content-->
-                <div class="row-fluid">
-                    <div class="span12">
-                        <div class="box well grad_colour_dark_blue">
-                            <h2 class="box_head round_top"><#menu4#> - <#menu4_2_1#></h2>
-                            <div class="round_bottom">
-                                <div class="row-fluid">
-                                    <div id="tabMenu" class="submenuBlock"></div>
+    <table class="content" align="center" cellpadding="0" cellspacing="0">
+        <tr>
+            <td width="17">&nbsp;</td>
+            <td valign="top" width="202">
+                <div id="mainMenu"></div>
+                <div id="subMenu"></div>
+            </td>
+            <td valign="top">
+                <div id="tabMenu" class="submenuBlock"></div>
+                <table width="98%" border="0" align="left" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td align="left" valign="top">
+                            <table width="760px" border="0" cellpadding="5" cellspacing="0" class="FormTitle" id="FormTitle">
+                                <tbody>
+                                    <tr>
+                                        <td bgcolor="#4D595D" valign="top">
+                                            <div class="container">
+                                                <div>&nbsp;</div>
+                                                <div id="bx_label" class="formfonttitle"><#menu4#> - <#menu4_2_1#></div>
+                                                <div style="margin:10px 0 10px 5px;" class="splitLine"></div>
 
                                     <div align="right" style="margin: 3px 8px 0px 0px;">
                                         <select id="sel_netif" style="width: 200px; margin-bottom: 5px;" onchange="tabSelect(this.value);">
@@ -431,7 +431,7 @@ function switchPage(id){
                                     </div>
 
                                     <div style="margin-bottom: 0px; margin: -36px 0px 0px 0px;">
-                                        <ul id="tabs" class="nav nav-tabs">
+                                        <ul id="tabs" class="traffic_tabs">
                                             <li class="active"><a href="javascript:void(0)" id="tab_bw_rt"><#menu4_2_1#></a></li>
                                             <li><a href="javascript:void(0)" id="tab_bw_24"><#menu4_2_2#></a></li>
                                             <li><a href="javascript:void(0)" id="tab_tr_dy"><#menu4_2_3#></a></li>
@@ -443,13 +443,13 @@ function switchPage(id){
                                         <table style="width: 100%; margin-top: 6px; margin-bottom: 6px;">
                                             <tr>
                                                 <td width="100%" align="center" style="text-align: center">
-                                                    <div id="net_chart" style="width: 670px; padding-left: 5px;"></div>
+                                                    <div id="net_chart" class="traffic_chart"></div>
                                                 </td>
                                             </tr>
                                         </table>
                                     </center>
 
-                                    <table width="100%" align="center" cellpadding="4" cellspacing="0" class="table table-stat">
+                                    <table width="100%" align="center" cellpadding="4" cellspacing="0" class="FormTable table-stat" border="1" bordercolor="#6b8fa3">
                                         <tr>
                                             <th width="9%"><#Color#></th>
                                             <th width="11%"><#Network#></th>
@@ -460,7 +460,7 @@ function switchPage(id){
                                         </tr>
                                         <tr>
                                             <td width="9%" style="text-align:center; vertical-align: middle;">
-                                                <div id="rx-sel" class="span12" style="border-radius: 5px;"></div>
+                                                <div id="rx-sel" class="traffic_swatch"></div>
                                             </td>
                                             <td width="11%"><#Downlink#></td>
                                             <td width="20%" align="center" valign="top" style="text-align:right;font-weight: bold;"><span id="rx-current"></span></td>
@@ -470,7 +470,7 @@ function switchPage(id){
                                         </tr>
                                         <tr>
                                             <td width="9%" style="text-align:center; vertical-align: middle;">
-                                                <div id="tx-sel" class="span12" style="border-radius: 5px;"></div>
+                                                <div id="tx-sel" class="traffic_swatch"></div>
                                             </td>
                                             <td width="11%"><#Uplink#></td>
                                             <td width="20%" align="center" valign="top" style="text-align:right;font-weight: bold;"><span id="tx-current"></span></td>
@@ -478,19 +478,21 @@ function switchPage(id){
                                             <td width="20%" align="center" valign="top" style="text-align:right" id='tx-max'></td>
                                             <td width="20%" align="center" valign="top" style="text-align:right" id='tx-total'></td>
                                         </tr>
-                                    </table>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                                                </table>
+                                            </div>
+                                            <div class="popup_container popup_element_second"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td width="10" align="center" valign="top">&nbsp;</td>
+        </tr>
+    </table>
 
     <div id="footer"></div>
-</div>
-
 </body>
 </html>
