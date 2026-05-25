@@ -51,16 +51,16 @@ body {
 
 .merlin-model-wrap{
 	float: left;
-	width: 190px;
+	width: 178px;
 	height: 54px;
-	margin-left: -90px;
+	margin-left: -75px;
 }
 
 .merlin-banner .modelName_top{
 	float: none;
 	display: inline-block;
-	max-width: 185px;
-	margin: 18px 0 0 0;
+	max-width: 170px;
+	margin: 13px 0 0 0;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -70,8 +70,9 @@ body {
 .merlin-powered{
 	float: left;
 	width: 160px;
-	height: 54px;
-	margin-left: 24px;
+	height: 52px;
+	margin-left: 25px;
+	margin-top: 0;
 }
 
 .merlin-powered img{
@@ -83,7 +84,7 @@ body {
 
 .merlin-titlebtn{
 	margin-top: 13px;
-	margin-left: 24px;
+	margin-left: 25px;
 	margin-right: 0;
 	min-width: 136px;
 	height: 34px;
@@ -91,18 +92,6 @@ body {
 
 .merlin-rebootbtn{
 	margin-left: 0;
-}
-
-.merlin-commit{
-	position: absolute;
-	top: 14px;
-	right: 170px;
-}
-
-.merlin-commit .button_gen{
-	min-width: 76px;
-	height: 28px;
-	padding: 0 10px;
 }
 
 .merlin-language{
@@ -284,7 +273,6 @@ body {
 .menu a {height:44px; text-decoration:none;	position:relative;}
 .menu a:link, .menu a:visited {
 	color: #ffffff;	display: block;
-	padding-left:10px;
 	position:relative;
 }
 .menu div{
@@ -1066,10 +1054,33 @@ width:122px;
 	width: 36px;
 	height: 36px;
 }
+.merlin-menu-table{
+	width: 185px;
+	height: 48px;
+	border: 0;
+	border-collapse: collapse;
+}
+.merlin-menu-icon-cell{
+	width: 58px;
+	height: 48px;
+	padding: 0 0 0 13px;
+	vertical-align: middle;
+}
 .menu_Desc{
 	word-break: keep-all;
 	font-size:12px;
 	font-weight: bold;
+	height: 48px;
+	line-height: 16px;
+	padding: 0;
+	vertical-align: middle;
+}
+.menu_Desc a:link,
+.menu_Desc a:visited{
+	height: auto;
+	min-height: 0;
+	padding-left: 0;
+	display: inline-block;
 }
 .menu_Split{
 	background-color: #4E5659;

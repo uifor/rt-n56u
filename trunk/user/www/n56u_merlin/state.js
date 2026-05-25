@@ -646,6 +646,7 @@ function show_top_status(){
 
 	showtext($("firmver"), merlin_firmver);
 	showtext($("modelName_top"), merlin_productid || '<#Web_Title#>');
+	showtext($("operation_mode_title"), merlin_preferred_lang == "CN" ? "操作模式" : "Operation Mode");
 
 	if($("sw_mode_span"))
 		$("sw_mode_span").innerHTML = (sw_mode == "3") ? "AP" : "Router";

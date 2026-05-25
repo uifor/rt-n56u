@@ -53,7 +53,7 @@
 		if(url)
 			code += ' onclick="location.href=\'' + escapeAttr(url) + '\'" title="' + escapeAttr(url) + '"';
 		code += ' id="' + idPrefix + '_menu">';
-		code += '<table><tr><td><div class="menu_Icon ' + iconClass + '"></div></td>';
+		code += '<table class="merlin-menu-table"><tr><td class="merlin-menu-icon-cell"><div class="menu_Icon ' + iconClass + '"></div></td>';
 		code += '<td class="menu_Desc"><a href="' + target + '">' + title + '</a></td></tr></table></div>\n';
 		return code;
 	}
@@ -158,7 +158,7 @@
 
 	function renderMainMenu(L1, L2){
 		var code = '<div class="merlin-leftnav">';
-		code += '<div class="menu_Split menu_Split_general"><table width="192px" height="30px"><tbody><tr><td>General</td></tr></tbody></table></div>';
+		code += '<div class="menu_Split menu_Split_general"><table width="192px" height="30px"><tbody><tr><td><#menu5_1_1#></td></tr></tbody></table></div>';
 		for(var i = 1; i < menuL1_title.length; i++){
 			if(menuL1_title[i] == "")
 				continue;
@@ -217,7 +217,6 @@
 		code += '<div class="merlin-powered" align="left"><span><a href="https://www.asuswrt-merlin.net/" target="_blank" rel="noreferrer"><img src="images/merlin-logo.png" alt="Powered by Asuswrt-Merlin"></a></span></div>';
 		code += '<a href="javascript:logout();"><div class="titlebtn merlin-titlebtn" align="center"><span><#t1Logout#></span></div></a>';
 		code += '<a href="javascript:reboot();"><div class="titlebtn merlin-titlebtn merlin-rebootbtn" align="center"><span><#BTN_REBOOT#></span></div></a>';
-		code += '<div class="merlin-commit"><input class="button_gen" type="button" id="commit_btn" value="<#CTL_Commit#>" onclick="commit();"></div>';
 		code += '<div class="merlin-language"><select id="select_lang" name="select_lang" onchange="submit_language();">';
 		code += '<option value="EN">English</option><option value="CN">Chinese</option><option value="TW">Traditional</option><option value="JP">Japanese</option><option value="RU">Russian</option>';
 		code += '</select></div>';
@@ -225,7 +224,7 @@
 		code += '<div class="statusBar minup_bg merlin-statusbar">';
 		code += '<div class="merlin-status-inner">';
 		code += '<div class="merlin-status-text">';
-		code += '<div class="titledown"><span><#menu5_6_1_title#>:</span><span class="title_link" style="text-decoration:none;" id="op_link"><a href="/Advanced_OperationMode_Content.asp" style="color:white"><span id="sw_mode_span" style="text-decoration:underline;"></span></a></span>';
+		code += '<div class="titledown"><span id="operation_mode_title">Operation Mode</span><span>:</span><span class="title_link" style="text-decoration:none;" id="op_link"><a href="/Advanced_OperationMode_Content.asp" style="color:white"><span id="sw_mode_span" style="text-decoration:underline;"></span></a></span>';
 		code += '<span>Firmware:</span><a href="/Advanced_FirmwareUpgrade_Content.asp" style="color:white;"><span id="firmver" class="title_link"></span></a></div>';
 		code += '<div id="ssidTitle" class="titledown">SSID:<span onclick="go_setting(2)" title="2.4GHz" id="elliptic_ssid_2g" class="title_link"></span><span onclick="go_setting(5)" title="5GHz" id="elliptic_ssid_5g" class="title_link"></span></div>';
 		code += '</div>';
