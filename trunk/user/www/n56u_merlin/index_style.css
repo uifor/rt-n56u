@@ -1273,8 +1273,11 @@ width:122px;
 	margin-bottom: -10px;
 	max-width: 760px;
 }
-.content .submenuBlock{
+.merlin-form-page .content{
 	margin-top:-140px;
+}
+.merlin-form-page .merlin-leftnav{
+	margin-top:-24px;
 }
 /* used for QIS */
 .m_qis_r {

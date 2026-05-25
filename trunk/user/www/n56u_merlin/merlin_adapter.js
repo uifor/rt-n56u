@@ -248,9 +248,13 @@
 
 	window.show_menu = function(L1, L2, L3){
 		pruneMenus(L1, L2, L3);
+		if(document.body)
+			document.body.className = document.body.className.replace(/\bmerlin-form-page\b/g, "").replace(/\s+/g, " ").replace(/^\s+|\s+$/g, "");
 		byId("mainMenu").innerHTML = renderMainMenu(L1, L2);
 		byId("subMenu").innerHTML = renderSubMenu(L2);
 		renderTabs(L2, L3);
+		if(document.body && byId("tabMenu") && byId("tabMenu").className.indexOf("submenuBlock") >= 0 && !(L1 == 1 && L2 <= 0))
+			document.body.className += (document.body.className ? " " : "") + "merlin-form-page";
 	};
 
 	window.show_footer = function(){
