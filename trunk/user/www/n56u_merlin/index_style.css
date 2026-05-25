@@ -53,14 +53,14 @@ body {
 	float: left;
 	width: 152px;
 	height: 54px;
-	margin-left: -88px;
+	margin-left: -138px;
 }
 
 .merlin-banner .modelName_top{
 	float: none;
 	display: inline-block;
 	max-width: 145px;
-	margin: 12px 0 0 0;
+	margin: 20px 0 0 0;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
