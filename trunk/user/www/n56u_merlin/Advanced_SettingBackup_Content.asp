@@ -8,12 +8,13 @@
 
 <link rel="shortcut icon" href="images/favicon.ico">
 <link rel="icon" href="images/favicon.png">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/main.css">
+<link rel="stylesheet" type="text/css" href="/index_style.css">
+<link rel="stylesheet" type="text/css" href="/form_style.css">
+<link rel="stylesheet" type="text/css" href="/other.css">
 
 <script type="text/javascript" src="/jquery.js"></script>
-<script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="/state.js"></script>
+<script type="text/javascript" src="/merlin_adapter.js"></script>
 <script type="text/javascript" src="/help.js"></script>
 <script type="text/javascript" src="/general.js"></script>
 <script type="text/javascript" src="/popup.js"></script>
@@ -227,36 +228,67 @@ $j.fn.fileName = function() {
 	display: block;
 }
 /* hide the real file upload input field */
-.file input {
-	cursor: pointer;
+	.file input {
+		cursor: pointer;
 	height: 100%;
 	position: absolute;
 	right: 0;
 	top: 0;
 	filter: alpha(opacity=1);
-	-moz-opacity: 0.01;
-	font-size: 100px;
-}
-</style>
+		-moz-opacity: 0.01;
+		font-size: 100px;
+	}
+	.alert {
+		padding: 8px 10px;
+		margin: 10px 0;
+		border: 1px solid #6b8fa3;
+		color: #FFFFFF;
+		background: #596e74;
+	}
+	.alert-danger,
+	.alert-error {
+		background: #7a3a3a;
+		border-color: #b94a48;
+	}
+	.alert-success {
+		background: #2f855a;
+		border-color: #48a477;
+	}
+	.btn {
+		display: inline-block;
+		padding: 3px 8px;
+		color: #FFFFFF;
+		background: #596e74;
+		border: 1px solid #6b8fa3;
+		cursor: pointer;
+	}
+	.btn-info {
+		background: #2f769b;
+		border-color: #4a9cc6;
+	}
+	.btn-danger {
+		background: #8a3b3b;
+		border-color: #b94a48;
+	}
+	.progress {
+		height: 18px;
+		background: #253137;
+		border: 1px solid #52666F;
+	}
+	.progress .bar {
+		height: 18px;
+		background: #2f769b;
+	}
+	</style>
 
 </head>
 
-<body onload="initial();">
-
-<div class="wrapper">
-    <div class="container-fluid" style="padding-right: 0px">
-        <div class="row-fluid">
-            <div class="span3"><center><div id="logo"></div></center></div>
-            <div class="span9" >
-                <div id="TopBanner"></div>
-            </div>
-        </div>
-    </div>
+<body onload="initial();" class="bg">
 
     <div id="LoadingBar" class="popup_bg">
         <center>
-            <div class="container-fluid" style="margin-top: 150px;">
-                <div class="well" style="background-color: #212121; width: 60%;">
+            <div style="margin-top: 150px;">
+                <div style="background-color: #212121; width: 60%; padding: 20px;">
                     <div class="progress" style="max-width: 450px; text-align: left;">
                         <div class="bar" id="proceeding_img"><span id="proceeding_img_text"></span></div>
                     </div>
@@ -264,9 +296,10 @@ $j.fn.fileName = function() {
                 </div>
             </div>
         </center>
-    </div>
+	    </div>
 
-    <div id="Loading" class="popup_bg"></div>
+	    <div id="Loading" class="popup_bg"></div>
+	    <div id="TopBanner"></div>
 
     <iframe name="hidden_frame" id="hidden_frame" src="" width="0" height="0" frameborder="0"></iframe>
 
@@ -284,33 +317,29 @@ $j.fn.fileName = function() {
     <input type="hidden" name="mtd_rwfs_mount" value="<% nvram_get_x("", "mtd_rwfs_mount"); %>">
     <input type="hidden" name="submit_fake" value="" onclick="submitRule();">
 
-    <div class="container-fluid">
-        <div class="row-fluid">
-            <div class="span3">
-                <!--Sidebar content-->
-                <!--=====Beginning of Main Menu=====-->
-                <div class="well sidebar-nav side_nav" style="padding: 0px;">
-                    <ul id="mainMenu" class="clearfix"></ul>
-                    <ul class="clearfix">
-                        <li>
-                            <div id="subMenu" class="accordion"></div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+<table class="content" align="center" cellpadding="0" cellspacing="0">
+	<tr>
+		<td width="17">&nbsp;</td>
+		<td valign="top" width="202">
+			<div id="mainMenu"></div>
+			<div id="subMenu"></div>
+		</td>
+		<td valign="top">
+			<div id="tabMenu" class="submenuBlock"></div>
+			<table width="98%" border="0" align="left" cellpadding="0" cellspacing="0">
+				<tr>
+					<td align="left" valign="top">
+						<table width="760px" border="0" cellpadding="5" cellspacing="0" class="FormTitle" id="FormTitle">
+							<tbody>
+								<tr>
+									<td bgcolor="#4D595D" valign="top">
+										<div class="container">
+											<div>&nbsp;</div>
+											<div class="formfonttitle"><#menu5_6#> - <#menu5_6_4#></div>
+											<div style="margin:10px 0 10px 5px;" class="splitLine"></div>
+	                                    <div class="alert alert-info"><#Setting_save_upload_desc#></div>
 
-            <div class="span9">
-                <!--Body content-->
-                <div class="row-fluid">
-                    <div class="span12">
-                        <div class="box well grad_colour_dark_blue">
-                            <h2 class="box_head round_top"><#menu5_6#> - <#menu5_6_4#></h2>
-                            <div class="round_bottom">
-                                <div class="row-fluid">
-                                    <div id="tabMenu" class="submenuBlock"></div>
-                                    <div class="alert alert-info" style="margin: 10px;"><#Setting_save_upload_desc#></div>
-
-                                    <table width="100%" cellpadding="4" cellspacing="0" class="table">
+	                                            <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">
                                         <tr>
                                             <th colspan="2" style="background-color: #E3E3E3;"><#Adm_Setting_nvram#></th>
                                         </tr>
@@ -355,7 +384,7 @@ $j.fn.fileName = function() {
                                         </tr>
                                     </table>
 
-                                    <table width="100%" cellpadding="4" cellspacing="0" class="table" id="tbl_rwfs" style="display:none">
+	                                            <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" id="tbl_rwfs" style="display:none; margin-top:10px;">
                                         <tr>
                                             <th colspan="2" style="background-color: #E3E3E3;"><#Adm_Setting_rwfs#></th>
                                         </tr>
@@ -370,7 +399,7 @@ $j.fn.fileName = function() {
                                         </tr>
                                     </table>
 
-                                    <table width="100%" cellpadding="4" cellspacing="0" class="table">
+	                                            <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" style="margin-top:10px;">
                                         <tr>
                                             <th colspan="3" style="background-color: #E3E3E3;"><#Adm_Setting_store#></th>
                                         </tr>
@@ -430,19 +459,23 @@ $j.fn.fileName = function() {
                                         </tr>
                                     </table>
 
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+										</div>
+										<div class="popup_container popup_element_second"></div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</td>
+		<td width="10" align="center" valign="top">&nbsp;</td>
+	</tr>
+</table>
 
     </form>
 
     <div id="footer"></div>
 
-</div>
 </body>
 </html>

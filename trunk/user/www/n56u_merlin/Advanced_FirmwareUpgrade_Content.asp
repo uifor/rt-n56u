@@ -8,12 +8,13 @@
 
 <link rel="shortcut icon" href="images/favicon.ico">
 <link rel="icon" href="images/favicon.png">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/main.css">
+<link rel="stylesheet" type="text/css" href="/index_style.css">
+<link rel="stylesheet" type="text/css" href="/form_style.css">
+<link rel="stylesheet" type="text/css" href="/other.css">
 
 <script type="text/javascript" src="/jquery.js"></script>
-<script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="/state.js"></script>
+<script type="text/javascript" src="/merlin_adapter.js"></script>
 <script type="text/javascript" src="/general.js"></script>
 <script type="text/javascript" src="/popup.js"></script>
 <script>
@@ -86,29 +87,48 @@ $j.fn.fileName = function(){
 	display: block;
 }
 /* hide the real file upload input field */
-.file input {
-	cursor: pointer;
-	height: 100%;
+	.file input {
+		cursor: pointer;
+		height: 100%;
 	position: absolute;
 	right: 0;
 	top: 0;
 	filter: alpha(opacity=1);
-	-moz-opacity: 0.01;
-	font-size: 100px;
-}
-</style>
+		-moz-opacity: 0.01;
+		font-size: 100px;
+	}
+	.alert {
+		padding: 8px 10px;
+		margin: 10px 0;
+		border: 1px solid #6b8fa3;
+		color: #FFFFFF;
+		background: #596e74;
+	}
+	.alert-danger {
+		background: #7a3a3a;
+		border-color: #b94a48;
+	}
+	.progress {
+		height: 18px;
+		background: #253137;
+		border: 1px solid #52666F;
+	}
+	.progress .bar {
+		height: 18px;
+		background: #2f769b;
+	}
+	</style>
 </head>
 
-<body onload="initial();">
+<body onload="initial();" class="bg">
 
-<div class="wrapper">
-    <div id="LoadingBar" class="popup_bg">
-        <center>
-        <div class="container-fluid" style="margin-top: 150px;">
-            <div class="well" style="background-color: #212121; width: 60%;">
-                <div class="progress" style="max-width: 450px; text-align: left;">
-                    <div class="bar" id="proceeding_img"><span id="proceeding_img_text"></span></div>
-                </div>
+<div id="LoadingBar" class="popup_bg">
+	        <center>
+	        <div style="margin-top: 150px;">
+	            <div style="background-color: #212121; width: 60%; padding: 20px;">
+	                <div class="progress" style="max-width: 450px; text-align: left;">
+	                    <div class="bar" id="proceeding_img"><span id="proceeding_img_text"></span></div>
+	                </div>
                 <div class="alert alert-danger" style="max-width: 400px;"><#FIRM_ok_desc#></div>
             </div>
         </div>
@@ -122,54 +142,42 @@ $j.fn.fileName = function(){
                     <div class="alert alert-info"><#FIRM_ok_desc#></div>
                 </td>
             </tr>
-        </table>
+	        </table>
 
-    </div>
-    <div id="Loading" class="popup_bg"></div><!--for uniform show, useless but have exist-->
+	</div>
+	<div id="Loading" class="popup_bg"></div><!--for uniform show, useless but have exist-->
+	<div id="TopBanner"></div>
 
-    <div class="container-fluid" style="padding-right: 0px">
-        <div class="row-fluid">
-            <div class="span3"><center><div id="logo"></div></center></div>
-            <div class="span9" >
-                <div id="TopBanner"></div>
-            </div>
-        </div>
-    </div>
-
-    <iframe name="hidden_frame" id="hidden_frame" src="" width="0" height="0" frameborder="0"></iframe>
+	    <iframe name="hidden_frame" id="hidden_frame" src="" width="0" height="0" frameborder="0"></iframe>
 
     <form method="post" action="upgrade.cgi" name="form" target="hidden_frame" enctype="multipart/form-data">
     <input type="hidden" name="current_page" value="Advanced_FirmwareUpgrade_Content.asp">
     <input type="hidden" name="next_page" value="">
     <input type="hidden" name="action_mode" value="">
 
-    <div class="container-fluid">
-        <div class="row-fluid">
-            <div class="span3">
-                <!--Sidebar content-->
-                <!--=====Beginning of Main Menu=====-->
-                <div class="well sidebar-nav side_nav" style="padding: 0px;">
-                    <ul id="mainMenu" class="clearfix"></ul>
-                    <ul class="clearfix">
-                        <li>
-                            <div id="subMenu" class="accordion"></div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="span9">
-                <!--Body content-->
-                <div class="row-fluid">
-                    <div class="span12">
-                        <div class="box well grad_colour_dark_blue">
-                            <h2 class="box_head round_top"><#menu5_6#> - <#menu5_6_3#></h2>
-                            <div class="round_bottom">
-                                <div class="row-fluid">
-                                    <div id="tabMenu" class="submenuBlock"></div>
-                                    <div class="alert alert-info" style="margin: 10px;">
-                                        <#FW_desc1#>
-                                        <ol>
+<table class="content" align="center" cellpadding="0" cellspacing="0">
+	<tr>
+		<td width="17">&nbsp;</td>
+		<td valign="top" width="202">
+			<div id="mainMenu"></div>
+			<div id="subMenu"></div>
+		</td>
+		<td valign="top">
+			<div id="tabMenu" class="submenuBlock"></div>
+			<table width="98%" border="0" align="left" cellpadding="0" cellspacing="0">
+				<tr>
+					<td align="left" valign="top">
+						<table width="760px" border="0" cellpadding="5" cellspacing="0" class="FormTitle" id="FormTitle">
+							<tbody>
+								<tr>
+									<td bgcolor="#4D595D" valign="top">
+										<div class="container">
+											<div>&nbsp;</div>
+											<div class="formfonttitle"><#menu5_6#> - <#menu5_6_3#></div>
+											<div style="margin:10px 0 10px 5px;" class="splitLine"></div>
+											<div class="alert alert-info">
+	                                        <#FW_desc1#>
+	                                        <ol>
                                             <li><#FW_desc2#></li>
                                             <li><#FW_desc3#></li>
                                             <li><#FW_desc4#></li>
@@ -178,7 +186,7 @@ $j.fn.fileName = function(){
                                         </ol>
                                     </div>
 
-                                    <table width="100%" cellpadding="4" cellspacing="0" class="table">
+	                                            <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">
                                         <tr>
                                             <th width="50%"><#FW_item1#></th>
                                             <td><input type="text" class="input" value="<% nvram_get_x("", "productid"); %>" readonly="1"></td>
@@ -193,33 +201,35 @@ $j.fn.fileName = function(){
                                                 <input type="file" name="file" size="36" />
                                             </td>
                                         </tr>
-                                        <tr>
-                                            <td colspan="2">
-                                                <center><input type="button" name="button" class="btn btn-primary" style="width: 219px;" onclick="fwUpload();" value="<#CTL_upload#>" /></center>
-                                            </td>
-                                        </tr>
-                                    </table>
+	                                    </table>
 
-                                    <div class="alert alert-info" style="margin-left: 10px; margin-right: 10px;">
-                                        <strong><#FW_note#></strong>
-                                        <ol>
+	                                    <div class="alert alert-info">
+	                                        <strong><#FW_note#></strong>
+	                                        <ol>
                                             <li><#FW_n1#></li>
                                             <li><#FW_n2#></li>
                                         </ol>
-                                    </div>
+	                                    </div>
 
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+											<div class="apply_gen">
+												<input type="button" name="button" class="button_gen" onclick="fwUpload();" value="<#CTL_upload#>">
+											</div>
+										</div>
+										<div class="popup_container popup_element_second"></div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</td>
+		<td width="10" align="center" valign="top">&nbsp;</td>
+	</tr>
+</table>
 
-    </form>
+	    </form>
 
-    <div id="footer"></div>
-</div>
+	    <div id="footer"></div>
 </body>
 </html>
