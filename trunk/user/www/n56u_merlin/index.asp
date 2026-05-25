@@ -26,6 +26,7 @@ var $j = jQuery.noConflict();
 <% available_disk_names_and_sizes(); %>
 <% get_usb_ports_info(); %>
 <% get_ext_ports_info(); %>
+<% wanlink(); %>
 
 var all_disks = foreign_disks().concat(blank_disks());
 var all_disk_interface = foreign_disk_interface_names().concat(blank_disk_interface_names());
@@ -54,6 +55,7 @@ function initial(){
 		$("linkInternet").href = "/device-map/intranet.asp"
 
 	update_internet_status();
+	update_index_wan_info();
 }
 
 function detect_update_info(){
@@ -64,7 +66,7 @@ function detect_update_info(){
 
 function show_default_icon(){
 	var icon_name = "iconRouter";
-	$("statusframe").src = "/device-map/router.asp";
+	$("statusframe").src = "/device-map/router_status.asp";
 	clickEvent($(icon_name));
 }
 
@@ -79,6 +81,8 @@ function set_default_choice(){
 			$("statusframe").src = "/device-map/router2g.asp";
 		else if(flag == "Router5g")
 			$("statusframe").src = "/device-map/router.asp";
+		else if(flag == "Router")
+			$("statusframe").src = "/device-map/router_status.asp";
 		else{
 			show_default_icon();
 			return;
@@ -108,6 +112,25 @@ function showMapWANStatus(flag){
 		$j("#NM_connect_status").removeClass("mapText-on mapText-warn").addClass("mapText-off").html("<#Disconnected#>");
 		$j("#single_wan").removeClass("mapLine-on mapLine-warn").addClass("mapLine-off");
 	}
+}
+
+function update_index_wan_info(){
+	if(typeof wanlink_ip4_wan != "function")
+		return;
+
+	var wan_ip = wanlink_ip4_wan();
+	if(!wan_ip || wan_ip == "0.0.0.0")
+		wan_ip = "--";
+
+	$j("#wanIPStatus").html(wan_ip);
+
+	var ddns_host = '<% nvram_get_x("", "ddns_hostname_x"); %>';
+	if(ddns_host && ddns_host.length > 0){
+		$j("#ddnsHostName").html(ddns_host);
+		$j("#ddnsHostName_div").show();
+	}
+	else
+		$j("#ddnsHostName_div").hide();
 }
 
 function show_middle_status(){
@@ -469,7 +492,7 @@ function clickEvent(obj){
 		stitle = "<#statusTitle_System#>";
 		current_src = $("statusframe").getAttribute("src") || "";
 		if(current_src.indexOf("/device-map/router") < 0)
-			$("statusframe").src = "/device-map/router.asp";
+			$("statusframe").src = "/device-map/router_status.asp";
 	}
 	else if(obj.id.indexOf("Client") > 0){
 		stitle = "<#statusTitle_Client#>";
@@ -511,11 +534,32 @@ function clickEvent(obj){
 
 	$j(".mapNode").removeClass("mapNode-active");
 	$j(obj).closest(".mapNode").addClass("mapNode-active");
+	update_map_icon_selection(obj);
 
 	$('helpname').innerHTML = stitle;
 
 	lastClicked = obj;
 	lastName = obj.id;
+}
+
+function update_map_icon_selection(obj){
+	if(lastClicked && lastClicked != obj)
+		reset_map_icon(lastClicked);
+
+	if(obj.id.indexOf("Internet") > 0 || obj.id.indexOf("Router") > 0 || obj.id.indexOf("Client") > 0)
+		obj.style.backgroundPosition = "0% 100%";
+	else if(obj.id.indexOf("USBdisk") > 0 || obj.id.indexOf("Printer") > 0 || obj.id.indexOf("Modem") > 0 || obj.id.indexOf("Hub") > 0 || obj.id.indexOf("SATA") > 0 || obj.id.indexOf("Card") > 0)
+		obj.style.backgroundPosition = "0% 100%";
+}
+
+function reset_map_icon(obj){
+	if(!obj || !obj.id)
+		return;
+
+	if(obj.id.indexOf("Internet") > 0 || obj.id.indexOf("Router") > 0 || obj.id.indexOf("Client") > 0)
+		obj.style.backgroundPosition = "0% 0%";
+	else if(obj.id.indexOf("USBdisk") > 0 || obj.id.indexOf("Printer") > 0 || obj.id.indexOf("Modem") > 0 || obj.id.indexOf("Hub") > 0 || obj.id.indexOf("SATA") > 0 || obj.id.indexOf("Card") > 0)
+		obj.style.backgroundPosition = "0% 0%";
 }
 
 function mouseEvent(obj, key){
@@ -647,8 +691,13 @@ $j(document).ready(function(){
                                         <div id="NM_connect_title" style="font-size:12px;font-family:Verdana, Arial, Helvetica, sans-serif;"><#statusTitle_Internet#>:</div>
                                         <div id="NM_connect_status" class="index_status mapText-warn" style="font-size:14px;"><#QIS_step2#>...</div>
                                         <div style="margin-top:10px;">
-                                            <span style="font-size:12px;font-family:Verdana, Arial, Helvetica, sans-serif;"><#Status_Str#>:</span>
+                                            <span style="font-size:12px;font-family:Verdana, Arial, Helvetica, sans-serif;">WAN IP:</span>
+                                            <strong id="wanIPStatus" class="index_status mapText-warn" style="font-size:14px;">--</strong>
                                             <div id="internetStatus" class="mapStatus-warn" style="margin-top:5px;"><#QKSet_detect_freshbtn#></div>
+                                        </div>
+                                        <div id="ddnsHostName_div" style="margin-top:5px;word-break:break-all;word-wrap:break-word;width:180px;display:none;">
+                                            <span style="font-size:12px;font-family:Verdana, Arial, Helvetica, sans-serif;">DDNS:</span>
+                                            <strong id="ddnsHostName" class="index_status mapText-on" style="font-size:12px;"></strong>
                                         </div>
                                     </td>
                                 </tr>
@@ -659,7 +708,7 @@ $j(document).ready(function(){
                                 </tr>
                                 <tr>
                                     <td align="right" bgcolor="#444f53" class="NM_radius_left mapNode" onclick="clickEvent($('iconRouter'));" style="height:150px">
-                                        <a id="iconRouterLink" href="device-map/router.asp" target="statusframe" style="outline:0;"><div id="iconRouter" onclick="clickEvent(this);"></div></a>
+                                        <a id="iconRouterLink" href="device-map/router_status.asp" target="statusframe" style="outline:0;"><div id="iconRouter" onclick="clickEvent(this);"></div></a>
                                     </td>
                                     <td colspan="2" valign="middle" bgcolor="#444f53" class="NM_radius_right mapNode" onclick="clickEvent($('iconRouter'));">
                                         <div id="wlSecurityContext">
@@ -718,7 +767,7 @@ $j(document).ready(function(){
                                             <div id="helpname" style="padding-top:10px;font-size:16px;"></div>
                                         </div>
                                         <div class="NM_radius_bottom_container">
-                                            <iframe id="statusframe" class="NM_radius_bottom" name="statusframe" src="/device-map/router.asp" frameborder="0"></iframe>
+                                            <iframe id="statusframe" class="NM_radius_bottom" name="statusframe" src="/device-map/router_status.asp" frameborder="0"></iframe>
                                         </div>
                                     </td>
                                 </tr>

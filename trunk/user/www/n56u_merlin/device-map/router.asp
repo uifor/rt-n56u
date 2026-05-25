@@ -597,10 +597,14 @@ window.onunload  = function(){
 <input type="hidden" name="wl_key4_org" value="<% nvram_char_to_ascii("", "wl_key4"); %>">
 <input type="hidden" name="wl_gmode" value="<% nvram_get_x("","wl_gmode"); %>">
 
-<ul class="nav nav-tabs">
-    <li><a href="router2g.asp">2.4GHz</a></li>
-    <li class="active"><a href="javascript:;">5GHz</a></li>
-</ul>
+	<ul class="nav nav-tabs router-tabs">
+	    <li class="active"><a href="javascript:;"><#menu5_1#></a></li>
+	    <li><a href="router_status.asp"><#statusTitle_System#></a></li>
+	</ul>
+	<ul class="nav nav-tabs wireless-band-tabs">
+	    <li><a href="router2g.asp">2.4GHz</a></li>
+	    <li class="active"><a href="javascript:;">5GHz</a></li>
+	</ul>
 
 <table class="table">
   <tr>

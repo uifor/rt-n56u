@@ -596,10 +596,14 @@ window.onunload  = function(){
 <input type="hidden" name="rt_key4_org" value="<% nvram_char_to_ascii("", "rt_key4"); %>">
 <input type="hidden" name="rt_gmode" value="<% nvram_get_x("","rt_gmode"); %>">
 
-<ul class="nav nav-tabs">
-    <li class="active"><a href="javascript:;">2.4GHz</a></li>
-    <li id="tab_radio5g"><a href="router.asp">5GHz</a></li>
-</ul>
+	<ul class="nav nav-tabs router-tabs">
+	    <li class="active"><a href="javascript:;"><#menu5_1#></a></li>
+	    <li><a href="router_status.asp"><#statusTitle_System#></a></li>
+	</ul>
+	<ul class="nav nav-tabs wireless-band-tabs">
+	    <li class="active"><a href="javascript:;">2.4GHz</a></li>
+	    <li id="tab_radio5g"><a href="router.asp">5GHz</a></li>
+	</ul>
 
 <table class="table">
   <tr>
