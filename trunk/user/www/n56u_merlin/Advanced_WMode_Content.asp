@@ -8,12 +8,13 @@
 
 <link rel="shortcut icon" href="images/favicon.ico">
 <link rel="icon" href="images/favicon.png">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/main.css">
+<link rel="stylesheet" type="text/css" href="/index_style.css">
+<link rel="stylesheet" type="text/css" href="/form_style.css">
+<link rel="stylesheet" type="text/css" href="/other.css">
 
 <script type="text/javascript" src="/jquery.js"></script>
-<script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="/state.js"></script>
+<script type="text/javascript" src="/merlin_adapter.js"></script>
 <script type="text/javascript" src="/general.js"></script>
 <script type="text/javascript" src="/wireless.js"></script>
 <script type="text/javascript" src="/help_wl.js"></script>
@@ -228,7 +229,7 @@ function showLANIPList(){
 		code += '<div style="font-weight:bold;cursor:pointer;" onclick="rescan();"><#AP_survey#>&nbsp;</div>';
 	}
 	else{
-		code += '<div style="width: 207px"><center><img style="padding-top: 4px; display: block;" src="/bootstrap/img/ajax-loader.gif"></center></div>';
+		code += '<div style="width: 207px"><center><img style="padding-top: 4px; display: block;" src="/images/loading.gif"></center></div>';
 	}
 
 	code +='<!--[if lte IE 6.5]><iframe class="hackiframe_wdssurvey"></iframe><![endif]-->';
@@ -239,7 +240,7 @@ var isMenuopen = 0;
 
 function pullLANIPList(obj){
 	if(isMenuopen == 0){
-		$j(obj).children('i').removeClass('icon-chevron-down').addClass('icon-chevron-up');
+		$j(obj).text("^");
 		document.getElementById("WDSAPList").style.display = 'block';
 		document.form.wl_wdslist_x_0.focus();
 		isMenuopen = 1;
@@ -249,24 +250,37 @@ function pullLANIPList(obj){
 }
 
 function hideClients_Block(){
-	$j("#ctl_wds_2").children('i').removeClass('icon-chevron-up').addClass('icon-chevron-down');
+	$j("#ctl_wds_2").text("v");
 	document.getElementById('WDSAPList').style.display='none';
 	isMenuopen = 0;
 }
 </script>
+<style>
+	.wmode_button {
+		display: inline-block;
+		padding: 3px 8px;
+		color: #FFFFFF;
+		background: #596e74;
+		border: 1px solid #6b8fa3;
+		cursor: pointer;
+	}
+	.wmode_delete {
+		background: #8a3b3b;
+		border-color: #b94a48;
+	}
+	.wmode_notice {
+		margin-top: 5px;
+		margin-bottom: 0px;
+		color: #FFFFFF;
+		background: #8a3b3b;
+		border: 1px solid #b94a48;
+		padding: 5px 8px;
+	}
+</style>
 </head>
 
-<body onload="initial();" onunLoad="return unload_body();">
-
-<div class="wrapper">
-    <div class="container-fluid" style="padding-right: 0px">
-        <div class="row-fluid">
-            <div class="span3"><center><div id="logo"></div></center></div>
-            <div class="span9" >
-                <div id="TopBanner"></div>
-            </div>
-        </div>
-    </div>
+<body onload="initial();" onunLoad="return unload_body();" class="bg">
+    <div id="TopBanner"></div>
 
     <div id="Loading" class="popup_bg"></div>
 
@@ -288,31 +302,27 @@ function hideClients_Block(){
     <input type="hidden" name="wl_sta_wpa_mode" value="<% nvram_get_x("","wl_sta_wpa_mode"); %>">
     <input type="hidden" name="wl_sta_wpa_psk_org" value="<% nvram_char_to_ascii("", "wl_sta_wpa_psk"); %>">
 
-    <div class="container-fluid">
-        <div class="row-fluid">
-            <div class="span3">
-                <!--Sidebar content-->
-                <!--=====Beginning of Main Menu=====-->
-                <div class="well sidebar-nav side_nav" style="padding: 0px;">
-                    <ul id="mainMenu" class="clearfix"></ul>
-                    <ul class="clearfix">
-                        <li>
-                            <div id="subMenu" class="accordion"></div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="span9">
-                <!--Body content-->
-                <div class="row-fluid">
-                    <div class="span12">
-                        <div class="box well grad_colour_dark_blue">
-                            <h2 class="box_head round_top"><#menu5_1#> - <#menu5_1_3#> (5GHz)</h2>
-                            <div class="round_bottom">
-                                <div class="row-fluid">
-                                    <div id="tabMenu" class="submenuBlock"></div>
-                                    <div class="alert alert-info" style="margin: 10px;">
+<table class="content" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+        <td width="17">&nbsp;</td>
+        <td valign="top" width="202">
+            <div id="mainMenu"></div>
+            <div id="subMenu"></div>
+        </td>
+        <td valign="top">
+            <div id="tabMenu" class="submenuBlock"></div>
+            <table width="98%" border="0" align="left" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td align="left" valign="top">
+                        <table width="760px" border="0" cellpadding="5" cellspacing="0" class="FormTitle" id="FormTitle">
+                            <tbody>
+                                <tr>
+                                    <td bgcolor="#4D595D" valign="top">
+                                        <div class="container">
+                                            <div>&nbsp;</div>
+                                            <div class="formfonttitle"><#menu5_1#> - <#menu5_1_3#> (5GHz)</div>
+                                            <div style="margin:10px 0 10px 5px;" class="splitLine"></div>
+                                    <div class="formfontdesc">
                                         <#WdsDesc0#>
                                         <ul id="inf_wds" style="display:none;">
                                             <li><#WdsDesc1#></li>
@@ -326,7 +336,7 @@ function hideClients_Block(){
                                         </ul>
                                     </div>
 
-                                    <table width="100%" align="center" cellpadding="4" cellspacing="0" class="table" style="margin-bottom: 0px;">
+                                    <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" style="margin-bottom: 0px;">
                                         <tr>
                                             <th width="50%" style="border-top: 0 none;"><a class="help_tooltip" href="javascript:void(0);"  onmouseover="openTooltip(this, 1, 1);"><#WLANConfig11b_x_APMode_itemname#></a></th>
                                             <td style="border-top: 0 none;">
@@ -367,19 +377,19 @@ function hideClients_Block(){
                                         </tr>
                                     </table>
 
-                                    <table width="100%" align="center" cellpadding="4" cellspacing="0" class="table">
+                                    <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" style="margin-top:10px;">
                                         <tr id="row_wds_apc" style="display:none;">
                                             <th width="50%"><a id="ctl_apc_1" class="help_tooltip" href="javascript:void(0);" onmouseover="openTooltip(this, 0, 1);"><#APSTA_SSID#></a></th>
                                             <td>
-                                                <div id="WDSAPList" class="alert alert-info ddown-list"></div>
-                                                <div class="input-append" style="float: left;">
+                                                <div id="WDSAPList" class="ddown-list"></div>
+                                                <div style="float: left;">
                                                     <input type="text" id="ctl_wds_1" name="wl_wdslist_x_0" maxlength="12" size="14" onKeyPress="return is_hwaddr(event);" style="float:left; width: 175px;">
                                                     <input type="text" id="ctl_apc_2" name="wl_sta_ssid" value="" maxlength="32" class="input" size="20" onKeyPress="return is_string(this,event);" style="float:left; width: 175px;"/>
-                                                    <button class="btn btn-chevron" id="ctl_wds_2" type="button" onclick="pullLANIPList(this);" title="Select the Access Point"><i class="icon icon-chevron-down"></i></button>
+                                                    <button class="wmode_button" id="ctl_wds_2" type="button" onclick="pullLANIPList(this);" title="Select the Access Point">v</button>
                                                 </div>
 
-                                                <input class="btn btn-primary" id="RBRList" style="margin-left: 5px; width: 99px;" type="submit" onClick="return markGroup(this, 'RBRList', 4, ' Add ');" name="RBRList" value="<#CTL_add#>" size="12">
-                                                <div id="ctl_wds_3" class="alert alert-danger" style="margin-top: 5px; margin-bottom: 0px;">* <#JS_validmac#></div>
+                                                <input class="wmode_button" id="RBRList" style="margin-left: 5px; width: 99px;" type="submit" onClick="return markGroup(this, 'RBRList', 4, ' Add ');" name="RBRList" value="<#CTL_add#>" size="12">
+                                                <div id="ctl_wds_3" class="wmode_notice">* <#JS_validmac#></div>
                                             </td>
                                         </tr>
                                         <tr id="row_wds_2" style="display:none;">
@@ -389,7 +399,7 @@ function hideClients_Block(){
                                                     <select size="4" name="RBRList_s" multiple="true" class="input" style="vertical-align:top;" >
                                                         <% nvram_get_table_x("WLANConfig11a","RBRList"); %>
                                                     </select>
-                                                    <input class="btn btn-danger" style="width: 99px;" type="submit" onClick="return markGroup(this, 'RBRList', 2, ' Del ');" name="RBRList2" value="<#CTL_del#>" size="12">
+                                                    <input class="wmode_button wmode_delete" style="width: 99px;" type="submit" onClick="return markGroup(this, 'RBRList', 2, ' Del ');" name="RBRList2" value="<#CTL_del#>" size="12">
                                                 </div>
                                             </td>
                                         </tr>
@@ -415,36 +425,34 @@ function hideClients_Block(){
                                         <tr id="row_apc_3" style="display:none;">
                                             <th><a class="help_tooltip" href="javascript:void(0);" onmouseover="openTooltip(this, 0, 7);"><#WLANConfig11b_x_PSKKey_itemname#></a></th>
                                             <td>
-                                                <div class="input-append">
+                                                <div>
                                                     <input type="password" name="wl_sta_wpa_psk" id="wl_sta_wpa_psk" maxlength="64" size="32" value="" style="width: 175px;">
-                                                    <button style="margin-left: -5px;" class="btn" type="button" onclick="passwordShowHide('wl_sta_wpa_psk')"><i class="icon-eye-close"></i></button>
+                                                    <button class="wmode_button" style="margin-left: -5px;" type="button" onclick="passwordShowHide('wl_sta_wpa_psk')">...</button>
                                                 </div>
                                             </td>
                                         </tr>
                                     </table>
 
-                                    <table class="table">
-                                        <tr>
-                                            <td width="50%" style="margin-top: 10px; border-top: 0 none;">
-                                                <input class="btn btn-info" type="button"  value="<#GO_2G#>" onclick="location.href='Advanced_WMode2g_Content.asp';">
-                                            </td>
-                                            <td style="border-top: 0 none;">
-                                                <input class="btn btn-primary" style="width: 219px" type="button" value="<#CTL_apply#>" onclick="applyRule()" />
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                                            <div class="apply_gen">
+                                                <input class="button_gen" type="button" value="<#GO_2G#>" onclick="location.href='Advanced_WMode2g_Content.asp';">
+                                                <input class="button_gen" type="button" value="<#CTL_apply#>" onclick="applyRule()">
+                                            </div>
+                                        </div>
+                                        <div class="popup_container popup_element_second"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td width="10" align="center" valign="top">&nbsp;</td>
+    </tr>
+</table>
 
     </form>
 
     <div id="footer"></div>
-</div>
 </body>
 </html>
