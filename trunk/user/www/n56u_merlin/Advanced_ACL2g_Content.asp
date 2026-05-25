@@ -8,12 +8,13 @@
 
 <link rel="shortcut icon" href="images/favicon.ico">
 <link rel="icon" href="images/favicon.png">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/main.css">
+<link rel="stylesheet" type="text/css" href="/index_style.css">
+<link rel="stylesheet" type="text/css" href="/form_style.css">
+<link rel="stylesheet" type="text/css" href="/other.css">
 
 <script type="text/javascript" src="/jquery.js"></script>
-<script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="/state.js"></script>
+<script type="text/javascript" src="/merlin_adapter.js"></script>
 <script type="text/javascript" src="/general.js"></script>
 <script type="text/javascript" src="/wireless_2g.js"></script>
 <script type="text/javascript" src="/help_wl.js"></script>
@@ -131,14 +132,14 @@ function showLANIPList(){
 }
 
 function hideClients_Block(){
-	$j("#chevron").children('i').removeClass('icon-chevron-up').addClass('icon-chevron-down');
+	$j("#chevron").text("v");
 	$('ClientList_Block').style.display='none';
 	isMenuopen = 0;
 }
 
 function pullLANIPList(obj){
 	if(isMenuopen == 0){
-		$j(obj).children('i').removeClass('icon-chevron-down').addClass('icon-chevron-up');
+		$j(obj).text("^");
 		$("ClientList_Block").style.display = 'block';
 		document.form.rt_maclist_x_0.focus();
 		isMenuopen = 1;
@@ -204,7 +205,7 @@ function showACLList(){
 	    }
 		code += '<tr>';
 		code += '<td colspan="2">&nbsp;</td>'
-		code += '<td><button class="btn btn-danger" type="submit" onclick="return markGroupACL(this, 32, \' Del \');" name="rt_ACLList"><i class="icon icon-minus icon-white"></i></button></td>';
+		code += '<td><button class="acl_button acl_delete" type="submit" onclick="return markGroupACL(this, 32, \' Del \');" name="rt_ACLList">-</button></td>';
 		code += '</tr>'
 	}
 	$j('#ACLList_Block').append(code);
@@ -229,20 +230,31 @@ function done_validating(action){
     margin-top: 0px;
     margin-bottom: 0px;
 }
+	.acl_input {
+		width: 175px;
+		box-sizing: border-box;
+	}
+	.acl_desc {
+		width: 100%;
+		box-sizing: border-box;
+	}
+	.acl_button {
+		display: inline-block;
+		padding: 3px 8px;
+		color: #FFFFFF;
+		background: #596e74;
+		border: 1px solid #6b8fa3;
+		cursor: pointer;
+	}
+	.acl_delete {
+		background: #8a3b3b;
+		border-color: #b94a48;
+	}
 </style>
 </head>
 
-<body onload="initial();">
-
-<div class="wrapper">
-    <div class="container-fluid" style="padding-right: 0px">
-        <div class="row-fluid">
-            <div class="span3"><center><div id="logo"></div></center></div>
-            <div class="span9" >
-                <div id="TopBanner"></div>
-            </div>
-        </div>
-    </div>
+<body onload="initial();" class="bg">
+    <div id="TopBanner"></div>
 
     <div id="Loading" class="popup_bg"></div>
 
@@ -260,33 +272,29 @@ function done_validating(action){
 
     <input type="hidden" name="rt_macnum_x_0" value="<% nvram_get_x("", "rt_macnum_x"); %>" readonly="1" />
 
-    <div class="container-fluid">
-        <div class="row-fluid">
-            <div class="span3">
-                <!--Sidebar content-->
-                <!--=====Beginning of Main Menu=====-->
-                <div class="well sidebar-nav side_nav" style="padding: 0px;">
-                    <ul id="mainMenu" class="clearfix"></ul>
-                    <ul class="clearfix">
-                        <li>
-                            <div id="subMenu" class="accordion"></div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+<table class="content" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+        <td width="17">&nbsp;</td>
+        <td valign="top" width="202">
+            <div id="mainMenu"></div>
+            <div id="subMenu"></div>
+        </td>
+        <td valign="top">
+            <div id="tabMenu" class="submenuBlock"></div>
+            <table width="98%" border="0" align="left" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td align="left" valign="top">
+                        <table width="760px" border="0" cellpadding="5" cellspacing="0" class="FormTitle" id="FormTitle">
+                            <tbody>
+                                <tr>
+                                    <td bgcolor="#4D595D" valign="top">
+                                        <div class="container">
+                                            <div>&nbsp;</div>
+                                            <div class="formfonttitle"><#menu5_1#> - <#menu5_1_4#> (2.4GHz)</div>
+                                            <div style="margin:10px 0 10px 5px;" class="splitLine"></div>
+                                            <div class="formfontdesc"><#DeviceSecurity11a_display1_sectiondesc#></div>
 
-            <div class="span9">
-                <!--Body content-->
-                <div class="row-fluid">
-                    <div class="span12">
-                        <div class="box well grad_colour_dark_blue">
-                            <h2 class="box_head round_top"><#menu5_1#> - <#menu5_1_4#> (2.4GHz)</h2>
-                            <div class="round_bottom">
-                                <div class="row-fluid">
-                                    <div id="tabMenu" class="submenuBlock"></div>
-                                    <div class="alert alert-info" style="margin: 10px;"><#DeviceSecurity11a_display1_sectiondesc#></div>
-
-                                    <table width="100%" align="center" cellpadding="4" cellspacing="0" class="table">
+                                    <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">
                                         <tr>
                                             <th width="50%" style="border-top: 0 none;">
                                                 <a class="help_tooltip" href="javascript:void(0);" onmouseover="openTooltip(this,4,1);"><#FirewallConfig_MFMethod_itemname#></a>
@@ -301,7 +309,7 @@ function done_validating(action){
                                         </tr>
                                     </table>
 
-                                    <table width="100%" align="center" cellpadding="4" cellspacing="0" class="table table-list" id="ACLList_Block">
+                                    <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable table-list" id="ACLList_Block" style="margin-top:10px;">
                                         <tr>
                                             <th colspan="3" style="background-color: #E3E3E3;"><#FirewallConfig_MFList_groupitemname#></th>
                                         </tr>
@@ -312,43 +320,41 @@ function done_validating(action){
                                         </tr>
                                         <tr>
                                             <td width="35%">
-                                                <div id="ClientList_Block" class="alert alert-info ddown-list" style="width: 400px;"></div>
-                                                <div class="input-append">
-                                                    <input type="text" maxlength="12" class="span12" size="12" name="rt_maclist_x_0" value="<% nvram_get_x("", "rt_maclist_x_0"); %>" onKeyPress="return is_hwaddr(event);" style="float:left; width: 175px"/>
-                                                    <button class="btn btn-chevron" id="chevron" type="button" onclick="pullLANIPList(this);" title="Select the MAC of WiFi clients"><i class="icon icon-chevron-down"></i></button>
+                                                <div id="ClientList_Block" class="ddown-list" style="width: 400px;"></div>
+                                                <div>
+                                                    <input type="text" maxlength="12" class="acl_input" size="12" name="rt_maclist_x_0" value="<% nvram_get_x("", "rt_maclist_x_0"); %>" onKeyPress="return is_hwaddr(event);"/>
+                                                    <button class="acl_button" id="chevron" type="button" onclick="pullLANIPList(this);" title="Select the MAC of WiFi clients">v</button>
                                                 </div>
                                             </td>
                                             <td width="60%">
-                                                <input type="text" maxlength="32" class="span12" size="32" name="rt_macdesc_x_0" value="<% nvram_get_x("", "rt_macdesc_x_0"); %>" onKeyPress="return is_string(this,event);" />
+                                                <input type="text" maxlength="32" class="acl_desc" size="32" name="rt_macdesc_x_0" value="<% nvram_get_x("", "rt_macdesc_x_0"); %>" onKeyPress="return is_string(this,event);" />
                                             </td>
                                             <td width="5%">
-                                                <button class="btn" style="max-width: 219px" type="submit" onclick="return markGroupACL(this, 32, ' Add ');" name="rt_ACLList2" value="<#CTL_add#>" size="12"><i class="icon icon-plus"></i></button>
+                                                <button class="acl_button" style="max-width: 219px" type="submit" onclick="return markGroupACL(this, 32, ' Add ');" name="rt_ACLList2" value="<#CTL_add#>" size="12">+</button>
                                             </td>
                                         </tr>
                                     </table>
 
-                                    <table class="table">
-                                        <tr>
-                                            <td id="col_goto5" width="50%" style="margin-top: 10px; border-top: 0 none;">
-                                                <input class="btn btn-info" type="button" name="goto5" value="<#GO_5G#>" onclick="location.href='Advanced_ACL_Content.asp';">
-                                            </td>
-                                            <td style="border-top: 0 none;">
-                                                <input class="btn btn-primary" style="width: 219px" type="button" value="<#CTL_apply#>" onclick="applyRule()" />
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                                            <div class="apply_gen">
+                                                <input class="button_gen" type="button" name="goto5" value="<#GO_5G#>" onclick="location.href='Advanced_ACL_Content.asp';">
+                                                <input class="button_gen" type="button" value="<#CTL_apply#>" onclick="applyRule()">
+                                            </div>
+                                        </div>
+                                        <div class="popup_container popup_element_second"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td width="10" align="center" valign="top">&nbsp;</td>
+    </tr>
+</table>
 
     </form>
 
     <div id="footer"></div>
-</div>
 </body>
 </html>
