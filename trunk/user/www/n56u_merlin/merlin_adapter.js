@@ -58,13 +58,6 @@
 		return code;
 	}
 
-	function renderQisMenu(){
-		var code = '<div class="menu menu_QIS_title" id="QIS_wizard_menu" onclick="location.href=\'/index.asp\'" title="/index.asp">';
-		code += '<table><tr><td><div class="menu_Icon menu_QIS"></div></td>';
-		code += '<td class="menu_Desc"><a href="/index.asp"><#QIS#></a></td></tr></table></div>\n';
-		return code;
-	}
-
 	function pruneMenus(L1, L2, L3){
 		var i;
 		var num_ephy = support_num_ephy();
@@ -165,7 +158,6 @@
 
 	function renderMainMenu(L1, L2){
 		var code = '<div class="merlin-leftnav">';
-		code += renderQisMenu();
 		code += '<div class="menu_Split menu_Split_general"><table width="192px" height="30px"><tbody><tr><td>General</td></tr></tbody></table></div>';
 		for(var i = 1; i < menuL1_title.length; i++){
 			if(menuL1_title[i] == "")
