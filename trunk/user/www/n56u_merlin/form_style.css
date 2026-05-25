@@ -154,6 +154,151 @@ html::-webkit-scrollbar-track{
 	margin-top:3px;
 }
 
+/* Merlin port shared components */
+.merlin_tabs{
+	margin:0 0 10px 0;
+	padding:0;
+	list-style:none;
+	border-bottom:1px solid #6b8fa3;
+}
+.merlin_tabs li{
+	display:inline-block;
+	margin:0 2px -1px 0;
+}
+.merlin_tabs a{
+	display:block;
+	min-width:72px;
+	padding:6px 13px 7px;
+	color:#c9d6dc;
+	text-align:center;
+	text-decoration:none;
+	background:#2f3d42;
+	border:1px solid #6b8fa3;
+	border-bottom-color:#4d595d;
+}
+.merlin_tabs li.active a,
+.merlin_tabs a:hover{
+	color:#FFFFFF;
+	background:#596e74;
+	border-bottom-color:#596e74;
+}
+.merlin_notice{
+	padding:8px 10px;
+	margin:10px 0;
+	color:#FFFFFF;
+	background:#596e74;
+	border:1px solid #6b8fa3;
+}
+.merlin_badge{
+	display:inline-block;
+	padding:2px 7px;
+	color:#FFFFFF;
+	background:#596e74;
+	border:1px solid #6b8fa3;
+	border-radius:2px;
+}
+.merlin_badge.warning{
+	background:#8a6d2f;
+	border-color:#c09853;
+}
+.merlin_badge.success{
+	background:#3d774d;
+	border-color:#6b9b73;
+}
+.merlin_textarea{
+	box-sizing:border-box;
+	width:100%;
+	font-family:"Courier New";
+	font-size:12px;
+	color:#FFFFFF;
+	background:#596e74;
+	border:1px solid #929EA1;
+}
+.merlin_inline{
+	display:flex;
+	align-items:center;
+	gap:4px;
+}
+.merlin_button_small{
+	display:inline-block;
+	height:25px;
+	padding:0 10px;
+	color:#FFFFFF;
+	font-family:Verdana, MS UI Gothic, MS P Gothic, Microsoft Yahei UI, sans-serif;
+	font-size:12px;
+	line-height:23px;
+	background:#596e74;
+	border:1px solid #6b8fa3;
+	cursor:pointer;
+}
+.merlin_button_small:hover{
+	background:#085F96;
+}
+.table-list td,
+.table-stat td,
+.traffic_history td{
+	padding:4px 8px;
+}
+.alert{
+	padding:8px 10px;
+	margin:10px 0;
+	color:#FFFFFF;
+	background:#596e74;
+	border:1px solid #6b8fa3;
+}
+.alert-info{
+	background:#596e74;
+	border-color:#6b8fa3;
+}
+.alert-danger,
+.alert-error{
+	background:#7a3a3a;
+	border-color:#b94a48;
+}
+.alert-success{
+	background:#3d774d;
+	border-color:#6b9b73;
+}
+.label{
+	display:inline-block;
+	padding:2px 6px;
+	color:#FFFFFF;
+	background:#596e74;
+	border:1px solid #6b8fa3;
+	border-radius:2px;
+}
+.label-warning{
+	background:#8a6d2f;
+	border-color:#c09853;
+}
+.label-success{
+	background:#3d774d;
+	border-color:#6b9b73;
+}
+.btn{
+	display:inline-block;
+	padding:3px 8px;
+	color:#FFFFFF;
+	background:#596e74;
+	border:1px solid #6b8fa3;
+	cursor:pointer;
+}
+.btn:hover{
+	background:#085F96;
+}
+.span12{
+	box-sizing:border-box;
+	width:100%;
+}
+.input-append{
+	display:flex;
+	align-items:center;
+}
+.ddown-list{
+	position:absolute;
+	z-index:50;
+}
+
 /* for Table (for Add List) */
 .FormTable_table{
 	margin-top:10px;

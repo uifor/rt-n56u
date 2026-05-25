@@ -380,18 +380,6 @@ function switchPage(id){
 
 </script>
 <style>
-#tabs {margin: 0 0 8px 0; padding: 0; list-style: none;}
-.traffic_tabs li {display: inline-block; margin-right: 4px;}
-.traffic_tabs a {
-	display: inline-block;
-	padding: 6px 13px;
-	color: #c9d6dc;
-	background: #2f3d42;
-	border: 1px solid #6b8fa3;
-	text-decoration: none;
-}
-.traffic_tabs li.active a {color: #FFFFFF; background: #596e74;}
-.table-stat td {padding: 4px 8px;}
 .traffic_chart {width: 670px; padding-left: 5px;}
 .traffic_swatch {height: 16px; border-radius: 5px;}
 </style>
@@ -431,7 +419,7 @@ function switchPage(id){
                                     </div>
 
                                     <div style="margin-bottom: 0px; margin: -36px 0px 0px 0px;">
-                                        <ul id="tabs" class="traffic_tabs">
+                                        <ul id="tabs" class="merlin_tabs">
                                             <li class="active"><a href="javascript:void(0)" id="tab_bw_rt"><#menu4_2_1#></a></li>
                                             <li><a href="javascript:void(0)" id="tab_bw_24"><#menu4_2_2#></a></li>
                                             <li><a href="javascript:void(0)" id="tab_tr_dy"><#menu4_2_3#></a></li>

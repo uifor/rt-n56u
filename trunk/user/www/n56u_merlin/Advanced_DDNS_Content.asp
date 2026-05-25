@@ -408,32 +408,6 @@ function checkDDNSReturnCode(){
 </script>
 <style>
 .ddns_section {margin-top: 12px;}
-.alert {
-	padding: 8px 10px;
-	margin: 10px 0;
-	border: 1px solid #6b8fa3;
-	color: #FFFFFF;
-	background: #596e74;
-}
-.alert-danger {background: #7a3a3a; border-color: #b94a48;}
-.label {
-	display: inline-block;
-	padding: 2px 5px;
-	color: #FFFFFF;
-	background: #3a87ad;
-}
-.btn {
-	display: inline-block;
-	padding: 3px 8px;
-	color: #FFFFFF;
-	background: #596e74;
-	border: 1px solid #6b8fa3;
-	cursor: pointer;
-}
-.input-append {
-	display: flex;
-	align-items: center;
-}
 </style>
 </head>
 

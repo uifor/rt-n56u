@@ -590,7 +590,7 @@ function showACLList(vnet_show,rnet_show,is_openvpn){
 
 	code = '<table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable table-list">';
 	if(ACLList.length == 0)
-		code +='<tr><td colspan="5" style="text-align: center; padding-bottom: 0px;"><div class="vpn_notice"><#IPConnection_VSList_Norule#></div></td></tr>';
+		code +='<tr><td colspan="5" style="text-align: center; padding-bottom: 0px;"><div class="merlin_notice"><#IPConnection_VSList_Norule#></div></td></tr>';
 	else{
 		for(var i = 0; i < ACLList.length; i++){
 			acl_pass = '';
@@ -649,7 +649,7 @@ function createBodyTable(){
 		catch(err){}
 	}else{
 		t_body += '<tr class="client">\n';
-		t_body += '  <td colspan="4" style="text-align: center;"><div class="vpn_notice"><#Nodata#></div></td>\n';
+		t_body += '  <td colspan="4" style="text-align: center;"><div class="merlin_notice"><#Nodata#></div></td>\n';
 		t_body += '</tr>\n';
 	}
 	$j('#wnd_vpns_cli table tr.client').remove();
@@ -692,59 +692,6 @@ function getHash(){
 <style>
 .caption-bold {
     font-weight: bold;
-}
-.vpn_tabs {
-    margin: 0 0 10px 0;
-    padding: 0;
-    list-style: none;
-    border-bottom: 1px solid #6b8fa3;
-}
-.vpn_tabs li {
-    display: inline-block;
-    margin: 0 2px -1px 0;
-}
-.vpn_tabs a {
-    display: block;
-    padding: 7px 18px;
-    color: #FFFFFF;
-    text-decoration: none;
-    background: #475a5f;
-    border: 1px solid #6b8fa3;
-}
-.vpn_tabs li.active a {
-    color: #FFFFFF;
-    background: #596e74;
-    border-bottom-color: #596e74;
-    font-weight: bold;
-}
-.vpn_notice {
-    padding: 8px 10px;
-    margin: 10px 0;
-    color: #FFFFFF;
-    background: #596e74;
-    border: 1px solid #6b8fa3;
-}
-.vpn_badge {
-    display: inline-block;
-    padding: 2px 7px;
-    color: #FFFFFF;
-    background: #8a6d2f;
-    border: 1px solid #c09853;
-    border-radius: 2px;
-}
-.vpn_textarea {
-    box-sizing: border-box;
-    width: 100%;
-    font-family: "Courier New";
-    font-size: 12px;
-}
-.vpn_button {
-    display: inline-block;
-    padding: 3px 9px;
-    color: #FFFFFF;
-    background: #596e74;
-    border: 1px solid #6b8fa3;
-    cursor: pointer;
 }
 .vpn_cert_tools td {
     vertical-align: middle;
@@ -817,7 +764,7 @@ function getHash(){
                                             <div>&nbsp;</div>
                                             <div class="formfonttitle"><#menu2#></div>
                                             <div style="margin:10px 0 10px 5px;" class="splitLine"></div>
-                                            <ul class="vpn_tabs">
+                                            <ul class="merlin_tabs">
                                 <li class="active">
                                     <a id="tab_vpns_cfg" href="#cfg"><#Settings#></a>
                                 </li>
@@ -833,7 +780,7 @@ function getHash(){
                                             </ul>
 
                         <div id="wnd_vpns_cfg">
-                            <div class="vpn_notice"><#VPNS_Info#></div>
+                            <div class="merlin_notice"><#VPNS_Info#></div>
                             <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">
                                 <tr>
                                     <th width="50%" style="padding-bottom: 0px; border-top: 0 none;"><#VPNS_Enable#></th>
@@ -862,7 +809,7 @@ function getHash(){
                                             <option value="1" <% nvram_match_x("", "vpns_type", "1","selected"); %>>L2TP (w/o IPSec)</option>
                                             <option value="2" <% nvram_match_x("", "vpns_type", "2","selected"); %>>OpenVPN</option>
                                         </select>
-                                        <span id="certs_hint" style="display:none" class="vpn_badge"><#OVPN_Hint#></span>
+                                        <span id="certs_hint" style="display:none" class="merlin_badge warning"><#OVPN_Hint#></span>
                                     </td>
                                 </tr>
                                 <tr id="row_vpns_auth">
@@ -1005,7 +952,7 @@ function getHash(){
                                     <td colspan="2" style="padding-bottom: 15px;">
                                         <a href="javascript:spoiler_toggle('spoiler_vpns_ov_conf')"><span><#OVPN_User#></span></a>
                                         <div id="spoiler_vpns_ov_conf" style="display:none;">
-                                            <textarea rows="16" wrap="off" spellcheck="false" maxlength="8192" class="vpn_textarea" name="ovpnsvr.server.conf"><% nvram_dump("ovpnsvr.server.conf",""); %></textarea>
+                                            <textarea rows="16" wrap="off" spellcheck="false" maxlength="8192" class="merlin_textarea" name="ovpnsvr.server.conf"><% nvram_dump("ovpnsvr.server.conf",""); %></textarea>
                                         </div>
                                     </td>
                                 </tr>
@@ -1013,7 +960,7 @@ function getHash(){
                                     <td colspan="2" style="padding-bottom: 15px;">
                                         <a href="javascript:spoiler_toggle('spoiler_script')"><span><#RunPostVPNS#></span></a>
                                         <div id="spoiler_script" style="display:none;">
-                                            <textarea rows="16" wrap="off" spellcheck="false" maxlength="8192" class="vpn_textarea" name="scripts.vpns_client_script.sh"><% nvram_dump("scripts.vpns_client_script.sh",""); %></textarea>
+                                            <textarea rows="16" wrap="off" spellcheck="false" maxlength="8192" class="merlin_textarea" name="scripts.vpns_client_script.sh"><% nvram_dump("scripts.vpns_client_script.sh",""); %></textarea>
                                         </div>
                                     </td>
                                 </tr>
@@ -1132,7 +1079,7 @@ function getHash(){
                                         <input id="vpns_gen_dv" type="text" maxlength="5" size="10" style="width: 35px;" value="365" onKeyPress="return is_number(this,event);"/>
                                     </td>
                                     <td align="left" style="border-top: 0 none; padding-top: 0px;">
-                                        <input id="vpns_gen_bn" type="button" class="vpn_button" style="width: 145px; outline:0" onclick="create_server_cert();" value="<#VPNS_GenNew#>"/>
+                                        <input id="vpns_gen_bn" type="button" class="merlin_button_small" style="width: 145px; outline:0" onclick="create_server_cert();" value="<#VPNS_GenNew#>"/>
                                     </td>
                                 </tr>
                                 <tr id="row_vpns_exp" style="display:none">
@@ -1158,7 +1105,7 @@ function getHash(){
                                         <input id="vpns_exp_dv" type="text" maxlength="5" size="10" style="width: 35px;" value="365" onKeyPress="return is_number(this,event);"/>
                                     </td>
                                     <td align="left">
-                                        <input id="vpns_exp_bn" type="button" class="vpn_button" style="width: 145px; outline:0" onclick="export_client_ovpn('');" value="<#VPNS_Export#>"/>
+                                        <input id="vpns_exp_bn" type="button" class="merlin_button_small" style="width: 145px; outline:0" onclick="export_client_ovpn('');" value="<#VPNS_Export#>"/>
                                     </td>
                                 </tr>
                                 <tr>
@@ -1169,37 +1116,37 @@ function getHash(){
                                 <tr>
                                     <td style="padding-bottom: 0px; border-top: 0 none;">
                                         <span class="caption-bold">Root CA Certificate (ca.crt):</span>
-                                        <textarea rows="4" wrap="off" spellcheck="false" maxlength="8192" class="vpn_textarea" name="ovpnsvr.ca.crt"><% nvram_dump("ovpnsvr.ca.crt",""); %></textarea>
+                                        <textarea rows="4" wrap="off" spellcheck="false" maxlength="8192" class="merlin_textarea" name="ovpnsvr.ca.crt"><% nvram_dump("ovpnsvr.ca.crt",""); %></textarea>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="padding-bottom: 0px; border-top: 0 none;">
                                         <span class="caption-bold">Diffie-Hellman PEM (dh1024.pem):</span>
-                                        <textarea rows="4" wrap="off" spellcheck="false" maxlength="4096" class="vpn_textarea" name="ovpnsvr.dh1024.pem"><% nvram_dump("ovpnsvr.dh1024.pem",""); %></textarea>
+                                        <textarea rows="4" wrap="off" spellcheck="false" maxlength="4096" class="merlin_textarea" name="ovpnsvr.dh1024.pem"><% nvram_dump("ovpnsvr.dh1024.pem",""); %></textarea>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="padding-bottom: 0px; border-top: 0 none;">
                                         <span class="caption-bold">Server Certificate (server.crt):</span>
-                                        <textarea rows="4" wrap="off" spellcheck="false" maxlength="8192" class="vpn_textarea" name="ovpnsvr.server.crt"><% nvram_dump("ovpnsvr.server.crt",""); %></textarea>
+                                        <textarea rows="4" wrap="off" spellcheck="false" maxlength="8192" class="merlin_textarea" name="ovpnsvr.server.crt"><% nvram_dump("ovpnsvr.server.crt",""); %></textarea>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="padding-bottom: 0px; border-top: 0 none;">
                                         <span class="caption-bold">Server Private Key (server.key) - secret:</span>
-                                        <textarea rows="4" wrap="off" spellcheck="false" maxlength="8192" class="vpn_textarea" name="ovpnsvr.server.key"><% nvram_dump("ovpnsvr.server.key",""); %></textarea>
+                                        <textarea rows="4" wrap="off" spellcheck="false" maxlength="8192" class="merlin_textarea" name="ovpnsvr.server.key"><% nvram_dump("ovpnsvr.server.key",""); %></textarea>
                                     </td>
                                 </tr>
                                 <tr id="row_ta_key">
                                     <td style="padding-bottom: 0px; border-top: 0 none;">
                                         <span class="caption-bold">TLS Auth/Crypt Key (ta.key/tc.key) - secret:</span>
-                                        <textarea rows="4" wrap="off" spellcheck="false" maxlength="8192" class="vpn_textarea" name="ovpnsvr.ta.key"><% nvram_dump("ovpnsvr.ta.key",""); %></textarea>
+                                        <textarea rows="4" wrap="off" spellcheck="false" maxlength="8192" class="merlin_textarea" name="ovpnsvr.ta.key"><% nvram_dump("ovpnsvr.ta.key",""); %></textarea>
                                     </td>
                                 </tr>
                                 <tr id="row_stc2_key">
                                     <td style="padding-bottom: 0px; border-top: 0 none;">
                                         <span class="caption-bold">TLS Crypt v2 Key (stc2.key) - secret:</span>
-                                        <textarea rows="4" wrap="off" spellcheck="false" maxlength="8192" class="vpn_textarea" name="ovpnsvr.stc2.key"><% nvram_dump("ovpnsvr.stc2.key",""); %></textarea>
+                                        <textarea rows="4" wrap="off" spellcheck="false" maxlength="8192" class="merlin_textarea" name="ovpnsvr.stc2.key"><% nvram_dump("ovpnsvr.stc2.key",""); %></textarea>
                                     </td>
                                 </tr>
                             </table>
@@ -1207,7 +1154,7 @@ function getHash(){
                         </div>
 
                         <div id="wnd_vpns_acl" style="display:none">
-                            <div id="div_acl_info" class="vpn_notice"></div>
+                            <div id="div_acl_info" class="merlin_notice"></div>
                             <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable table-list">
                                 <tr>
                                     <th width="20%" style="border-top: 0 none;"><#VPNS_CName#>:</th>

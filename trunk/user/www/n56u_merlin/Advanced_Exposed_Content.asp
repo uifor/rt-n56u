@@ -123,29 +123,6 @@ function done_validating(action){
 }
 </script>
 <style>
-.alert {
-	padding: 8px 10px;
-	margin: 10px 0;
-	border: 1px solid #6b8fa3;
-	color: #FFFFFF;
-	background: #596e74;
-}
-.btn {
-	display: inline-block;
-	padding: 3px 8px;
-	color: #FFFFFF;
-	background: #596e74;
-	border: 1px solid #6b8fa3;
-	cursor: pointer;
-}
-.input-append {
-	display: flex;
-	align-items: center;
-}
-.ddown-list {
-	position: absolute;
-	z-index: 50;
-}
 </style>
 </head>
 <body onload="initial();" onunLoad="return unload_body();" class="bg">

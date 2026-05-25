@@ -331,33 +331,6 @@ function done_validating(action){
     margin-top: 0px;
     margin-bottom: 0px;
 }
-.alert {
-    padding: 8px 10px;
-    margin: 10px 0;
-    border: 1px solid #6b8fa3;
-    color: #FFFFFF;
-    background: #596e74;
-}
-.btn {
-    display: inline-block;
-    padding: 3px 8px;
-    color: #FFFFFF;
-    background: #596e74;
-    border: 1px solid #6b8fa3;
-    cursor: pointer;
-}
-.span12 {
-    box-sizing: border-box;
-    width: 100%;
-}
-.input-append {
-    display: flex;
-    align-items: center;
-}
-.ddown-list {
-    position: absolute;
-    z-index: 50;
-}
 </style>
 </head>
 
