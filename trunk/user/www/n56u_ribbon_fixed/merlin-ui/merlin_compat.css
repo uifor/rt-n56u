@@ -1,0 +1,551 @@
+/*
+ * Compatibility layer for gradually porting the Padavan/N56U web UI toward
+ * ASUSWRT-Merlin's visual language without replacing page logic.
+ */
+
+body {
+	background: #21333e;
+	color: #f4f7f8;
+	font-family: Arial, Verdana, Helvetica, "Microsoft Yahei UI", sans-serif;
+}
+
+.wrapper {
+	width: 998px;
+}
+
+#logo {
+	width: 245px;
+	height: 54px;
+	margin-top: 10px;
+	background: url("/merlin-ui/images/New_ui/title_bg.png") 0 0 no-repeat;
+	background-size: 998px 54px;
+}
+
+#logo:after {
+	content: "ASUS";
+	display: block;
+	width: 180px;
+	padding: 28px 0 0 18px;
+	color: #fff;
+	font-size: 17px;
+	font-weight: bold;
+	letter-spacing: 1px;
+	text-align: center;
+	text-shadow: 1px 1px 0 #000;
+}
+
+#TopBanner .well,
+.box.well,
+.well.sidebar-nav {
+	border: 1px solid #4d595d;
+	border-radius: 0 0 3px 3px;
+	background: #2f3a3e;
+	box-shadow: none;
+	color: #fff;
+}
+
+#TopBanner .well {
+	background: #475a5f;
+}
+
+.box.well {
+	padding: 0;
+}
+
+.box_head,
+h2.box_head {
+	margin: 0;
+	padding: 8px 10px;
+	border-radius: 0;
+	background: #4d595d;
+	color: #fff;
+	font-size: 13px;
+	line-height: 18px;
+	text-align: center;
+	text-shadow: 1px 1px 0 #000;
+}
+
+.round_bottom {
+	background: #475a5f;
+}
+
+.side_nav ul {
+	border-radius: 0;
+}
+
+.side_nav ul li a,
+.side_nav #subMenu a {
+	min-height: 26px;
+	border: 0;
+	background: #3a4042;
+	color: #94ccf2;
+	font: bold 12px/26px Verdana, Arial, sans-serif;
+	text-shadow: 1px 1px 0 #000;
+}
+
+.side_nav ul li.active > a,
+.side_nav #subMenu a[style*="font-weight: bold"] {
+	background: linear-gradient(to bottom, #8aa6be 0%, #668cad 44%, #4a779d 45%, #376c9b 100%);
+	color: #fff !important;
+}
+
+.side_nav ul li a:hover,
+.side_nav #subMenu a:hover {
+	background: #77a5c6;
+	color: #fff;
+}
+
+.submenuBlock .nav-tabs {
+	border-bottom: 0;
+}
+
+.submenuBlock .nav-tabs > li > a {
+	min-width: 92px;
+	margin-right: 2px;
+	border: 0;
+	border-radius: 0;
+	background: #5f6f75;
+	color: #cfe7f7;
+	font-size: 12px;
+	text-align: center;
+	text-shadow: 1px 1px 0 #000;
+}
+
+.submenuBlock .nav-tabs > .active > a,
+.submenuBlock .nav-tabs > .active > a:hover {
+	background: #c5d2d6;
+	color: #000;
+	text-shadow: none;
+}
+
+.alert.alert-info {
+	border: 1px solid #5f6f75;
+	background: #2f3a3e;
+	color: #f4f7f8;
+	text-shadow: none;
+}
+
+.table th {
+	background: #2f3a3e;
+	color: #fff;
+	font-weight: normal;
+}
+
+.table td {
+	background: #475a5f;
+	color: #fff;
+}
+
+.table th,
+.table td {
+	border-color: #222;
+}
+
+input.input,
+textarea,
+select {
+	border: 1px solid #576d73;
+	border-radius: 2px;
+	background: #eef4f5;
+	color: #111;
+}
+
+.btn.btn-primary,
+.btn.btn-info,
+input[type="button"].btn-primary,
+input[type="submit"].btn-primary {
+	border: 1px solid #6b8795;
+	border-radius: 3px;
+	background: linear-gradient(to bottom, #92a0a5 0%, #66757c 100%);
+	color: #fff;
+	text-shadow: 1px 1px 0 #000;
+}
+
+.btn.btn-primary:hover,
+.btn.btn-info:hover,
+input[type="button"].btn-primary:hover,
+input[type="submit"].btn-primary:hover {
+	background: linear-gradient(to bottom, #b9d8e6 0%, #699bbf 100%);
+}
+
+#footer,
+.copyright {
+	color: #c8d5d9;
+	text-shadow: 1px 1px 0 #000;
+}
+
+.bottom-image {
+	width: 998px;
+	height: 30px;
+	background: url("/merlin-ui/images/New_ui/bottom_bg.png") no-repeat;
+}
+
+.FormTitle {
+	line-height: 160%;
+	font-size: 12px;
+	font-family: Arial, Verdana, Helvetica, "Microsoft Yahei UI", sans-serif;
+	border: 1px solid #4d595d;
+	border-radius: 0 0 3px 3px;
+	color: #fff;
+	position: relative;
+}
+
+.merlin-form-container {
+	min-height: 420px;
+	padding: 0 12px 12px;
+	background: #4d595d;
+}
+
+.formfonttitle {
+	margin: 0 0 10px 5px;
+	color: #fff;
+	font-family: Arial, Helvetica, "Microsoft Yahei UI", sans-serif;
+	font-size: 16px;
+	font-weight: bold;
+	text-shadow: 1px 1px 0 #000;
+}
+
+.formfontdesc {
+	margin: 0 0 10px 5px;
+	color: #fff;
+	font-family: Arial, Helvetica, "Microsoft Yahei UI", sans-serif;
+	font-size: 13px;
+}
+
+.splitLine {
+	width: 100%;
+	max-width: 740px;
+	height: 2px;
+	background: linear-gradient(#32393b 0%, #32393b 20%, #667881 80%, #667881 100%);
+}
+
+.FormTable {
+	border: 1px solid #000;
+	border-collapse: collapse;
+	font-size: 12px;
+	font-family: Arial, Helvetica, "Microsoft Yahei UI", sans-serif;
+}
+
+.FormTable th {
+	width: 35%;
+	height: 30px;
+	padding-left: 10px;
+	border: 1px solid #222;
+	border-collapse: collapse;
+	background: #2f3a3e;
+	color: #fff;
+	font-family: Arial, Helvetica, "Microsoft Yahei UI", sans-serif;
+	font-size: 12px;
+	font-weight: normal;
+	line-height: 15px;
+	text-align: left;
+}
+
+.FormTable td {
+	padding: 4px 10px;
+	border: 1px solid #222;
+	border-collapse: collapse;
+	background: #475a5f;
+	color: #fff;
+}
+
+.FormTable a,
+.FormTable a:hover {
+	color: #fff;
+	text-decoration: underline;
+}
+
+.FormTable td span,
+.FormTable td .merlin-hint {
+	background: #475a5f;
+	color: #fc0;
+}
+
+input.input_15_table,
+input.input_15_table.input {
+	box-sizing: content-box;
+	width: 120px;
+	height: 23px;
+	margin-left: 2px;
+	padding-left: 0.4em;
+	border: 1px solid #929ea1;
+	border-radius: 0;
+	background: #596e74;
+	color: #fff;
+	font-family: "Lucida Console", monospace;
+	font-size: 12px;
+	line-height: 23px;
+}
+
+.FormTable input.input,
+.FormTable input[type="text"],
+.FormTable input[type="password"],
+.FormTable select.input,
+.FormTable select {
+	border: 1px solid #929ea1;
+	border-radius: 0;
+	background: #596e74;
+	color: #fff;
+	font-family: "Lucida Console", monospace;
+	font-size: 12px;
+}
+
+.FormTable input[type="text"],
+.FormTable input[type="password"] {
+	height: 23px;
+	padding-left: 0.4em;
+	line-height: 23px;
+}
+
+.FormTable select {
+	min-height: 25px;
+}
+
+.FormTable .input-append {
+	margin-bottom: 0;
+}
+
+.FormTable .input-append .btn {
+	height: 33px;
+	border: 1px solid #929ea1;
+	border-radius: 0;
+	background: linear-gradient(#233438 0%, #0f1011 100%);
+	color: #fff;
+	text-shadow: 1px 1px 0 #000;
+}
+
+.FormTable .controls,
+.FormTable label.checkbox.inline {
+	margin-bottom: 0;
+	color: #fff;
+}
+
+.FormTable label.checkbox.inline {
+	display: inline-block;
+	padding-top: 0;
+	vertical-align: middle;
+}
+
+.FormTable input[type="checkbox"],
+.FormTable input[type="radio"] {
+	margin-top: 0;
+}
+
+.apply_gen {
+	width: 100%;
+	margin-top: 10px;
+	padding: 8px 0 0;
+	background: #4d595d;
+	text-align: center;
+}
+
+.button_gen {
+	min-width: 122px;
+	height: 33px;
+	padding: 0 0.7em;
+	overflow: visible;
+	border: 0;
+	border-radius: 8px;
+	background: linear-gradient(#233438 0%, #0f1011 100%);
+	color: #fff;
+	cursor: pointer;
+	font-family: Verdana, "Microsoft Yahei UI", sans-serif;
+	font-size: 12px;
+	font-weight: bold;
+	outline: none;
+	text-shadow: 1px 1px 0 #000;
+	white-space: normal;
+	word-break: break-all;
+}
+
+.button_gen:hover {
+	background: linear-gradient(#09639c 0%, #003047 100%);
+}
+
+.wireless-apply-row .button_gen + .button_gen {
+	margin-left: 14px;
+}
+
+.merlin-network-map-panel {
+	min-height: 650px;
+	padding: 0 12px 12px;
+	background: #4d595d;
+}
+
+.merlin-network-grid {
+	display: table;
+	width: 100%;
+	table-layout: fixed;
+	border: 1px solid #222;
+	background: #2a3539 url("/merlin-ui/images/New_ui/networkmap/bg.png") center top repeat;
+}
+
+.merlin-map-column,
+.merlin-status-panel {
+	display: table-cell;
+	vertical-align: top;
+}
+
+.merlin-map-column {
+	width: 155px;
+	padding: 14px 0 12px 14px;
+	border-right: 1px solid #222;
+	background: #324044;
+}
+
+.merlin-map-table {
+	width: 132px;
+	margin: 0;
+	border: 0;
+	background: transparent;
+}
+
+.merlin-map-table td {
+	position: relative;
+	height: 104px;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	text-align: center;
+}
+
+.merlin-map-node {
+	position: relative;
+	width: 120px;
+	height: 100px;
+}
+
+.merlin-map-column .big-icons {
+	display: block;
+	margin: 0 auto;
+	background-position: 0 0;
+	background-repeat: no-repeat;
+	cursor: pointer;
+}
+
+.merlin-map-column #iconInternet,
+.merlin-map-column .big-icons-globe,
+.merlin-map-column .big-icons-globe-active {
+	width: 107px;
+	height: 95px;
+	background-image: url("/merlin-ui/images/New_ui/networkmap/map-iconInternet.png");
+}
+
+.merlin-map-column #iconRouter,
+.merlin-map-column .big-icons-router,
+.merlin-map-column .big-icons-router-active {
+	width: 107px;
+	height: 95px;
+	background-image: url("/merlin-ui/images/New_ui/networkmap/map-iconRouter.png");
+}
+
+.merlin-map-column #iconClient,
+.merlin-map-column .big-icons-laptop,
+.merlin-map-column .big-icons-laptop-active {
+	width: 95px;
+	height: 95px;
+	background-image: url("/merlin-ui/images/New_ui/networkmap/map-iconClient.png");
+}
+
+.merlin-map-column .big-icons-usb,
+.merlin-map-column .big-icons-usb-active,
+.merlin-map-column .big-icons-usbhdd,
+.merlin-map-column .big-icons-usbhdd-active,
+.merlin-map-column .big-icons-hub,
+.merlin-map-column .big-icons-hub-active,
+.merlin-map-column .big-icons-ata,
+.merlin-map-column .big-icons-ata-active,
+.merlin-map-column .big-icons-mmc,
+.merlin-map-column .big-icons-mmc-active {
+	width: 91px;
+	height: 91px;
+	background-image: url("/merlin-ui/images/New_ui/networkmap/USB_2.png");
+}
+
+.merlin-map-column .big-icons-printer,
+.merlin-map-column .big-icons-printer-active {
+	width: 91px;
+	height: 96px;
+	background-image: url("/merlin-ui/images/New_ui/networkmap/map-iconPrinter.png");
+}
+
+.merlin-map-column .big-icons-modem,
+.merlin-map-column .big-icons-modem-active {
+	width: 95px;
+	height: 96px;
+	background-image: url("/merlin-ui/images/New_ui/networkmap/map-iconmodem.png");
+}
+
+.merlin-map-column .iconNo {
+	width: 91px;
+	height: 91px;
+	margin: 0 auto;
+	background: url("/merlin-ui/images/New_ui/networkmap/devicebt_default.png") no-repeat;
+}
+
+.merlin-map-column #clientNumber,
+.merlin-map-column .badge {
+	min-width: 18px;
+	min-height: 18px;
+	border-radius: 9px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+	line-height: 16px;
+	text-align: center;
+}
+
+.merlin-map-badge {
+	position: absolute;
+	top: 46px;
+	left: 76px;
+	min-width: 22px;
+	z-index: 2;
+	text-align: left;
+}
+
+.merlin-map-badge .badge {
+	display: inline-block;
+}
+
+.merlin-map-column .arrow-right {
+	position: absolute;
+	top: 37px;
+	right: -20px;
+	margin: 0;
+	display: none;
+	z-index: 3;
+}
+
+.merlin-map-column .arrow-right img {
+	max-width: none;
+}
+
+.merlin-status-panel {
+	padding: 14px;
+	background: #2a3539;
+}
+
+.merlin-status-title {
+	height: 36px;
+	margin: 0;
+	border-radius: 10px 10px 0 0;
+	background: linear-gradient(to bottom, #a5a5a5 0%, #434343 100%);
+	color: #fff;
+	font-family: "Times New Roman", Times, "Microsoft Yahei UI", serif;
+	font-size: 14px;
+	font-weight: bold;
+	letter-spacing: 1px;
+	line-height: 36px;
+	text-align: center;
+	text-shadow: 1px 1px 0 #000;
+}
+
+.merlin-status-frame {
+	border: 1px solid #222;
+	border-top: 0;
+	background: #475a5f;
+}
+
+.merlin-status-frame iframe {
+	display: block;
+	background: #2a3539;
+}
