@@ -8,11 +8,13 @@
 
 <link rel="shortcut icon" href="images/favicon.ico">
 <link rel="icon" href="images/favicon.png">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/main.css">
+<link rel="stylesheet" type="text/css" href="/index_style.css">
+<link rel="stylesheet" type="text/css" href="/form_style.css">
+<link rel="stylesheet" type="text/css" href="/other.css">
 
 <script type="text/javascript" src="/jquery.js"></script>
 <script type="text/javascript" src="/state.js"></script>
+<script type="text/javascript" src="/merlin_adapter.js"></script>
 <script type="text/javascript" src="/popup.js"></script>
 <script>
 var $j = jQuery.noConflict();
@@ -65,19 +67,30 @@ function checkEnter(e){
 	return (e.keyCode || event.which || event.charCode || 0) === 13;
 }
 </script>
+<style>
+	.console_input,
+	.console_area {
+		width: 100%;
+		box-sizing: border-box;
+	}
+	.console_area {
+		font-family: "Courier New", Courier, monospace;
+		font-size: 13px;
+	}
+	.console_button {
+		width: 100%;
+		display: inline-block;
+		padding: 3px 8px;
+		color: #FFFFFF;
+		background: #596e74;
+		border: 1px solid #6b8fa3;
+		cursor: pointer;
+	}
+</style>
 </head>
 
-<body onLoad="initial();" >
-
-<div class="wrapper">
-    <div class="container-fluid" style="padding-right: 0px">
-        <div class="row-fluid">
-            <div class="span3"><center><div id="logo"></div></center></div>
-            <div class="span9" >
-                <div id="TopBanner"></div>
-            </div>
-        </div>
-    </div>
+<body onLoad="initial();" class="bg">
+    <div id="TopBanner"></div>
     <div id="Loading" class="popup_bg"></div>
     <iframe name="hidden_frame" id="hidden_frame" src="" width="0" height="0" frameborder="0"></iframe>
 
@@ -90,55 +103,55 @@ function checkEnter(e){
     <input type="hidden" name="action_mode" value="">
     <input type="hidden" name="action_script" value="">
 
-    <div class="container-fluid">
-        <div class="row-fluid">
-            <div class="span3">
-                <!--Sidebar content-->
-                <!--=====Beginning of Main Menu=====-->
-                <div class="well sidebar-nav side_nav" style="padding: 0px;">
-                    <ul id="mainMenu" class="clearfix"></ul>
-                    <ul class="clearfix">
-                        <li>
-                            <div id="subMenu" class="accordion"></div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+<table class="content" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+        <td width="17">&nbsp;</td>
+        <td valign="top" width="202">
+            <div id="mainMenu"></div>
+            <div id="subMenu"></div>
+        </td>
+        <td valign="top">
+            <div id="tabMenu" class="submenuBlock"></div>
+            <table width="98%" border="0" align="left" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td align="left" valign="top">
+                        <table width="760px" border="0" cellpadding="5" cellspacing="0" class="FormTitle" id="FormTitle">
+                            <tbody>
+                                <tr>
+                                    <td bgcolor="#4D595D" valign="top">
+                                        <div class="container">
+                                            <div>&nbsp;</div>
+                                            <div class="formfonttitle"><#menu5_6#> - <#menu5_6_6#></div>
+                                            <div style="margin:10px 0 10px 5px;" class="splitLine"></div>
+                                            <div class="formfontdesc"><#Console_warn#></div>
 
-            <div class="span9">
-                <!--Body content-->
-                <div class="row-fluid">
-                    <div class="span12">
-                        <div class="box well grad_colour_dark_blue">
-                            <h2 class="box_head round_top"><#menu5_6#> - <#menu5_6_6#></h2>
-                            <div class="round_bottom">
-                                <div class="row-fluid">
-                                    <div id="tabMenu" class="submenuBlock"></div>
-                                    <div class="alert alert-danger" style="margin: 10px;"><#Console_warn#></div>
-
-                                    <table width="100%" cellpadding="4" cellspacing="0" class="table">
+                                    <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">
                                         <tr>
-                                            <td width="80%" style="border-top: 0 none"><input type="text" id="SystemCmd" class="span12" name="SystemCmd" maxlength="127" onkeypress="if (checkEnter(event)) startPost();" value=""></td>
-                                            <td style="border-top: 0 none"><input class="btn btn-primary span12" id="btn_exec" onClick="startPost()" type="button" value="<#CTL_refresh#>" name="action"></td>
-                                            <td style="border-top: 0 none"><button class="btn span12" onClick="clearOut();" type="button" value="<#CTL_refresh#>" name="action" style="outline: 0"><i class="icon icon-remove"></i></button></td>
+                                            <td width="80%" style="border-top: 0 none"><input type="text" id="SystemCmd" class="console_input" name="SystemCmd" maxlength="127" onkeypress="if (checkEnter(event)) startPost();" value=""></td>
+                                            <td style="border-top: 0 none"><input class="console_button" id="btn_exec" onClick="startPost()" type="button" value="<#CTL_refresh#>" name="action"></td>
+                                            <td style="border-top: 0 none"><button class="console_button" onClick="clearOut();" type="button" value="<#CTL_refresh#>" name="action" style="outline: 0">X</button></td>
                                         </tr>
                                         <tr>
                                             <td colspan="3" style="border-top: 0 none">
-                                                <textarea class="span12" id="console_area" style="font-family: 'Courier New', Courier, mono; font-size:13px;" rows="23" wrap="off" readonly="1"><% nvram_dump("syscmd.log","syscmd.sh"); %></textarea>
+                                                <textarea class="console_area" id="console_area" rows="23" wrap="off" readonly="1"><% nvram_dump("syscmd.log","syscmd.sh"); %></textarea>
                                             </td>
                                         </tr>
                                     </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                 </div>
-            </div>
-         </div>
-    </div>
+                                        </div>
+                                        <div class="popup_container popup_element_second"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td width="10" align="center" valign="top">&nbsp;</td>
+    </tr>
+</table>
     </form>
 
      <div id="footer"></div>
-</div>
 </body>
 </html>

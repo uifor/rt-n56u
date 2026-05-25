@@ -8,14 +8,15 @@
 
 <link rel="shortcut icon" href="images/favicon.ico">
 <link rel="icon" href="images/favicon.png">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/main.css">
+<link rel="stylesheet" type="text/css" href="/index_style.css">
+<link rel="stylesheet" type="text/css" href="/form_style.css">
+<link rel="stylesheet" type="text/css" href="/other.css">
 <link rel="stylesheet" type="text/css" href="/bootstrap/css/engage.itoggle.css">
 
 <script type="text/javascript" src="/jquery.js"></script>
-<script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="/bootstrap/js/engage.itoggle.min.js"></script>
 <script type="text/javascript" src="/state.js"></script>
+<script type="text/javascript" src="/merlin_adapter.js"></script>
 <script type="text/javascript" src="/general.js"></script>
 <script type="text/javascript" src="/itoggle.js"></script>
 <script type="text/javascript" src="/popup.js"></script>
@@ -357,10 +358,25 @@ function change_ip6_lan_dhcp(){
 </script>
 <style>
     .ip6_residual {width: 62px;}
+	.label {
+		display: inline-block;
+		padding: 2px 6px;
+		color: #FFFFFF;
+	}
+	.label-success {background: #2f855a;}
+	.label-warning {background: #9a6b25;}
+	.input-prepend .add-on {
+		display: inline-block;
+		padding: 3px 5px;
+		color: #FFFFFF;
+		background: #596e74;
+		border: 1px solid #6b8fa3;
+		border-right: 0 none;
+	}
 </style>
 </head>
 
-<body onload="initial();" onunLoad="return unload_body();">
+<body onload="initial();" onunLoad="return unload_body();" class="bg">
 <script>
 	if(get_ap_mode()){
 		alert("<#page_not_support_mode_hint#>");
@@ -368,15 +384,7 @@ function change_ip6_lan_dhcp(){
 	}
 </script>
 
-<div class="wrapper">
-    <div class="container-fluid" style="padding-right: 0px">
-        <div class="row-fluid">
-            <div class="span3"><center><div id="logo"></div></center></div>
-            <div class="span9" >
-                <div id="TopBanner"></div>
-            </div>
-        </div>
-    </div>
+    <div id="TopBanner"></div>
 
     <div id="Loading" class="popup_bg"></div>
 
@@ -395,34 +403,30 @@ function change_ip6_lan_dhcp(){
     <input type="hidden" name="ip6_lan_sfps" value="<% nvram_get_x("", "ip6_lan_sfps"); %>">
     <input type="hidden" name="ip6_lan_sfpe" value="<% nvram_get_x("", "ip6_lan_sfpe"); %>">
 
-    <div class="container-fluid">
-        <div class="row-fluid">
-            <div class="span3">
-                <!--Sidebar content-->
-                <!--=====Beginning of Main Menu=====-->
-                <div class="well sidebar-nav side_nav" style="padding: 0px;">
-                    <ul id="mainMenu" class="clearfix"></ul>
-                    <ul class="clearfix">
-                        <li>
-                            <div id="subMenu" class="accordion"></div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+<table class="content" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+        <td width="17">&nbsp;</td>
+        <td valign="top" width="202">
+            <div id="mainMenu"></div>
+            <div id="subMenu"></div>
+        </td>
+        <td valign="top">
+            <div id="tabMenu" class="submenuBlock"></div>
+            <table width="98%" border="0" align="left" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td align="left" valign="top">
+                        <table width="760px" border="0" cellpadding="5" cellspacing="0" class="FormTitle" id="FormTitle">
+                            <tbody>
+                                <tr>
+                                    <td bgcolor="#4D595D" valign="top">
+                                        <div class="container">
+                                            <div>&nbsp;</div>
+                                            <div class="formfonttitle"><#menu5_3#> - <#menu5_3_3#></div>
+                                            <div style="margin:10px 0 10px 5px;" class="splitLine"></div>
+                                            <div class="formfontdesc"><#IP6_desc#></div>
+                                            <div id="hint_no_ipv6" style="display:none; margin: 10px;"><b><#IP6_hint#></b></div>
 
-            <div class="span9">
-                <!--Body content-->
-                <div class="row-fluid">
-                    <div class="span12">
-                        <div class="box well grad_colour_dark_blue">
-                            <h2 class="box_head round_top"><#menu5_3#> - <#menu5_3_3#></h2>
-                            <div class="round_bottom">
-                                <div class="row-fluid">
-                                    <div id="tabMenu" class="submenuBlock"></div>
-                                    <div class="alert alert-info" style="margin: 10px;"><#IP6_desc#></div>
-                                    <div id="hint_no_ipv6" class="alert alert-danger" style="display:none; margin: 10px;"><b><#IP6_hint#></b></div>
-
-                                    <table width="100%" align="center" cellpadding="4" cellspacing="0" class="table" id="tbl_ip6_con">
+                                    <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" id="tbl_ip6_con">
                                         <tr>
                                             <th width="50%"><#IP6_SVC#></th>
                                             <td align="left">
@@ -460,7 +464,7 @@ function change_ip6_lan_dhcp(){
                                         </tr>
                                     </table>
 
-                                    <table width="100%" align="center" cellpadding="4" cellspacing="0" class="table" id="tbl_ip6_sit" style="display:none;">
+                                    <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" id="tbl_ip6_sit" style="display:none; margin-top:10px;">
                                         <tr>
                                             <th colspan="2" style="background-color: #E3E3E3;"><#IP6_SIT_desc#></th>
                                         </tr>
@@ -502,7 +506,7 @@ function change_ip6_lan_dhcp(){
                                         </tr>
                                     </table>
 
-                                    <table width="100%" align="center" cellpadding="4" cellspacing="0" class="table" id="tbl_ip6_wan" style="display:none;">
+                                    <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" id="tbl_ip6_wan" style="display:none; margin-top:10px;">
                                         <tr>
                                             <th colspan="2" style="background-color: #E3E3E3;"><#IP6_WAN_desc#></th>
                                         </tr>
@@ -554,7 +558,7 @@ function change_ip6_lan_dhcp(){
                                         </tr>
                                     </table>
 
-                                    <table width="100%" align="center" cellpadding="4" cellspacing="0" class="table" id="tbl_ip6_dns" style="display:none;">
+                                    <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" id="tbl_ip6_dns" style="display:none; margin-top:10px;">
                                         <tr>
                                             <th colspan="2" style="background-color: #E3E3E3;"><#IP6_DNS_desc#></th>
                                         </tr>
@@ -593,7 +597,7 @@ function change_ip6_lan_dhcp(){
                                         </tr>
                                     </table>
 
-                                    <table width="100%" align="center" cellpadding="4" cellspacing="0" class="table" id="tbl_ip6_lan" style="display:none;">
+                                    <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" id="tbl_ip6_lan" style="display:none; margin-top:10px;">
                                         <tr>
                                             <th colspan="2" style="background-color: #E3E3E3;"><#IP6_LAN_desc#></th>
                                         </tr>
@@ -666,23 +670,25 @@ function change_ip6_lan_dhcp(){
                                         </tr>
                                     </table>
 
-                                    <table class="table" id="tbl_apply">
-                                        <tr>
-                                            <td style="border: 0 none;"><center><input name="button" type="button" class="btn btn-primary" style="width: 219px" onclick="applyRule();" value="<#CTL_apply#>"/></center></td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                                            <div class="apply_gen" id="tbl_apply">
+                                                <input name="button" class="button_gen" onclick="applyRule();" type="button" value="<#CTL_apply#>">
+                                            </div>
+                                        </div>
+                                        <div class="popup_container popup_element_second"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td width="10" align="center" valign="top">&nbsp;</td>
+    </tr>
+</table>
 
     </form>
 
     <div id="footer"></div>
-</div>
 </body>
 </html>
