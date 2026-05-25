@@ -8,19 +8,28 @@
 
 <link rel="shortcut icon" href="images/favicon.ico">
 <link rel="icon" href="images/favicon.png">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/main.css">
+<link rel="stylesheet" type="text/css" href="/index_style.css">
+<link rel="stylesheet" type="text/css" href="/form_style.css">
+<link rel="stylesheet" type="text/css" href="/other.css">
 <link rel="stylesheet" type="text/css" href="/bootstrap/css/engage.itoggle.css">
 
 <style>
-.table th, .table td{vertical-align: middle;}
-.table input, .table select {margin-bottom: 0px;}
+.FormTable th, .FormTable td{vertical-align: middle;}
+.FormTable input, .FormTable select {margin-bottom: 0px;}
+.guest_button {
+	display: inline-block;
+	padding: 3px 8px;
+	color: #FFFFFF;
+	background: #596e74;
+	border: 1px solid #6b8fa3;
+	cursor: pointer;
+}
 </style>
 
 <script type="text/javascript" src="/jquery.js"></script>
-<script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="/bootstrap/js/engage.itoggle.min.js"></script>
 <script type="text/javascript" src="/state.js"></script>
+<script type="text/javascript" src="/merlin_adapter.js"></script>
 <script type="text/javascript" src="/general.js"></script>
 <script type="text/javascript" src="/itoggle.js"></script>
 <script type="text/javascript" src="/wireless.js"></script>
@@ -234,17 +243,8 @@ function change_guest_auth_mode(mflag) {
 </script>
 </head>
 
-<body onload="initial();" onunLoad="return unload_body();">
-
-<div class="wrapper">
-    <div class="container-fluid" style="padding-right: 0px">
-        <div class="row-fluid">
-            <div class="span3"><center><div id="logo"></div></center></div>
-            <div class="span9" >
-                <div id="TopBanner"></div>
-            </div>
-        </div>
-    </div>
+<body onload="initial();" onunLoad="return unload_body();" class="bg">
+    <div id="TopBanner"></div>
 
     <div id="Loading" class="popup_bg"></div>
     <iframe name="hidden_frame" id="hidden_frame" width="0" height="0" frameborder="0"></iframe>
@@ -267,32 +267,29 @@ function change_guest_auth_mode(mflag) {
     <input type="hidden" name="wl_guest_time_x" value="<% nvram_get_x("","wl_guest_time_x"); %>">
     <input type="hidden" name="wl_guest_time2_x" value="<% nvram_get_x("","wl_guest_time2_x"); %>">
 
-    <div class="container-fluid">
-        <div class="row-fluid">
-            <div class="span3">
-                <!--Sidebar content-->
-                <!--=====Beginning of Main Menu=====-->
-                <div class="well sidebar-nav side_nav" style="padding: 0px;">
-                    <ul id="mainMenu" class="clearfix"></ul>
-                    <ul class="clearfix">
-                        <li>
-                            <div id="subMenu" class="accordion"></div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
 
-            <div class="span9">
-                <!--Body content-->
-                <div class="row-fluid">
-                    <div class="span12">
-                        <div class="box well grad_colour_dark_blue">
-                            <h2 class="box_head round_top"><#menu5_1#> - <#menu5_1_2#> (5GHz)</h2>
-                            <div class="round_bottom">
-                                <div class="row-fluid">
-                                    <div id="tabMenu" class="submenuBlock"></div>
+<table class="content" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+        <td width="17">&nbsp;</td>
+        <td valign="top" width="202">
+            <div id="mainMenu"></div>
+            <div id="subMenu"></div>
+        </td>
+        <td valign="top">
+            <div id="tabMenu" class="submenuBlock"></div>
+            <table width="98%" border="0" align="left" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td align="left" valign="top">
+                        <table width="760px" border="0" cellpadding="5" cellspacing="0" class="FormTitle" id="FormTitle">
+                            <tbody>
+                                <tr>
+                                    <td bgcolor="#4D595D" valign="top">
+                                        <div class="container">
+                                            <div>&nbsp;</div>
+                                            <div class="formfonttitle"><#menu5_1#> - <#menu5_1_2#> (5GHz)</div>
+                                            <div style="margin:10px 0 10px 5px;" class="splitLine"></div>
 
-                                    <table width="100%" align="center" cellpadding="4" cellspacing="0" class="table">
+                                    <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">
                                         <tr>
                                             <th width="50%" style="border-top: 0 none;"><#WIFIGuestEnable#></th>
                                             <td style="border-top: 0 none;">
@@ -437,9 +434,9 @@ function change_guest_auth_mode(mflag) {
                                         <tr id="row_guest_12" style="display:none;">
                                             <th><a class="help_tooltip" href="javascript:void(0);" onmouseover="openTooltip(this, 0, 7);"><#WLANConfig11b_x_PSKKey_itemname#></a></th>
                                             <td>
-                                                <div class="input-append">
+                                                <div>
                                                     <input type="password" name="wl_guest_wpa_psk" id="wl_guest_wpa_psk" maxlength="64" size="32" value="" style="width: 175px;">
-                                                    <button style="margin-left: -5px;" class="btn" type="button" onclick="passwordShowHide('wl_guest_wpa_psk');"><i class="icon-eye-close"></i></button>
+                                                    <button class="guest_button" style="margin-left: -5px;" type="button" onclick="passwordShowHide('wl_guest_wpa_psk');">...</button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -460,28 +457,26 @@ function change_guest_auth_mode(mflag) {
                                         </tr>
                                     </table>
 
-                                    <table class="table">
-                                        <tr>
-                                            <td width="50%" style="margin-top: 10px; border-top: 0 none;">
-                                                <input type="button" class="btn btn-info" value="<#GO_2G#>" onclick="location.href='Advanced_WGuest2g_Content.asp';">
-                                            </td>
-                                            <td style="border-top: 0 none;">
-                                                <input type="button" id="applyButton" class="btn btn-primary" style="width: 219px" value="<#CTL_apply#>" onclick="applyRule();">
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                                            <div class="apply_gen">
+                                                <input type="button" class="button_gen" value="<#GO_2G#>" onclick="location.href='Advanced_WGuest2g_Content.asp';">
+                                                <input type="button" id="applyButton" class="button_gen" value="<#CTL_apply#>" onclick="applyRule();">
+                                            </div>
+                                        </div>
+                                        <div class="popup_container popup_element_second"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td width="10" align="center" valign="top">&nbsp;</td>
+    </tr>
+</table>
 
     </form>
 
     <div id="footer"></div>
-</div>
 </body>
 </html>
