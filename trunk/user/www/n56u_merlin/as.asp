@@ -8,12 +8,13 @@
 
 <link rel="shortcut icon" href="images/favicon.ico">
 <link rel="icon" href="images/favicon.png">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/main.css">
+<link rel="stylesheet" type="text/css" href="/index_style.css">
+<link rel="stylesheet" type="text/css" href="/form_style.css">
+<link rel="stylesheet" type="text/css" href="/other.css">
 
 <script type="text/javascript" src="/jquery.js"></script>
-<script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="/state.js"></script>
+<script type="text/javascript" src="/merlin_adapter.js"></script>
 <script type="text/javascript" src="/popup.js"></script>
 
 <script>
@@ -59,7 +60,7 @@ function show_sitemap(){
 	if (l1 > 8) l1 = 8;
 
 	for(var l = 0; l < l1; l++){
-		map_code = '<ul class="nav nav-list">\n';
+		map_code = '<ul class="sitemap_list">\n';
 		for(var m = 1; m < tabtitle[l].length; m++){
 			if(tablink[l][m] == "")
 				continue;
@@ -78,59 +79,63 @@ function show_sitemap(){
 </script>
 
 <style>
-    table#menu_body tr td.head {text-align: center;}
-    table#menu_body tr td {vertical-align: top;}
+    table#menu_body tr td.head {
+        text-align: center;
+        color: #FFFFFF;
+        font-weight: bold;
+        background: #596e74;
+    }
+    table#menu_body tr td {
+        vertical-align: top;
+        background: #475a5f;
+    }
+    .sitemap_list {
+        margin: 8px 0 0 0;
+        padding: 0;
+        list-style: none;
+    }
+    .sitemap_list li {
+        padding: 4px 0;
+    }
+    .sitemap_list a {
+        color: #FFFFFF;
+        text-decoration: none;
+    }
+    .sitemap_list a:hover {
+        color: #FFCC00;
+    }
 </style>
 
 </head>
 
-<body onload="initial();" onunload="return unload_body();">
+<body onload="initial();" onunload="return unload_body();" class="bg">
+<div id="TopBanner"></div>
 
-<div class="wrapper">
+<div id="Loading" class="popup_bg"></div>
 
-    <div class="container-fluid" style="padding-right: 0px">
-        <div class="row-fluid">
-            <div class="span3"><center><div id="logo"></div></center></div>
-            <div class="span9" >
-                <div id="TopBanner"></div>
-            </div>
-        </div>
-    </div>
+<iframe name="hidden_frame" id="hidden_frame" src="" width="0" height="0" frameborder="0"></iframe>
 
-    <div id="Loading" class="popup_bg"></div>
-
-    <iframe name="hidden_frame" id="hidden_frame" src="" width="0" height="0" frameborder="0"></iframe>
-
-    <div class="container-fluid">
-        <div class="row-fluid">
-            <div class="span3">
-                <!--Sidebar content-->
-                <!--=====Beginning of Main Menu=====-->
-                <div class="well sidebar-nav side_nav" style="padding: 0px;">
-                    <ul id="mainMenu" class="clearfix"></ul>
-                    <ul class="clearfix">
-                        <li>
-                            <div id="subMenu" class="accordion"></div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="span9">
-                <!--Body content-->
-                <div class="row-fluid">
-                    <div class="span12">
-                        <div class="box well grad_colour_dark_blue">
-                            <h2 class="box_head round_top"><#menu5_title#></h2>
-                            <div class="round_bottom">
-
-                                <div class="row-fluid">
-                                    <div id="tabMenu"></div>
-                                    <table class="table">
-                                        <tr>
-                                            <!--=====Beginning of Main Content=====-->
-                                            <td style="border-top: 0 none;">
-                                                <table id="menu_body" width="100%" border="0" align="center" cellpadding="3" cellspacing="1" bgcolor="#CCCCCC" class="sitemap">
+<table class="content" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+        <td width="17">&nbsp;</td>
+        <td valign="top" width="202">
+            <div id="mainMenu"></div>
+            <div id="subMenu"></div>
+        </td>
+        <td valign="top">
+            <div id="tabMenu" class="submenuBlock"></div>
+            <table width="98%" border="0" align="left" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td align="left" valign="top">
+                        <table width="760px" border="0" cellpadding="5" cellspacing="0" class="FormTitle" id="FormTitle">
+                            <tbody>
+                                <tr>
+                                    <td bgcolor="#4D595D" valign="top">
+                                        <div class="container">
+                                            <div>&nbsp;</div>
+                                            <div class="formfonttitle"><#menu5_title#></div>
+                                            <div style="margin:10px 0 10px 5px;" class="splitLine"></div>
+                                            <table id="menu_body" width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable sitemap">
                                                     <tr>
                                                         <td width="25%">&nbsp;</td>
                                                         <td width="25%">&nbsp;</td>
@@ -172,21 +177,21 @@ function show_sitemap(){
                                                         <td height="120"></td>
                                                         <td height="120"></td>
                                                     </tr>
-                                                </table>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-             </div>
-        </div>
-    </div>
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td width="10" align="center" valign="top">&nbsp;</td>
+    </tr>
+</table>
 
-    <div id="footer"></div>
-</div>
+<div id="footer"></div>
 
 </body>
 </html>

@@ -8,14 +8,15 @@
 
 <link rel="shortcut icon" href="images/favicon.ico">
 <link rel="icon" href="images/favicon.png">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" type="text/css" href="/bootstrap/css/main.css">
+<link rel="stylesheet" type="text/css" href="/index_style.css">
+<link rel="stylesheet" type="text/css" href="/form_style.css">
+<link rel="stylesheet" type="text/css" href="/other.css">
 <link rel="stylesheet" type="text/css" href="/bootstrap/css/engage.itoggle.css">
 
 <script type="text/javascript" src="/jquery.js"></script>
-<script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="/bootstrap/js/engage.itoggle.min.js"></script>
 <script type="text/javascript" src="/state.js"></script>
+<script type="text/javascript" src="/merlin_adapter.js"></script>
 <script type="text/javascript" src="/general.js"></script>
 <script type="text/javascript" src="/itoggle.js"></script>
 <script type="text/javascript" src="/popup.js"></script>
@@ -272,11 +273,79 @@ function getHash(){
     .caption-bold {
         font-weight: bold;
     }
+    .vpn_tabs {
+        margin: 0 0 10px 0;
+        padding: 0;
+        list-style: none;
+        border-bottom: 1px solid #6b8fa3;
+    }
+    .vpn_tabs li {
+        display: inline-block;
+        margin: 0 2px -1px 0;
+    }
+    .vpn_tabs a {
+        display: block;
+        padding: 7px 18px;
+        color: #FFFFFF;
+        text-decoration: none;
+        background: #475a5f;
+        border: 1px solid #6b8fa3;
+    }
+    .vpn_tabs li.active a {
+        color: #FFFFFF;
+        background: #596e74;
+        border-bottom-color: #596e74;
+        font-weight: bold;
+    }
+    .vpn_notice {
+        padding: 8px 10px;
+        margin: 10px 0;
+        color: #FFFFFF;
+        background: #596e74;
+        border: 1px solid #6b8fa3;
+    }
+    .vpn_badge {
+        display: inline-block;
+        padding: 2px 7px;
+        color: #FFFFFF;
+        background: #596e74;
+        border: 1px solid #6b8fa3;
+        border-radius: 2px;
+    }
+    .vpn_badge_warning {
+        color: #FFFFFF;
+        background: #8a6d2f;
+        border-color: #c09853;
+    }
+    .vpn_badge_success {
+        color: #FFFFFF;
+        background: #3d774d;
+        border-color: #6b9b73;
+    }
+    .vpn_textarea {
+        box-sizing: border-box;
+        width: 100%;
+        font-family: "Courier New";
+        font-size: 12px;
+    }
+    .vpn_inline {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .vpn_button {
+        display: inline-block;
+        padding: 3px 9px;
+        color: #FFFFFF;
+        background: #596e74;
+        border: 1px solid #6b8fa3;
+        cursor: pointer;
+    }
 </style>
 
 </head>
 
-<body onload="initial();" onunload="unload_body();">
+<body onload="initial();" onunload="unload_body();" class="bg">
 <script>
     if(get_ap_mode()){
         alert("<#page_not_support_mode_hint#>");
@@ -284,23 +353,13 @@ function getHash(){
     }
 </script>
 
-<div class="wrapper">
-    <div class="container-fluid" style="padding-right: 0px">
-        <div class="row-fluid">
-            <div class="span3"><center><div id="logo"></div></center></div>
-            <div class="span9" >
-                <div id="TopBanner"></div>
-            </div>
-        </div>
-    </div>
+<div id="TopBanner"></div>
 
-    <br>
+<div id="Loading" class="popup_bg"></div>
 
-    <div id="Loading" class="popup_bg"></div>
+<iframe name="hidden_frame" id="hidden_frame" src="" width="0" height="0" frameborder="0"></iframe>
 
-    <iframe name="hidden_frame" id="hidden_frame" src="" width="0" height="0" frameborder="0" style="position: absolute;"></iframe>
-
-    <form method="post" name="form" id="ruleForm" action="/start_apply.htm" target="hidden_frame">
+<form method="post" name="form" id="ruleForm" action="/start_apply.htm" target="hidden_frame">
     <input type="hidden" name="current_page" value="vpncli.asp">
     <input type="hidden" name="next_page" value="">
     <input type="hidden" name="next_host" value="">
@@ -310,42 +369,38 @@ function getHash(){
     <input type="hidden" name="action_script" value="">
     <input type="hidden" name="flag" value="">
 
-    <div class="container-fluid">
-        <div class="row-fluid">
-             <div class="span3">
-                <!--Sidebar content-->
-                  <!--=====Beginning of Main Menu=====-->
-                  <div class="well sidebar-nav side_nav" style="padding: 0px;">
-                      <ul id="mainMenu" class="clearfix"></ul>
-                      <ul class="clearfix">
-                          <li>
-                              <div id="subMenu" class="accordion"></div>
-                          </li>
-                      </ul>
-                  </div>
-             </div>
-
-             <div class="span9">
-                <div class="box well grad_colour_dark_blue">
-                    <div id="tabMenu"></div>
-                    <h2 class="box_head round_top"><#menu6#></h2>
-
-                    <div class="round_bottom">
-
-                        <div>
-                            <ul class="nav nav-tabs" style="margin-bottom: 10px;">
+<table class="content" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+        <td width="17">&nbsp;</td>
+        <td valign="top" width="202">
+            <div id="mainMenu"></div>
+            <div id="subMenu"></div>
+        </td>
+        <td valign="top">
+            <div id="tabMenu" class="submenuBlock"></div>
+            <table width="98%" border="0" align="left" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td align="left" valign="top">
+                        <table width="760px" border="0" cellpadding="5" cellspacing="0" class="FormTitle" id="FormTitle">
+                            <tbody>
+                                <tr>
+                                    <td bgcolor="#4D595D" valign="top">
+                                        <div class="container">
+                                            <div>&nbsp;</div>
+                                            <div class="formfonttitle"><#menu6#></div>
+                                            <div style="margin:10px 0 10px 5px;" class="splitLine"></div>
+                                            <ul class="vpn_tabs">
                                 <li class="active">
                                     <a id="tab_vpnc_cfg" href="#cfg"><#Settings#></a>
                                 </li>
                                 <li>
                                     <a id="tab_vpnc_ssl" href="#ssl" style="display:none"><#OVPN_Cert#></a>
                                 </li>
-                            </ul>
-                        </div>
+                                            </ul>
 
                         <div id="wnd_vpnc_cfg">
-                            <div class="alert alert-info" style="margin: 10px;"><#VPNC_Info#></div>
-                            <table class="table">
+                            <div class="vpn_notice"><#VPNC_Info#></div>
+                            <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">
                                 <tr>
                                     <th width="50%" style="padding-bottom: 0px; border-top: 0 none;"><#VPNC_Enable#></th>
                                     <td style="padding-bottom: 0px; border-top: 0 none;">
@@ -361,7 +416,7 @@ function getHash(){
                                     </td>
                                 </tr>
                             </table>
-                            <table class="table" id="tbl_vpnc_config" style="display:none">
+                            <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" id="tbl_vpnc_config" style="display:none; margin-top:10px;">
                                 <tr>
                                     <th colspan="2" style="background-color: #E3E3E3;"><#VPNC_Base#></th>
                                 </tr>
@@ -373,14 +428,14 @@ function getHash(){
                                             <option value="1" <% nvram_match_x("", "vpnc_type", "1","selected"); %>>L2TP (w/o IPSec)</option>
                                             <option value="2" <% nvram_match_x("", "vpnc_type", "2","selected"); %>>OpenVPN</option>
                                         </select>
-                                        <span id="certs_hint" style="display:none" class="label label-warning"><#OVPN_Hint#></span>
+                                        <span id="certs_hint" style="display:none" class="vpn_badge vpn_badge_warning"><#OVPN_Hint#></span>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th><#VPNC_Peer#></th>
                                     <td>
                                         <input type="text" name="vpnc_peer" class="input" maxlength="256" size="32" value="<% nvram_get_x("", "vpnc_peer"); %>" onKeyPress="return is_string(this,event);"/>
-                                        &nbsp;<span id="col_vpnc_state" style="display:none" class="label label-success"><#Connected#></span>
+                                        &nbsp;<span id="col_vpnc_state" style="display:none" class="vpn_badge vpn_badge_success"><#Connected#></span>
                                     </td>
                                 </tr>
                                 <tr id="row_vpnc_ov_port" style="display:none">
@@ -430,9 +485,9 @@ function getHash(){
                                 <tr id="row_vpnc_pass">
                                     <th><#ISP_Authentication_pass#></th>
                                     <td>
-                                        <div class="input-append">
+                                        <div class="vpn_inline">
                                             <input type="password" maxlength="64" class="input" size="32" name="vpnc_pass" id="vpnc_pass" style="width: 175px;" value="<% nvram_get_x("", "vpnc_pass"); %>"/>
-                                            <button style="margin-left: -5px;" class="btn" type="button" onclick="passwordShowHide('vpnc_pass')"><i class="icon-eye-close"></i></button>
+                                            <button class="vpn_button" type="button" onclick="passwordShowHide('vpnc_pass')">...</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -556,12 +611,12 @@ function getHash(){
                                     <td colspan="2" style="padding-bottom: 0px;">
                                         <a href="javascript:spoiler_toggle('spoiler_vpnc_ov_conf')"><span><#OVPN_User#></span></a>
                                         <div id="spoiler_vpnc_ov_conf" style="display:none;">
-                                            <textarea rows="16" wrap="off" spellcheck="false" maxlength="8192" class="span12" name="ovpncli.client.conf" style="font-family:'Courier New'; font-size:12px;"><% nvram_dump("ovpncli.client.conf",""); %></textarea>
+                                            <textarea rows="16" wrap="off" spellcheck="false" maxlength="8192" class="vpn_textarea" name="ovpncli.client.conf"><% nvram_dump("ovpncli.client.conf",""); %></textarea>
                                         </div>
                                     </td>
                                 </tr>
                             </table>
-                            <table class="table" id="tbl_vpnc_server">
+                            <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" id="tbl_vpnc_server" style="margin-top:10px;">
                                 <tr>
                                     <th colspan="2" style="background-color: #E3E3E3;"><#VPNC_VPNS#></th>
                                 </tr>
@@ -599,12 +654,12 @@ function getHash(){
                                     <td colspan="2" style="padding-bottom: 0px;">
                                         <a href="javascript:spoiler_toggle('spoiler_script')"><span><#RunPostVPNC#></span></a>
                                         <div id="spoiler_script" style="display:none;">
-                                            <textarea rows="16" wrap="off" spellcheck="false" maxlength="8192" class="span12" name="scripts.vpnc_server_script.sh" style="font-family:'Courier New'; font-size:12px;"><% nvram_dump("scripts.vpnc_server_script.sh",""); %></textarea>
+                                            <textarea rows="16" wrap="off" spellcheck="false" maxlength="8192" class="vpn_textarea" name="scripts.vpnc_server_script.sh"><% nvram_dump("scripts.vpnc_server_script.sh",""); %></textarea>
                                         </div>
                                     </td>
                                 </tr>
                             </table>
-                            <table class="table" id="tbl_vpnc_route" style="display:none">
+                            <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" id="tbl_vpnc_route" style="display:none; margin-top:10px;">
                                 <tr>
                                     <th colspan="2" style="background-color: #E3E3E3;"><#VPNC_Route#></th>
                                 </tr>
@@ -616,56 +671,54 @@ function getHash(){
                                     </td>
                                 </tr>
                             </table>
-                            <table class="table">
-                                <tr>
-                                    <td style="border: 0 none; padding: 0px;"><center><input name="button" type="button" class="btn btn-primary" style="width: 219px" onclick="applyRule();" value="<#CTL_apply#>"/></center></td>
-                                </tr>
-                            </table>
+                            <div class="apply_gen"><input name="button" type="button" class="button_gen" onclick="applyRule();" value="<#CTL_apply#>"></div>
                         </div>
 
                         <div id="wnd_vpnc_ssl" style="display:none">
-                            <table class="table">
+                            <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">
                                 <tr>
                                     <td style="padding-bottom: 0px; border-top: 0 none;">
                                         <span class="caption-bold">ca.crt (Root CA Certificate):</span>
-                                        <textarea rows="4" wrap="off" spellcheck="false" maxlength="8192" class="span12" name="ovpncli.ca.crt" style="font-family:'Courier New'; font-size:12px;"><% nvram_dump("ovpncli.ca.crt",""); %></textarea>
+                                        <textarea rows="4" wrap="off" spellcheck="false" maxlength="8192" class="vpn_textarea" name="ovpncli.ca.crt"><% nvram_dump("ovpncli.ca.crt",""); %></textarea>
                                     </td>
                                 </tr>
                                 <tr id="row_client_crt">
                                     <td style="padding-bottom: 0px; border-top: 0 none;">
                                         <span class="caption-bold">client.crt (Client Certificate):</span>
-                                        <textarea rows="4" wrap="off" spellcheck="false" maxlength="8192" class="span12" name="ovpncli.client.crt" style="font-family:'Courier New'; font-size:12px;"><% nvram_dump("ovpncli.client.crt",""); %></textarea>
+                                        <textarea rows="4" wrap="off" spellcheck="false" maxlength="8192" class="vpn_textarea" name="ovpncli.client.crt"><% nvram_dump("ovpncli.client.crt",""); %></textarea>
                                     </td>
                                 </tr>
                                 <tr id="row_client_key">
                                     <td style="padding-bottom: 0px; border-top: 0 none;">
                                         <span class="caption-bold">client.key (Client Private Key) - secret:</span>
-                                        <textarea rows="4" wrap="off" spellcheck="false" maxlength="8192" class="span12" name="ovpncli.client.key" style="font-family:'Courier New'; font-size:12px;"><% nvram_dump("ovpncli.client.key",""); %></textarea>
+                                        <textarea rows="4" wrap="off" spellcheck="false" maxlength="8192" class="vpn_textarea" name="ovpncli.client.key"><% nvram_dump("ovpncli.client.key",""); %></textarea>
                                     </td>
                                 </tr>
                                 <tr id="row_ta_key">
                                     <td style="padding-bottom: 0px; border-top: 0 none;">
                                         <span class="caption-bold">ta.key/tc.key(ctc2.key) (TLS Auth/Crypt(Crypt-v2) Key) - secret:</span>
-                                        <textarea rows="4" wrap="off" spellcheck="false" maxlength="8192" class="span12" name="ovpncli.ta.key" style="font-family:'Courier New'; font-size:12px;"><% nvram_dump("ovpncli.ta.key",""); %></textarea>
+                                        <textarea rows="4" wrap="off" spellcheck="false" maxlength="8192" class="vpn_textarea" name="ovpncli.ta.key"><% nvram_dump("ovpncli.ta.key",""); %></textarea>
                                     </td>
                                 </tr>
                             </table>
-                            <table class="table">
-                                <tr>
-                                    <td style="border: 0 none;"><center><input name="button2" type="button" class="btn btn-primary" style="width: 219px" onclick="applyRule();" value="<#CTL_apply#>"/></center></td>
-                                </tr>
-                            </table>
+                            <div class="apply_gen"><input name="button2" type="button" class="button_gen" onclick="applyRule();" value="<#CTL_apply#>"></div>
                         </div>
 
-                    </div>
-                </div>
-             </div>
-        </div>
-    </div>
-    </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td width="10" align="center" valign="top">&nbsp;</td>
+    </tr>
+</table>
+</form>
 
-    <div id="footer"></div>
-</div>
+<div id="footer"></div>
 
 </body>
 </html>
