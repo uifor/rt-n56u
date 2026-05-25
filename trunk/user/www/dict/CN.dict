@@ -771,6 +771,7 @@ HowToSharebySamba_notIE2=然后点击 [确定] 进入网上邻居共享空间。
 HowToSharebyFTP1=输入 FTP 共享空间。
 HowToSharebyFTP3=启用 DDNS 服务允许通过 FTP 访问，或者点击下面的链接：
 HowToSharebyFTP4=(仅内网可访问)。
+QIS=网络设置向导
 menu1=网络地图
 menu2=VPN 服务器
 menu6=VPN 客户端
@@ -1866,5 +1867,4 @@ GfwList=GfwList
 Login=登录
 BTN_SHUTDOWN=关机
 JS_shutdown=关机后需要手动断电并重新接电才能启动路由!!!\n确定要关机吗？
-
 

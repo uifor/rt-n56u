@@ -158,6 +158,10 @@
 
 	function renderMainMenu(L1, L2){
 		var code = '<div class="merlin-leftnav">';
+		code += '<div class="m_qis_r merlin-qis-tile"><table class="merlin-menu-table"><tbody><tr>';
+		code += '<td class="merlin-menu-icon-cell"><div class="menu_Icon menu_QIS"></div></td>';
+		code += '<td class="menu_Desc"><a href="javascript:void(0);"><#QIS#></a></td>';
+		code += '</tr></tbody></table></div>';
 		code += '<div class="menu_Split menu_Split_general"><table width="192px" height="30px"><tbody><tr><td><#menu5_1_1#></td></tr></tbody></table></div>';
 		for(var i = 1; i < menuL1_title.length; i++){
 			if(menuL1_title[i] == "")
@@ -225,8 +229,8 @@
 		code += '<div class="merlin-status-inner">';
 		code += '<div class="merlin-status-text">';
 		code += '<div class="titledown"><span id="operation_mode_title">Operation Mode</span><span>:</span><span class="title_link" style="text-decoration:none;" id="op_link"><a href="/Advanced_OperationMode_Content.asp" style="color:white"><span id="sw_mode_span" style="text-decoration:underline;"></span></a></span>';
-		code += '<span>Firmware:</span><a href="/Advanced_FirmwareUpgrade_Content.asp" style="color:white;"><span id="firmver" class="title_link"></span></a></div>';
-		code += '<div id="ssidTitle" class="titledown">SSID:<span onclick="go_setting(2)" title="2.4GHz" id="elliptic_ssid_2g" class="title_link"></span><span onclick="go_setting(5)" title="5GHz" id="elliptic_ssid_5g" class="title_link"></span></div>';
+		code += '<span>Firmware:</span><a href="/Advanced_FirmwareUpgrade_Content.asp" style="color:white;"><span id="firmver" class="title_link"></span></a>';
+		code += '<span id="ssidTitle">SSID:<span onclick="go_setting(2)" title="2.4GHz" id="elliptic_ssid_2g" class="title_link"></span><span onclick="go_setting(5)" title="5GHz" id="elliptic_ssid_5g" class="title_link"></span></span></div>';
 		code += '</div>';
 		code += '<div id="status_block" class="merlin-status-icons">';
 		code += '<div id="wifi_hw_sw_status" class="wifihwswstatusoff merlin-status-icon" title="<#menu5_1#>" onclick="location.href=\'Advanced_Wireless2g_Content.asp\'"></div>';

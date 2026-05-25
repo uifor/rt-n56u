@@ -756,6 +756,7 @@ HowToSharebySamba_notIE2= then Click [OK] to enter share space in the Network Ne
 HowToSharebyFTP1= to enter FTP share space.
 HowToSharebyFTP3=Enable the DDNS service to allow access via the FTP, or click the following link:
 HowToSharebyFTP4=(Only accessible in LAN).
+QIS=Quick Internet Setup
 menu1=Network Map
 menu2=VPN Server
 menu6=VPN Client
@@ -1851,5 +1852,3 @@ GfwList=GfwList
 Login=Login
 BTN_SHUTDOWN=Shutdown
 JS_shutdown=You need manually power on after shutdown!!! Continue to shutdown?
-
-
