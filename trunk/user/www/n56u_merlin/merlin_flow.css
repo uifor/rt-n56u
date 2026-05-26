@@ -1,0 +1,39 @@
+.merlin-flow-wrap {
+	width: 760px;
+	margin: 92px auto 0 auto;
+}
+
+.merlin-flow-wrap .FormTitle {
+	width: 760px;
+}
+
+.merlin-flow-body {
+	padding: 24px 28px 28px 28px;
+	text-align: center;
+}
+
+.merlin-flow-title {
+	margin: 0 0 12px 0;
+	color: #fff;
+	font: normal 20px Arial, Verdana, Helvetica, sans-serif;
+}
+
+.merlin-flow-desc {
+	margin: 8px auto 0 auto;
+	color: #d7e7ee;
+	font: 13px/1.7 Arial, Verdana, Helvetica, sans-serif;
+}
+
+.merlin-flow-desc strong,
+.merlin-flow-highlight {
+	color: #ffcc00;
+	font-weight: normal;
+}
+
+.merlin-flow-action {
+	margin-top: 22px;
+}
+
+.merlin-flow-action .button_gen {
+	min-width: 120px;
+}

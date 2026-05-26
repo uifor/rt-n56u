@@ -11,6 +11,7 @@
 <link rel="stylesheet" type="text/css" href="/index_style.css">
 <link rel="stylesheet" type="text/css" href="/form_style.css">
 <link rel="stylesheet" type="text/css" href="/other.css">
+<link rel="stylesheet" type="text/css" href="/merlin_flow.css">
 <script>
 function initial(){
 	var xmlhttp;
@@ -28,27 +29,24 @@ function initial(){
 	}
 }
 </script>
-<style>
-.logout_shell {
-	width: 520px;
-	margin: 90px auto 0 auto;
-	padding: 26px 32px;
-	color: #FFF;
-	background: #4D595D;
-	border: 1px solid #6b8fa3;
-	text-align: center;
-}
-.logout_shell h2 {
-	margin: 0 0 16px 0;
-	font-size: 22px;
-	font-weight: normal;
-}
-</style>
 </head>
-<body onload="initial()" class="bg">
-    <div class="logout_shell">
-        <h2><#logoutmessage#></h2>
-        <div><#Not_authpage_login_again#></div>
-    </div>
+<body onload="initial()">
+<div class="merlin-flow-wrap">
+	<table border="0" cellpadding="5" cellspacing="0" class="FormTitle">
+		<thead>
+			<tr>
+				<td><#Web_Title#></td>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td class="merlin-flow-body">
+					<h1 class="merlin-flow-title"><#logoutmessage#></h1>
+					<div class="merlin-flow-desc"><#Not_authpage_login_again#></div>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
 </body>
 </html>
