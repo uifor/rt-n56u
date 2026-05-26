@@ -49,16 +49,13 @@ var nmClientListText = (function(){
 		hide: zh ? "隐藏" : "Hide",
 		internet: zh ? "互联网" : "Internet",
 		icon: zh ? "图标" : "Icon",
-		name: zh ? "客户端名称" : "Clients Name",
-		ip: zh ? "客户端 IP 地址" : "Client IP address",
-		mac: zh ? "客户端 MAC 地址" : "Clients MAC Address",
-		interfaceCol: zh ? "接口" : "Interface",
-		tx: zh ? "Tx 速率 (Mbps)" : "Tx Rate (Mbps)",
-		rx: zh ? "Rx 速率 (Mbps)" : "Rx Rate (Mbps)",
-		access: zh ? "访问时间" : "Access time",
-		exportBtn: zh ? "导出" : "Export",
-		wired: zh ? "有线" : "Wired",
-		wireless: zh ? "无线" : "Wireless",
+			name: zh ? "客户端名称" : "Clients Name",
+			ip: zh ? "客户端 IP 地址" : "Client IP address",
+			mac: zh ? "客户端 MAC 地址" : "Clients MAC Address",
+			interfaceCol: zh ? "接口" : "Interface",
+			exportBtn: zh ? "导出" : "Export",
+			wired: zh ? "有线" : "Wired",
+			wireless: zh ? "无线" : "Wireless",
 		allow: zh ? "允许互联网访问" : "Allow Internet access",
 		noData: zh ? "没有数据" : "No data"
 	};
@@ -229,9 +226,6 @@ function applyClientListText(){
 	$j("#clientListThIp").html(nmClientListText.ip);
 	$j("#clientListThMac").html(nmClientListText.mac);
 	$j("#clientListThInterface").html(nmClientListText.interfaceCol);
-	$j("#clientListThTx").html(nmClientListText.tx.replace(" (", "<br>("));
-	$j("#clientListThRx").html(nmClientListText.rx.replace(" (", "<br>("));
-	$j("#clientListThAccess").html(nmClientListText.access);
 	$j("#clientListExportButton").val(nmClientListText.exportBtn);
 }
 
@@ -267,7 +261,16 @@ function get_client_interface(client){
 
 function get_client_icon_html(client){
 	var type = client[5] || "1";
-	return "<img class='nmClientDeviceIcon' title='" + html_escape(type) + "' src='/bootstrap/img/wl_device/" + html_escape(type) + ".gif'>";
+	var iconClass = "pc";
+
+	if(type == "2" || type == "3")
+		iconClass = "network";
+	else if(type == "4")
+		iconClass = "storage";
+	else if(type == "5" || type == "6")
+		iconClass = "mobile";
+
+	return "<div class='nmClientDeviceIcon nmClientDeviceIcon-" + iconClass + "' title='" + html_escape(type) + "'><span></span></div>";
 }
 
 function get_client_interface_html(client){
@@ -290,14 +293,11 @@ function get_client_rows(){
 			icon: get_client_icon_html(client),
 			name: get_client_name(client),
 			ip: client[1] || "-",
-			mac: (typeof mac_add_delimiters == "function") ? mac_add_delimiters(client[2]) : client[2],
-			interfaceHtml: get_client_interface_html(client),
-			interfaceText: iface.label,
-			tx: "-",
-			rx: "-",
-			access: "-",
-			sort: iface.sort
-		});
+				mac: (typeof mac_add_delimiters == "function") ? mac_add_delimiters(client[2]) : client[2],
+				interfaceHtml: get_client_interface_html(client),
+				interfaceText: iface.label,
+				sort: iface.sort
+			});
 	}
 
 	if(clientListViewMode == "ByInterface"){
@@ -339,7 +339,7 @@ function renderClientListView(){
 	$j("#clientListViewHeader").html(headerText + "<a href='javascript:void(0);' onclick='hideClientlistModal(); return false;'>[ " + nmClientListText.hide + " ]</a>");
 
 	if(rows.length < 1){
-		html += "<tr><td colspan='9' class='nmClientNoData'>" + nmClientListText.noData + "</td></tr>";
+		html += "<tr><td colspan='6' class='nmClientNoData'>" + nmClientListText.noData + "</td></tr>";
 	}
 	else{
 		for(var i = 0; i < rows.length; i++){
@@ -350,9 +350,6 @@ function renderClientListView(){
 			html += "<td class='nmClientIp'>" + html_escape(rows[i].ip) + "<span>DHCP</span></td>";
 			html += "<td>" + html_escape(rows[i].mac) + "</td>";
 			html += "<td>" + rows[i].interfaceHtml + "</td>";
-			html += "<td>" + html_escape(rows[i].tx) + "</td>";
-			html += "<td>" + html_escape(rows[i].rx) + "</td>";
-			html += "<td>" + html_escape(rows[i].access) + "</td>";
 			html += "</tr>";
 		}
 	}
@@ -369,10 +366,7 @@ function exportClientListLog(){
 			"Client Name",
 			"Client IP address",
 			"Clients MAC Address",
-			"Interface",
-			"Tx Rate",
-			"Rx Rate",
-			"Access time"
+			"Interface"
 		]
 	];
 
@@ -383,10 +377,7 @@ function exportClientListLog(){
 			rows[i].name,
 			rows[i].ip,
 			rows[i].mac,
-			rows[i].interfaceText,
-			rows[i].tx,
-			rows[i].rx,
-			rows[i].access
+			rows[i].interfaceText
 		]);
 	}
 
@@ -1028,19 +1019,16 @@ $j(document).ready(function(){
 	                    <table width="100%" cellspacing="0" cellpadding="0" align="center" class="nmClientListTable">
 	                        <thead>
 	                            <tr>
-	                                <td id="clientListViewHeader" colspan="9" class="nmClientListHeader">全部列表<a href="javascript:void(0);" onclick="hideClientlistModal(); return false;">[ 隐藏 ]</a></td>
-	                            </tr>
-	                            <tr>
-	                                <th id="clientListThInternet" width="6%">互联网</th>
-	                                <th id="clientListThIcon" width="6%">图标</th>
-	                                <th id="clientListThName" width="27%">客户端名称</th>
-	                                <th id="clientListThIp" width="20%">客户端 IP 地址</th>
-	                                <th id="clientListThMac" width="15%">客户端 MAC 地址</th>
-	                                <th id="clientListThInterface" width="6%">接口</th>
-	                                <th id="clientListThTx" width="6%">Tx 速率<br>(Mbps)</th>
-	                                <th id="clientListThRx" width="6%">Rx 速率<br>(Mbps)</th>
-	                                <th id="clientListThAccess" width="8%">访问时间</th>
-	                            </tr>
+		                                <td id="clientListViewHeader" colspan="6" class="nmClientListHeader">全部列表<a href="javascript:void(0);" onclick="hideClientlistModal(); return false;">[ 隐藏 ]</a></td>
+		                            </tr>
+		                            <tr>
+		                                <th id="clientListThInternet" width="12%">互联网</th>
+		                                <th id="clientListThIcon" width="12%">图标</th>
+		                                <th id="clientListThName" width="19%">客户端名称</th>
+		                                <th id="clientListThIp" width="19%">客户端 IP 地址</th>
+		                                <th id="clientListThMac" width="19%">客户端 MAC 地址</th>
+		                                <th id="clientListThInterface" width="19%">接口</th>
+		                            </tr>
 	                        </thead>
 	                        <tbody id="clientListTableBody"></tbody>
 	                    </table>
