@@ -35,6 +35,34 @@ var flag = '<% get_parameter("flag"); %>';
 var disk_number = foreign_disks().length+blank_disks().length;
 
 var ccount = <% get_static_ccount(); %>;
+var ipmonitor = [<% get_static_client(); %>];
+var wireless = {<% wl_auth_list(); %>};
+var clientListViewMode = "All";
+
+var nmClientListText = (function(){
+	var zh = (typeof merlin_preferred_lang != "undefined" && merlin_preferred_lang == "CN");
+	return {
+		viewList: zh ? "浏览名单" : "View List",
+		all: zh ? "全部" : "All",
+		interfaceTab: zh ? "接口" : "Interface",
+		allList: zh ? "全部列表" : "All list",
+		hide: zh ? "隐藏" : "Hide",
+		internet: zh ? "互联网" : "Internet",
+		icon: zh ? "图标" : "Icon",
+		name: zh ? "客户端名称" : "Clients Name",
+		ip: zh ? "客户端 IP 地址" : "Client IP address",
+		mac: zh ? "客户端 MAC 地址" : "Clients MAC Address",
+		interfaceCol: zh ? "接口" : "Interface",
+		tx: zh ? "Tx 速率 (Mbps)" : "Tx Rate (Mbps)",
+		rx: zh ? "Rx 速率 (Mbps)" : "Rx Rate (Mbps)",
+		access: zh ? "访问时间" : "Access time",
+		exportBtn: zh ? "导出" : "Export",
+		wired: zh ? "有线" : "Wired",
+		wireless: zh ? "无线" : "Wireless",
+		allow: zh ? "允许互联网访问" : "Allow Internet access",
+		noData: zh ? "没有数据" : "No data"
+	};
+})();
 
 function initial(){
 	show_banner(0);
@@ -65,9 +93,12 @@ function detect_update_info(){
 }
 
 function show_default_icon(){
-	var icon_name = "iconRouter";
 	$("statusframe").src = "/device-map/router_status.asp";
-	clickEvent($(icon_name));
+	$("helpname").innerHTML = "<#menu5_8#>";
+	$j(".mapNode").removeClass("mapNode-active");
+	reset_map_icon(lastClicked);
+	lastClicked = null;
+	lastName = "";
 }
 
 function set_default_choice(){
@@ -75,8 +106,8 @@ function set_default_choice(){
 	if(flag && flag.length > 0 && sw_mode != "3"){
 		if(flag == "Internet")
 			$("statusframe").src = "/device-map/internet.asp";
-		else if(flag == "Client")
-			$("statusframe").src = "/device-map/clients.asp";
+			else if(flag == "Client")
+				$("statusframe").src = "/device-map/router_status.asp";
 		else if(flag == "Router2g")
 			$("statusframe").src = "/device-map/router2g.asp";
 		else if(flag == "Router5g")
@@ -87,8 +118,12 @@ function set_default_choice(){
 			show_default_icon();
 			return;
 		}
-		if(flag == "Router2g" || flag == "Router5g")
-			icon_name = "iconRouter";
+			if(flag == "Client"){
+				show_default_icon();
+				return;
+			}
+			else if(flag == "Router2g" || flag == "Router5g")
+				icon_name = "iconRouter";
 		else
 			icon_name = "icon"+flag;
 		clickEvent($(icon_name));
@@ -98,18 +133,18 @@ function set_default_choice(){
 
 function showMapWANStatus(flag){
 	if(flag == 1){
-		$j("#internetStatus").removeClass("mapStatus-warn mapStatus-off").addClass("mapStatus-on").html("<#Connected#>");
-		$j("#NM_connect_status").removeClass("mapText-warn mapText-off").addClass("mapText-on").html("<#Connected#>");
+		$j("#internetStatus").removeClass("mapStatus-warn mapStatus-off").addClass("mapStatus-on mapStatus-plain").html("<#Connected#>");
+		$j("#NM_connect_status").removeClass("mapText-warn mapText-off").addClass("mapText-on mapText-plain").html("<#Connected#>");
 		$j("#single_wan").removeClass("mapLine-warn mapLine-off").addClass("mapLine-on");
 	}
 	else if(flag == 2){
-		$j("#internetStatus").removeClass("mapStatus-on mapStatus-off").addClass("mapStatus-warn").html("<#QKSet_detect_freshbtn#>");
-		$j("#NM_connect_status").removeClass("mapText-on mapText-off").addClass("mapText-warn").html("<#QKSet_detect_freshbtn#>");
+		$j("#internetStatus").removeClass("mapStatus-on mapStatus-off").addClass("mapStatus-warn mapStatus-plain").html("<#QKSet_detect_freshbtn#>");
+		$j("#NM_connect_status").removeClass("mapText-on mapText-off").addClass("mapText-warn mapText-plain").html("<#QKSet_detect_freshbtn#>");
 		$j("#single_wan").removeClass("mapLine-on mapLine-off").addClass("mapLine-warn");
 	}
 	else{
-		$j("#internetStatus").removeClass("mapStatus-on mapStatus-warn").addClass("mapStatus-off").html("<#Disconnected#>");
-		$j("#NM_connect_status").removeClass("mapText-on mapText-warn").addClass("mapText-off").html("<#Disconnected#>");
+		$j("#internetStatus").removeClass("mapStatus-on mapStatus-warn").addClass("mapStatus-off mapStatus-plain").html("<#Disconnected#>");
+		$j("#NM_connect_status").removeClass("mapText-on mapText-warn").addClass("mapText-off mapText-plain").html("<#Disconnected#>");
 		$j("#single_wan").removeClass("mapLine-on mapLine-warn").addClass("mapLine-off");
 	}
 }
@@ -181,6 +216,194 @@ function show_client_status(clients_count){
 
 	client_str += "<#Full_Clients#>: <span>"+clients_count+"</span>";
 	$j("#clientNumber").html(client_str);
+	applyClientListText();
+}
+
+function applyClientListText(){
+	$j("#clientListButton").val(nmClientListText.viewList);
+	$j("#clientListTabAll span").html(nmClientListText.all);
+	$j("#clientListTabInterface span").html(nmClientListText.interfaceTab);
+	$j("#clientListThInternet").html(nmClientListText.internet);
+	$j("#clientListThIcon").html(nmClientListText.icon);
+	$j("#clientListThName").html(nmClientListText.name);
+	$j("#clientListThIp").html(nmClientListText.ip);
+	$j("#clientListThMac").html(nmClientListText.mac);
+	$j("#clientListThInterface").html(nmClientListText.interfaceCol);
+	$j("#clientListThTx").html(nmClientListText.tx.replace(" (", "<br>("));
+	$j("#clientListThRx").html(nmClientListText.rx.replace(" (", "<br>("));
+	$j("#clientListThAccess").html(nmClientListText.access);
+	$j("#clientListExportButton").val(nmClientListText.exportBtn);
+}
+
+function get_networkmap_clients(){
+	if(typeof getclients != "function")
+		return [];
+
+	return getclients(1, 0);
+}
+
+function html_escape(str){
+	if(str == null)
+		return "";
+
+	return String(str)
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#39;");
+}
+
+function get_client_name(client){
+	return (client[0] && client[0] != "*") ? client[0] : client[2];
+}
+
+function get_client_interface(client){
+	if(client[3] == 10)
+		return {type:"wireless", label:nmClientListText.wireless, sort:1};
+
+	return {type:"wired", label:nmClientListText.wired, sort:0};
+}
+
+function get_client_icon_html(client){
+	var type = client[5] || "1";
+	return "<img class='nmClientDeviceIcon' title='" + html_escape(type) + "' src='/bootstrap/img/wl_device/" + html_escape(type) + ".gif'>";
+}
+
+function get_client_interface_html(client){
+	var iface = get_client_interface(client);
+	if(iface.type == "wireless")
+		return "<div class='nmClientInterface nmClientInterface-wifi'><span></span><strong>" + html_escape(iface.label) + "</strong></div>";
+
+	return "<div class='nmClientInterface nmClientInterface-wired'><span></span><strong>" + html_escape(iface.label) + "</strong></div>";
+}
+
+function get_client_rows(){
+	var rows = [];
+	var list = get_networkmap_clients();
+
+	for(var i = 0; i < list.length; i++){
+		var client = list[i];
+		var iface = get_client_interface(client);
+		rows.push({
+			internet: nmClientListText.allow,
+			icon: get_client_icon_html(client),
+			name: get_client_name(client),
+			ip: client[1] || "-",
+			mac: (typeof mac_add_delimiters == "function") ? mac_add_delimiters(client[2]) : client[2],
+			interfaceHtml: get_client_interface_html(client),
+			interfaceText: iface.label,
+			tx: "-",
+			rx: "-",
+			access: "-",
+			sort: iface.sort
+		});
+	}
+
+	if(clientListViewMode == "ByInterface"){
+		rows.sort(function(a, b){
+			if(a.sort != b.sort)
+				return a.sort - b.sort;
+			return a.name.localeCompare(b.name);
+		});
+	}
+
+	return rows;
+}
+
+function showClientlistModal(){
+	clientListViewMode = "All";
+	applyClientListText();
+	$j("#clientListViewMask").show();
+	$j("#clientListViewPanel").show();
+	renderClientListView();
+}
+
+function hideClientlistModal(){
+	$j("#clientListViewPanel").hide();
+	$j("#clientListViewMask").hide();
+}
+
+function changeClientListViewMode(mode){
+	clientListViewMode = mode;
+	renderClientListView();
+}
+
+function renderClientListView(){
+	var rows = get_client_rows();
+	var headerText = (clientListViewMode == "ByInterface") ? nmClientListText.interfaceTab : nmClientListText.allList;
+	var html = "";
+
+	$j("#clientListTabAll").toggleClass("active", clientListViewMode == "All");
+	$j("#clientListTabInterface").toggleClass("active", clientListViewMode == "ByInterface");
+	$j("#clientListViewHeader").html(headerText + "<a href='javascript:void(0);' onclick='hideClientlistModal(); return false;'>[ " + nmClientListText.hide + " ]</a>");
+
+	if(rows.length < 1){
+		html += "<tr><td colspan='9' class='nmClientNoData'>" + nmClientListText.noData + "</td></tr>";
+	}
+	else{
+		for(var i = 0; i < rows.length; i++){
+			html += "<tr>";
+			html += "<td><div class='nmClientInternetIcon' title='" + html_escape(rows[i].internet) + "'></div></td>";
+			html += "<td>" + rows[i].icon + "</td>";
+			html += "<td class='nmClientName'>" + html_escape(rows[i].name) + "</td>";
+			html += "<td class='nmClientIp'>" + html_escape(rows[i].ip) + "<span>DHCP</span></td>";
+			html += "<td>" + html_escape(rows[i].mac) + "</td>";
+			html += "<td>" + rows[i].interfaceHtml + "</td>";
+			html += "<td>" + html_escape(rows[i].tx) + "</td>";
+			html += "<td>" + html_escape(rows[i].rx) + "</td>";
+			html += "<td>" + html_escape(rows[i].access) + "</td>";
+			html += "</tr>";
+		}
+	}
+
+	$j("#clientListTableBody").html(html);
+}
+
+function exportClientListLog(){
+	var rows = get_client_rows();
+	var csv = [
+		[
+			"Internet access state",
+			"Device Type",
+			"Client Name",
+			"Client IP address",
+			"Clients MAC Address",
+			"Interface",
+			"Tx Rate",
+			"Rx Rate",
+			"Access time"
+		]
+	];
+
+	for(var i = 0; i < rows.length; i++){
+		csv.push([
+			rows[i].internet,
+			"",
+			rows[i].name,
+			rows[i].ip,
+			rows[i].mac,
+			rows[i].interfaceText,
+			rows[i].tx,
+			rows[i].rx,
+			rows[i].access
+		]);
+	}
+
+	var csvContent = "";
+	for(var j = 0; j < csv.length; j++){
+		for(var k = 0; k < csv[j].length; k++){
+			csv[j][k] = '"' + String(csv[j][k]).replace(/"/g, '""') + '"';
+		}
+		csvContent += csv[j].join(",") + "\n";
+	}
+
+	var link = document.createElement("a");
+	link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csvContent);
+	link.download = "ClientList.csv";
+	document.body.appendChild(link);
+	link.click();
+	document.body.removeChild(link);
 }
 
 function show_usb_ports(){
@@ -489,15 +712,20 @@ function clickEvent(obj){
 		}
 	}
 	else if(obj.id.indexOf("Router") > 0){
-		stitle = "<#statusTitle_System#>";
+		stitle = "<#menu5_8#>";
 		current_src = $("statusframe").getAttribute("src") || "";
-		if(current_src.indexOf("/device-map/router") < 0)
+		if(current_src.indexOf("/device-map/router2g.asp") >= 0 || current_src.indexOf("/device-map/router.asp") >= 0)
+			;
+		else if(support_2g_radio())
+			$("statusframe").src = "/device-map/router2g.asp";
+		else if(support_5g_radio())
+			$("statusframe").src = "/device-map/router.asp";
+		else
 			$("statusframe").src = "/device-map/router_status.asp";
 	}
-	else if(obj.id.indexOf("Client") > 0){
-		stitle = "<#statusTitle_Client#>";
-		$("statusframe").src = "/device-map/clients.asp";
-	}
+		else if(obj.id.indexOf("Client") > 0){
+			return;
+		}
 	else if(obj.id.indexOf("USBdisk") > 0){
 		stitle = "<#statusTitle_USB_Disk#>";
 		$("statusframe").src = "/device-map/disk.asp";
@@ -533,13 +761,27 @@ function clickEvent(obj){
 	}
 
 	$j(".mapNode").removeClass("mapNode-active");
-	$j(obj).closest(".mapNode").addClass("mapNode-active");
+	activate_map_card(obj);
 	update_map_icon_selection(obj);
 
 	$('helpname').innerHTML = stitle;
 
 	lastClicked = obj;
 	lastName = obj.id;
+}
+
+function activate_map_card(obj){
+	var cardClass = "";
+
+	if(obj.id.indexOf("Internet") > 0)
+		cardClass = "mapCard-internet";
+	else if(obj.id.indexOf("Router") > 0)
+		cardClass = "mapCard-router";
+
+	if(cardClass)
+		$j("." + cardClass).addClass("mapNode-active");
+	else
+		$j(obj).closest(".mapNode").addClass("mapNode-active");
 }
 
 function update_map_icon_selection(obj){
@@ -683,10 +925,10 @@ $j(document).ready(function(){
                             <table id="_NM_table" border="0" cellpadding="0" cellspacing="0" height="720" style="opacity:.95;">
                                 <tr>
                                     <td width="40" rowspan="11" valign="center"></td>
-                                    <td id="single_wan_icon" align="right" class="NM_radius_left mapNode" valign="middle" bgcolor="#444f53" onclick="clickEvent($('iconInternet'));">
+                                    <td id="single_wan_icon" align="right" class="NM_radius_left mapNode mapCard-internet" valign="middle" bgcolor="#444f53" onclick="clickEvent($('iconInternet'));">
                                         <a id="linkInternet" href="/device-map/internet.asp" target="statusframe" style="outline:0;"><div id="iconInternet" onclick="clickEvent(this);"></div></a>
                                     </td>
-                                    <td id="single_wan_status" colspan="2" valign="middle" bgcolor="#444f53" class="NM_radius_right mapNode" style="padding:5px;cursor:pointer;width:180px;height:130px" onclick="clickEvent($('iconInternet'));">
+                                    <td id="single_wan_status" colspan="2" valign="middle" bgcolor="#444f53" class="NM_radius_right mapNode mapCard-internet mapCardText" style="padding:5px;cursor:pointer;width:180px;height:130px" onclick="clickEvent($('iconInternet'));">
                                         <div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>
                                         <div id="NM_connect_title" style="font-size:12px;font-family:Verdana, Arial, Helvetica, sans-serif;"><#statusTitle_Internet#>:</div>
                                         <div id="NM_connect_status" class="index_status mapText-warn" style="font-size:14px;"><#QIS_step2#>...</div>
@@ -707,10 +949,10 @@ $j(document).ready(function(){
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td align="right" bgcolor="#444f53" class="NM_radius_left mapNode" onclick="clickEvent($('iconRouter'));" style="height:150px">
-                                        <a id="iconRouterLink" href="device-map/router_status.asp" target="statusframe" style="outline:0;"><div id="iconRouter" onclick="clickEvent(this);"></div></a>
+                                    <td align="right" bgcolor="#444f53" class="NM_radius_left mapNode mapCard-router" onclick="clickEvent($('iconRouter'));" style="height:150px">
+                                        <a id="iconRouterLink" href="javascript:void(0);" style="outline:0;"><div id="iconRouter" onclick="clickEvent(this);"></div></a>
                                     </td>
-                                    <td colspan="2" valign="middle" bgcolor="#444f53" class="NM_radius_right mapNode" onclick="clickEvent($('iconRouter'));">
+                                    <td colspan="2" valign="middle" bgcolor="#444f53" class="NM_radius_right mapNode mapCard-router mapCardText" onclick="clickEvent($('iconRouter'));">
                                         <div id="wlSecurityContext">
                                             <span style="font-size:14px;font-family:Verdana, Arial, Helvetica, sans-serif;"><#Security#>:</span><br>
                                             <strong id="wl_securitylevel_span" class="index_status"></strong>
@@ -727,10 +969,11 @@ $j(document).ready(function(){
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td id="clients_td" width="150" bgcolor="#444f53" align="center" valign="top" class="NM_radius mapNode" style="padding-bottom:15px;" onclick="clickEvent($('iconClient'));">
+                                    <td id="clients_td" width="150" bgcolor="#444f53" align="center" valign="top" class="NM_radius mapNode mapNode-passive" style="padding-bottom:15px;">
                                         <div id="clientsContainer">
-                                            <a id="clientStatusLink" href="device-map/clients.asp" target="statusframe" style="outline:0;"><div id="iconClient" style="margin:20px auto 0 auto;" onclick="clickEvent(this);"></div></a>
-                                            <div class="clients" id="clientNumber" style="cursor:pointer;"></div>
+                                            <div id="iconClient" style="margin:20px auto 0 auto;"></div>
+                                            <div class="clients" id="clientNumber"></div>
+                                            <input type="button" id="clientListButton" class="button_gen nmClientListButton" value="浏览名单" onclick="showClientlistModal(); return false;">
                                         </div>
                                     </td>
                                     <td width="36" rowspan="6" id="clientspace_td"></td>
@@ -773,18 +1016,48 @@ $j(document).ready(function(){
                                 </tr>
                             </table>
                         </div>
-                        <br style="clear:both;">
-                    </div>
-                </div>
-            </td>
+	                        <br style="clear:both;">
+	                    </div>
+	                    <div id="clientListViewMask" onclick="hideClientlistModal();"></div>
+	                    <div id="clientListViewPanel" class="clientlist_viewlist" onclick="event.cancelBubble=true; if(event.stopPropagation) event.stopPropagation();">
+	                    <a class="nmClientListClose" href="javascript:void(0);" onclick="hideClientlistModal(); return false;">×</a>
+	                    <div class="nmClientTabs">
+	                        <div id="clientListTabAll" class="nmClientTab active" onclick="changeClientListViewMode('All');"><span>全部</span></div>
+	                        <div id="clientListTabInterface" class="nmClientTab" onclick="changeClientListViewMode('ByInterface');"><span>接口</span></div>
+	                    </div>
+	                    <table width="100%" cellspacing="0" cellpadding="0" align="center" class="nmClientListTable">
+	                        <thead>
+	                            <tr>
+	                                <td id="clientListViewHeader" colspan="9" class="nmClientListHeader">全部列表<a href="javascript:void(0);" onclick="hideClientlistModal(); return false;">[ 隐藏 ]</a></td>
+	                            </tr>
+	                            <tr>
+	                                <th id="clientListThInternet" width="6%">互联网</th>
+	                                <th id="clientListThIcon" width="6%">图标</th>
+	                                <th id="clientListThName" width="27%">客户端名称</th>
+	                                <th id="clientListThIp" width="20%">客户端 IP 地址</th>
+	                                <th id="clientListThMac" width="15%">客户端 MAC 地址</th>
+	                                <th id="clientListThInterface" width="6%">接口</th>
+	                                <th id="clientListThTx" width="6%">Tx 速率<br>(Mbps)</th>
+	                                <th id="clientListThRx" width="6%">Rx 速率<br>(Mbps)</th>
+	                                <th id="clientListThAccess" width="8%">访问时间</th>
+	                            </tr>
+	                        </thead>
+	                        <tbody id="clientListTableBody"></tbody>
+	                    </table>
+	                    <div class="nmClientExportBlock">
+	                        <input type="button" id="clientListExportButton" class="button_gen nmClientExportButton" value="导出" onclick="exportClientListLog(); return false;">
+	                    </div>
+	                </div>
+	                </div>
+	            </td>
             <td width="10" align="center" valign="top">&nbsp;</td>
         </tr>
     </table>
 
     <div id="footer"></div>
     <script>
-    if(flag == "Internet" || flag == "Client")
-        $("statusframe").src = "";
+	    if(flag == "Internet")
+	        $("statusframe").src = "";
     </script>
 </body>
 </html>

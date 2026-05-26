@@ -73,6 +73,7 @@
 .iconUSBdisk{ background:url(images/New_ui/networkmap/USB_2.png) no-repeat 0% 0%;	width:91px; height:91px; cursor:pointer;}
 .iconM2{ background:url(images/New_ui/networkmap/M2.png) no-repeat 0% 0%; width:91px; height:91px; cursor:pointer;}
 #iconClient{ background:url(images/New_ui/networkmap/map-iconClient.png) no-repeat 0% 0%; width:95px; height:95px; cursor:pointer;}
+.mapNode-passive #iconClient{ cursor:default; }
 .iconPrinter{ background:url(images/New_ui/networkmap/map-iconPrinter.png) no-repeat 0% 0%;	width:91px; height:96px; cursor:pointer;}
 .iconmodem{ background:url(images/New_ui/networkmap/map-iconmodem.png) no-repeat 0% 0%;	width:95px; height:96px; cursor:pointer;}
 #iconWebcam{ background:url(images/New_ui/networkmap/map-iconWebcam.png) no-repeat 0% 0%; width:89px; height:89px; cursor:pointer;}
@@ -392,8 +393,38 @@
 	cursor:pointer;
 	transition:filter .15s ease-out, box-shadow .15s ease-out;
 }
+.mapNode-passive{
+	cursor:default;
+}
 .mapNode-active{
 	filter:brightness(1.08);
+}
+.mapCard-internet,
+.mapCard-router{
+	border-top:1px solid transparent;
+	border-bottom:1px solid transparent;
+}
+.mapCard-internet.NM_radius_left,
+.mapCard-router.NM_radius_left{
+	border-left:1px solid transparent;
+}
+.mapCard-internet.NM_radius_right,
+.mapCard-router.NM_radius_right{
+	border-right:1px solid transparent;
+}
+.mapCard-internet.mapNode-active,
+.mapCard-router.mapNode-active{
+	background:#516165 !important;
+	border-top-color:#7AA3BD;
+	border-bottom-color:#7AA3BD;
+}
+.mapCard-internet.NM_radius_left.mapNode-active,
+.mapCard-router.NM_radius_left.mapNode-active{
+	border-left-color:#7AA3BD;
+}
+.mapCard-internet.NM_radius_right.mapNode-active,
+.mapCard-router.NM_radius_right.mapNode-active{
+	border-right-color:#7AA3BD;
 }
 .mapNode-active.NM_radius_left,
 .mapNode-active.NM_radius_right,
@@ -420,6 +451,275 @@
 .mapText-on{ color:#569AC7; }
 .mapText-warn{ color:#FFCC00; }
 .mapText-off{ color:#ff8f8f; }
+.mapCardText,
+.mapCardText .index_status,
+.mapCardText .mapText-on,
+.mapCardText .mapText-warn,
+.mapCardText .mapText-off{
+	color:#FFFFFF !important;
+}
+.mapCardText .mapStatus-plain{
+	min-width:0;
+	padding:0;
+	border-radius:0;
+	background:transparent;
+	font-size:14px;
+	line-height:18px;
+	color:#FFFFFF;
+}
+.nmClientListButton{
+	margin-top:18px;
+	min-width:122px;
+	height:33px;
+	font-size:14px;
+}
+#clientListViewMask{
+	display:none;
+	position:absolute;
+	left:0;
+	top:0;
+	right:0;
+	bottom:0;
+	z-index:190;
+	background:transparent;
+}
+.clientlist_viewlist{
+	display:none;
+	position:absolute;
+	left:14px;
+	top:102px;
+	width:704px;
+	z-index:200;
+	background:#444f53;
+	border-radius:5px;
+	box-shadow:3px 3px 10px #000000;
+	padding:30px 16px 24px;
+	color:#FFFFFF;
+	font-family:Verdana, Arial, Helvetica, MS UI Gothic, MS P Gothic, Microsoft Yahei UI, sans-serif;
+}
+.nmClientListClose{
+	position:absolute;
+	right:14px;
+	top:10px;
+	color:#98a3a6;
+	font-size:32px;
+	line-height:26px;
+	font-weight:bold;
+	text-decoration:none;
+	text-shadow:1px 1px 1px #1b2427;
+}
+.nmClientListClose:hover{
+	color:#d4dadd;
+	text-decoration:none;
+}
+.nmClientTabs{
+	display:flex;
+	width:300px;
+	margin:0 0 30px 14px;
+	border:2px solid #172226;
+	border-radius:10px;
+	overflow:hidden;
+	background:#2d3a3d;
+	box-shadow:0 1px 0 rgba(255,255,255,.12) inset;
+}
+.nmClientTab{
+	width:150px;
+	height:58px;
+	line-height:58px;
+	text-align:center;
+	cursor:pointer;
+	color:#b7c2c6;
+	font-size:20px;
+	font-weight:bold;
+	background:linear-gradient(#4d5c60 0%, #2b383b 100%);
+	border-right:1px solid #172226;
+	text-shadow:1px 1px 1px #000000;
+}
+.nmClientTab:last-child{
+	border-right:0;
+}
+.nmClientTab.active{
+	background:#273236;
+	color:#d9e0e2;
+	box-shadow:0 3px 8px rgba(0,0,0,.3) inset;
+}
+.nmClientListTable{
+	width:100%;
+	border:2px solid #12191b;
+	border-collapse:collapse;
+	background:#465a5e;
+	table-layout:fixed;
+	font-size:13px;
+	text-align:center;
+}
+.nmClientListTable th,
+.nmClientListTable td{
+	border:2px solid #12191b;
+	border-collapse:collapse;
+	color:#FFFFFF;
+	vertical-align:middle;
+}
+.nmClientListTable th{
+	height:62px;
+	padding:6px 4px;
+	background:#2b383c;
+	font-size:13px;
+	font-weight:bold;
+	line-height:17px;
+	text-shadow:1px 1px 1px #000000;
+}
+.nmClientListTable td{
+	height:72px;
+	padding:6px 4px;
+	background:#465a5e;
+	font-size:13px;
+	font-weight:bold;
+	line-height:18px;
+	word-break:break-word;
+}
+.nmClientListTable .nmClientListHeader{
+	height:38px;
+	padding:0 10px;
+	background:linear-gradient(#8a999d 0%, #6c7c80 100%);
+	text-align:left;
+	font-size:17px;
+	line-height:38px;
+}
+.nmClientListHeader a{
+	float:right;
+	color:#FFFFFF;
+	text-decoration:none;
+	font-size:15px;
+}
+.nmClientName{
+	font-size:14px !important;
+}
+.nmClientIp{
+	position:relative;
+	padding-right:48px !important;
+	text-align:left;
+	padding-left:12px !important;
+}
+.nmClientIp span{
+	position:absolute;
+	right:8px;
+	top:50%;
+	margin-top:-13px;
+	padding:4px 6px;
+	border-radius:7px;
+	background:#1e2325;
+	color:#FFFFFF;
+	font-size:11px;
+	line-height:18px;
+}
+.nmClientInternetIcon{
+	width:32px;
+	height:32px;
+	margin:0 auto;
+	border:2px solid #32e7f3;
+	border-radius:50%;
+	position:relative;
+	box-sizing:border-box;
+}
+.nmClientInternetIcon:before{
+	content:"";
+	position:absolute;
+	left:5px;
+	right:5px;
+	top:13px;
+	height:2px;
+	background:#32e7f3;
+	box-shadow:0 -9px 0 -1px #32e7f3, 0 9px 0 -1px #32e7f3;
+}
+.nmClientInternetIcon:after{
+	content:"";
+	position:absolute;
+	top:-2px;
+	bottom:-2px;
+	left:12px;
+	width:8px;
+	border-left:2px solid #32e7f3;
+	border-right:2px solid #32e7f3;
+	border-radius:50%;
+}
+.nmClientDeviceIcon{
+	width:50px;
+	height:50px;
+	border-radius:10px;
+	background:#8ea0a4;
+	box-shadow:0 0 0 2px #2f3b3e;
+}
+.nmClientInterface{
+	width:44px;
+	margin:0 auto;
+	color:#122528;
+	font-size:10px;
+	font-weight:bold;
+}
+.nmClientInterface span{
+	display:block;
+	width:34px;
+	height:28px;
+	margin:0 auto 2px;
+	position:relative;
+}
+.nmClientInterface-wifi span:before,
+.nmClientInterface-wifi span:after{
+	content:"";
+	position:absolute;
+	bottom:0;
+	background:#29d8e3;
+	box-shadow:0 0 2px rgba(255,255,255,.4) inset;
+}
+.nmClientInterface-wifi span:before{
+	left:2px;
+	width:8px;
+	height:9px;
+	box-shadow:12px -8px 0 #29d8e3, 24px -16px 0 #29d8e3;
+}
+.nmClientInterface-wifi span:after{
+	left:2px;
+	width:32px;
+	height:4px;
+}
+.nmClientInterface-wired span{
+	width:32px;
+	height:32px;
+	border:3px solid #29d8e3;
+	border-radius:7px;
+	box-sizing:border-box;
+}
+.nmClientInterface-wired span:before{
+	content:"";
+	position:absolute;
+	left:7px;
+	top:7px;
+	width:12px;
+	height:9px;
+	border:2px solid #29d8e3;
+	border-top:0;
+}
+.nmClientInterface strong{
+	display:block;
+	background:#29d8e3;
+	color:#122528;
+	font-size:10px;
+	line-height:14px;
+	min-height:14px;
+}
+.nmClientNoData{
+	height:100px !important;
+	color:#d6e0e3 !important;
+}
+.nmClientExportBlock{
+	text-align:center;
+	margin-top:24px;
+}
+.nmClientExportButton{
+	min-width:130px;
+	height:34px;
+	font-size:15px;
+}
 .mapLine-on,
 .mapLine-warn,
 .mapLine-off{
