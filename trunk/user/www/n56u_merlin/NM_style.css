@@ -486,8 +486,10 @@
 .clientlist_viewlist{
 	display:none;
 	position:absolute;
-	left:-415px;
-	top:170px;
+	left: 0;
+    right: 0;
+    top: 0;
+    margin-left: auto;
 	width:950px;
 	z-index:200;
 	background:#444f53;
