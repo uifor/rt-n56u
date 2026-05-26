@@ -77,7 +77,8 @@ function update_lanip(){
 </head>
 
 <body class="body_iframe" onload="initial();">
-<table width="100%" align="center" cellpadding="4" cellspacing="0" class="table">
+<div class="main-block network-status-main-block">
+<table width="100%" align="center" cellpadding="4" cellspacing="0" class="table network-status-block">
   <tr>
     <th style="border-top: 0 none;"><#ConnectionStatus#></th>
     <td style="border-top: 0 none;" id="lan_status"></td>
@@ -114,6 +115,7 @@ function update_lanip(){
     </td>
   </tr>
 </table>
+</div>
 
 </body>
 </html>

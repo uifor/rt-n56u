@@ -333,6 +333,52 @@ select,
 	max-width: 260px;
 }
 
+.network-status-main-block {
+	margin-top: 0;
+}
+
+.network-status-block {
+	margin-bottom: 8px;
+	background: #4D595D;
+}
+
+.network-status-block th,
+.network-status-block td {
+	border-color: #5D6E74;
+	background: #4D595D;
+}
+
+.network-status-block th {
+	width: 34%;
+	background: #44555B;
+	color: #FFFFFF;
+	font-size: 13px;
+}
+
+.network-status-block td {
+	color: #DCEEF3;
+	font-size: 13px;
+}
+
+.network-status-block td span {
+	color: #DCEEF3;
+}
+
+.network-status-block .label {
+	padding: 5px 8px;
+	font-size: 12px;
+}
+
+.network-status-block .btn {
+	margin: 2px 4px 2px 0;
+}
+
+.network-status-block select {
+	min-height: 24px;
+	max-width: 260px;
+	font-size: 13px;
+}
+
 .division-block {
 	margin: 8px 0;
 	padding-left: 10px;

@@ -273,7 +273,8 @@ function submitInternet(v){
 </head>
 
 <body class="body_iframe" onload="initial();">
-<table width="100%" align="center" cellpadding="4" cellspacing="0" class="table" id="tbl_info">
+<div class="main-block network-status-main-block">
+<table width="100%" align="center" cellpadding="4" cellspacing="0" class="table network-status-block" id="tbl_info">
   <tr>
     <th width="50%" style="border-top: 0 none;"><#InetControl#></th>
     <td style="border-top: 0 none;" colspan="3">
@@ -375,6 +376,7 @@ function submitInternet(v){
     </td>
   </tr>
 </table>
+</div>
 
 <form method="post" name="internetForm" action="">
 <input type="hidden" name="wan_action" value="">
