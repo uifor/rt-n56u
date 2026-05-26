@@ -426,13 +426,6 @@
 .mapCard-router.NM_radius_right.mapNode-active{
 	border-right-color:#7AA3BD;
 }
-.mapNode-active.NM_radius_left,
-.mapNode-active.NM_radius_right,
-.mapNode-active.NM_radius,
-.mapNode-active .NM_radius,
-.mapNode-active.mapDeviceCell{
-	box-shadow:0 0 0 1px #7aa3bd, 12px 5px 10px #333;
-}
 .mapStatus-on,
 .mapStatus-warn,
 .mapStatus-off{
