@@ -113,28 +113,38 @@ $j.fn.fileName = function(){
 		background: #253137;
 		border: 1px solid #52666F;
 	}
-	.progress .bar {
-		height: 18px;
-		background: #2f769b;
-	}
-	</style>
+		.progress .bar {
+			height: 18px;
+			background: #2f769b;
+		}
+		.firmware-upgrade-progress-panel {
+			width: 60%;
+			margin: 150px auto 0 auto;
+			text-align: center;
+		}
+		.firmware-upgrade-progress-panel .progress {
+			max-width: 450px;
+			margin: 0 auto;
+			text-align: left;
+		}
+		.firmware-upgrade-progress-panel .alert {
+			max-width: 400px;
+			margin: 15px auto 0 auto;
+		}
+		</style>
 </head>
 
 <body onload="initial();" class="bg">
 
-<div id="LoadingBar" class="popup_bg">
-	        <center>
-	        <div style="margin-top: 150px;">
-	            <div style="background-color: #212121; width: 60%; padding: 20px;">
-	                <div class="progress" style="max-width: 450px; text-align: left;">
+	<div id="LoadingBar" class="popup_bg">
+		        <div class="firmware-upgrade-progress-panel">
+	                <div class="progress">
 	                    <div class="bar" id="proceeding_img"><span id="proceeding_img_text"></span></div>
 	                </div>
-                <div class="alert alert-danger" style="max-width: 400px;"><#FIRM_ok_desc#></div>
-            </div>
-        </div>
-        </center>
+	                <div class="alert alert-danger"><#FIRM_ok_desc#></div>
+	        </div>
 
-        <table cellpadding="5" cellspacing="0" id="loadingBarBlock" class="loadingBarBlock" style="position: absolute; margin-left: -10000px;" align="center">
+	        <table cellpadding="5" cellspacing="0" id="loadingBarBlock" class="loadingBarBlock" style="position: absolute; margin-left: -10000px;" align="center">
             <tr>
                 <td height="80">
                     <div class="progress">
