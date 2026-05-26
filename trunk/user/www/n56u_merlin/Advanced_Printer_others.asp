@@ -11,7 +11,6 @@
 <link rel="stylesheet" type="text/css" href="/index_style.css">
 <link rel="stylesheet" type="text/css" href="/form_style.css">
 <link rel="stylesheet" type="text/css" href="/other.css">
-<link rel="stylesheet" type="text/css" href="/merlin_legacy.css">
 <link rel="stylesheet" type="text/css" href="/bootstrap/css/engage.itoggle.css">
 
 <script type="text/javascript" src="/jquery.js"></script>
@@ -67,32 +66,24 @@ function done_validating(action){
 }
 </script>
 <style>
-    .nav-tabs > li > a {
-          padding-right: 6px;
-          padding-left: 6px;
-    }
+.FormTable input,
+.FormTable select {
+	margin-bottom: 0px;
+}
 </style>
 </head>
 
-<body onload="initial();" onunLoad="return unload_body();">
+<body onload="initial();" onunLoad="return unload_body();" class="bg">
 
-<div class="wrapper">
-    <div class="container-fluid" style="padding-right: 0px">
-        <div class="row-fluid">
-            <div class="span3"><center><div id="logo"></div></center></div>
-            <div class="span9" >
-                <div id="TopBanner"></div>
-            </div>
-        </div>
-    </div>
+<div id="TopBanner"></div>
 
-    <div id="Loading" class="popup_bg"></div>
+<div id="Loading" class="popup_bg"></div>
 
-    <iframe name="hidden_frame" id="hidden_frame" src="" width="0" height="0" frameborder="0"></iframe>
+<iframe name="hidden_frame" id="hidden_frame" src="" width="0" height="0" frameborder="0"></iframe>
 
-    <form method="post" name="form" id="ruleForm" action="/start_apply.htm" target="hidden_frame">
+<form method="post" name="form" id="ruleForm" action="/start_apply.htm" target="hidden_frame">
 
-    <input type="hidden" name="current_page" value="Advanced_Printer_others.asp">
+	<input type="hidden" name="current_page" value="Advanced_Printer_others.asp">
     <input type="hidden" name="next_page" value="">
     <input type="hidden" name="next_host" value="">
     <input type="hidden" name="sid_list" value="General;">
@@ -100,97 +91,86 @@ function done_validating(action){
     <input type="hidden" name="action_mode" value="">
     <input type="hidden" name="action_script" value="">
 
-    <div class="container-fluid">
-        <div class="row-fluid">
-            <div class="span3">
-                <!--Sidebar content-->
-                <!--=====Beginning of Main Menu=====-->
-                <div class="well sidebar-nav side_nav" style="padding: 0px;">
-                    <ul id="mainMenu" class="clearfix"></ul>
-                    <ul class="clearfix">
-                        <li>
-                            <div id="subMenu" class="accordion"></div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+<table class="content" align="center" cellpadding="0" cellspacing="0">
+	<tr>
+		<td width="17">&nbsp;</td>
+		<td valign="top" width="202">
+			<div id="mainMenu"></div>
+			<div id="subMenu"></div>
+		</td>
+		<td valign="top">
+			<div id="tabMenu" class="submenuBlock"></div>
+			<table width="98%" border="0" align="left" cellpadding="0" cellspacing="0">
+				<tr>
+					<td align="left" valign="top">
+						<table width="760px" border="0" cellpadding="5" cellspacing="0" class="FormTitle" id="FormTitle">
+							<tbody>
+								<tr>
+									<td bgcolor="#4D595D" valign="top">
+										<div class="container">
+											<div>&nbsp;</div>
+											<div class="formfonttitle"><#menu5_4#> - <#menu5_4_5#></div>
+											<div style="margin:10px 0 10px 5px;" class="splitLine"></div>
 
-            <div class="span9">
-                <!--Body content-->
-                <div class="row-fluid">
-                    <div class="span12">
-                        <div class="box well grad_colour_dark_blue">
-                            <h2 class="box_head round_top"><#menu5_4#> - <#menu5_4_5#></h2>
-                            <div class="round_bottom">
-                                <div class="row-fluid">
-                                    <div id="tabMenu" class="submenuBlock"></div>
+											<table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">
+												<tr>
+													<th width="50%"><#PrinterPortRAW#></th>
+													<td>
+														<select name="rawd_enable" class="input">
+															<option value="0" <% nvram_match_x("General", "rawd_enable", "0","selected"); %>><#checkbox_No#></option>
+															<option value="1" <% nvram_match_x("General", "rawd_enable", "1","selected"); %>><#checkbox_Yes#></option>
+															<option value="2" <% nvram_match_x("General", "rawd_enable", "2","selected"); %>><#checkbox_Yes#> (bidirectional)</option>
+														</select>
+													</td>
+												</tr>
+												<tr id="row_lprd">
+													<th><#PrinterPortLPR#></th>
+													<td>
+														<div class="main_itoggle">
+															<div id="lprd_enable_on_of">
+																<input type="checkbox" id="lprd_enable_fake" <% nvram_match_x("General", "lprd_enable", "1", "value=1 checked"); %><% nvram_match_x("General", "lprd_enable", "0", "value=0"); %>>
+															</div>
+														</div>
+														<div style="position: absolute; margin-left: -10000px;">
+															<input type="radio" value="1" name="lprd_enable" id="lprd_enable_1" class="input" <% nvram_match_x("General", "lprd_enable", "1", "checked"); %>/><#checkbox_Yes#>
+															<input type="radio" value="0" name="lprd_enable" id="lprd_enable_0" class="input" <% nvram_match_x("General", "lprd_enable", "0", "checked"); %>/><#checkbox_No#>
+														</div>
+													</td>
+												</tr>
+												<tr id="row_u2ec">
+													<th><#PrinterPortU2E#></th>
+													<td>
+														<div class="main_itoggle">
+															<div id="u2ec_enable_on_of">
+																<input type="checkbox" id="u2ec_enable_fake" <% nvram_match_x("General", "u2ec_enable", "1", "value=1 checked"); %><% nvram_match_x("General", "u2ec_enable", "0", "value=0"); %>>
+															</div>
+														</div>
+														<div style="position: absolute; margin-left: -10000px;">
+															<input type="radio" value="1" name="u2ec_enable" id="u2ec_enable_1" class="input" <% nvram_match_x("General", "u2ec_enable", "1", "checked"); %>/><#checkbox_Yes#>
+															<input type="radio" value="0" name="u2ec_enable" id="u2ec_enable_0" class="input" <% nvram_match_x("General", "u2ec_enable", "0", "checked"); %>/><#checkbox_No#>
+														</div>
+													</td>
+												</tr>
+											</table>
 
-                                    <table width="100%" cellpadding="4" cellspacing="0" class="table">
-                                        <tr>
-                                            <th width="50%" style="border-top: 0 none;">
-                                                <#PrinterPortRAW#>
-                                            </th>
-                                            <td style="border-top: 0 none;">
-                                                <select name="rawd_enable" class="input">
-                                                    <option value="0" <% nvram_match_x("General", "rawd_enable", "0","selected"); %>><#checkbox_No#></option>
-                                                    <option value="1" <% nvram_match_x("General", "rawd_enable", "1","selected"); %>><#checkbox_Yes#></option>
-                                                    <option value="2" <% nvram_match_x("General", "rawd_enable", "2","selected"); %>><#checkbox_Yes#> (bidirectional)</option>
-                                                </select>
-                                            </td>
-                                        </tr>
-                                        <tr id="row_lprd">
-                                            <th>
-                                                <#PrinterPortLPR#>
-                                            </th>
-                                            <td>
-                                                <div class="main_itoggle">
-                                                    <div id="lprd_enable_on_of">
-                                                        <input type="checkbox" id="lprd_enable_fake" <% nvram_match_x("General", "lprd_enable", "1", "value=1 checked"); %><% nvram_match_x("General", "lprd_enable", "0", "value=0"); %>>
-                                                    </div>
-                                                </div>
+											<div class="apply_gen">
+												<input class="button_gen" onclick="applyRule();" type="button" value="<#CTL_apply#>">
+											</div>
+										</div>
+										<div class="popup_container popup_element_second"></div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</td>
+		<td width="10" align="center" valign="top">&nbsp;</td>
+	</tr>
+</table>
+</form>
 
-                                                <div style="position: absolute; margin-left: -10000px;">
-                                                    <input type="radio" value="1" name="lprd_enable" id="lprd_enable_1" class="input" <% nvram_match_x("General", "lprd_enable", "1", "checked"); %>/><#checkbox_Yes#>
-                                                    <input type="radio" value="0" name="lprd_enable" id="lprd_enable_0" class="input" <% nvram_match_x("General", "lprd_enable", "0", "checked"); %>/><#checkbox_No#>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr id="row_u2ec">
-                                            <th>
-                                                <#PrinterPortU2E#>
-                                            </th>
-                                            <td>
-                                                <div class="main_itoggle">
-                                                    <div id="u2ec_enable_on_of">
-                                                        <input type="checkbox" id="u2ec_enable_fake" <% nvram_match_x("General", "u2ec_enable", "1", "value=1 checked"); %><% nvram_match_x("General", "u2ec_enable", "0", "value=0"); %>>
-                                                    </div>
-                                                </div>
-
-                                                <div style="position: absolute; margin-left: -10000px;">
-                                                    <input type="radio" value="1" name="u2ec_enable" id="u2ec_enable_1" class="input" <% nvram_match_x("General", "u2ec_enable", "1", "checked"); %>/><#checkbox_Yes#>
-                                                    <input type="radio" value="0" name="u2ec_enable" id="u2ec_enable_0" class="input" <% nvram_match_x("General", "u2ec_enable", "0", "checked"); %>/><#checkbox_No#>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="2">
-                                                <center><input class="btn btn-primary" style="width: 219px" onclick="applyRule();" type="button" value="<#CTL_apply#>" /></center>
-                                            </td>
-                                        </tr>
-                                    </table>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    </form>
-
-    <div id="footer"></div>
-</div>
+<div id="footer"></div>
 </body>
 </html>

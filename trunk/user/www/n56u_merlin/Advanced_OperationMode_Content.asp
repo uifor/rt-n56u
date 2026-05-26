@@ -99,6 +99,121 @@ function setScenerion(mode){
 <style>
 #Senario table {width: 100%;}
 #Senario table td {text-align: center;}
+#Senario .scenario-icons td {
+	height: 78px;
+	vertical-align: middle;
+}
+.op-icon {
+	position: relative;
+	display: inline-block;
+	width: 54px;
+	height: 54px;
+	box-sizing: border-box;
+	border: 1px solid #6b8fa3;
+	border-radius: 8px;
+	background: linear-gradient(#31454c 0%, #1e2e34 100%);
+	box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 1px 2px rgba(0,0,0,0.35);
+}
+.op-icon:before,
+.op-icon:after,
+.op-link:before,
+.op-link:after {
+	content: "";
+	position: absolute;
+	box-sizing: border-box;
+}
+.op-clients:before {
+	left: 11px;
+	top: 14px;
+	width: 14px;
+	height: 14px;
+	border: 2px solid #d7e7ee;
+	border-radius: 50%;
+	box-shadow: 17px 0 0 -2px #d7e7ee;
+}
+.op-clients:after {
+	left: 8px;
+	top: 31px;
+	width: 38px;
+	height: 10px;
+	border: 2px solid #d7e7ee;
+	border-top: 0;
+	border-radius: 0 0 12px 12px;
+}
+.op-router:before {
+	left: 10px;
+	top: 18px;
+	width: 34px;
+	height: 20px;
+	border: 2px solid #9ed3ea;
+	border-radius: 5px;
+}
+.op-router:after {
+	left: 15px;
+	top: 25px;
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	background: #9ed3ea;
+	box-shadow: 9px 0 0 #9ed3ea, 18px 0 0 #9ed3ea;
+}
+.op-ap:before {
+	left: 15px;
+	top: 13px;
+	width: 24px;
+	height: 28px;
+	border: 2px solid #d7e7ee;
+	border-radius: 5px;
+}
+.op-ap:after {
+	left: 25px;
+	top: 7px;
+	width: 4px;
+	height: 11px;
+	background: #d7e7ee;
+	box-shadow: -8px 9px 0 -1px #d7e7ee, 8px 9px 0 -1px #d7e7ee;
+}
+.op-internet {
+	border-radius: 50%;
+}
+.op-internet:before {
+	left: 12px;
+	top: 12px;
+	width: 30px;
+	height: 30px;
+	border: 2px solid #d7e7ee;
+	border-radius: 50%;
+}
+.op-internet:after {
+	left: 14px;
+	top: 25px;
+	width: 26px;
+	height: 2px;
+	background: #d7e7ee;
+	box-shadow: 0 -8px 0 -1px #d7e7ee, 0 8px 0 -1px #d7e7ee;
+}
+.op-link {
+	position: relative;
+	display: inline-block;
+	width: 54px;
+	height: 54px;
+}
+.op-link:before {
+	left: 7px;
+	top: 26px;
+	width: 40px;
+	height: 2px;
+	background: #9ed3ea;
+}
+.op-link:after {
+	left: 8px;
+	top: 20px;
+	width: 13px;
+	height: 13px;
+	border-left: 2px solid #9ed3ea;
+	border-bottom: 2px solid #9ed3ea;
+	transform: rotate(45deg);
+}
 .alert {
 	padding: 8px 10px;
 	margin: 10px 0;
@@ -183,14 +298,14 @@ function setScenerion(mode){
                                                             <td>&nbsp;</td>
                                                             <td id="Internet_span"><span class="label"><#Internet#></span></td>
                                                         </tr>
-                                                        <tr>
-                                                            <td><img src="bootstrap/img/wl_device/clients.png"></td>
-                                                            <td><img src="bootstrap/img/wl_device/arrow-left.png"></td>
-                                                            <td><img src="bootstrap/img/wl_device/n56u.png"></td>
-                                                            <td class="AP"><img src="bootstrap/img/wl_device/arrow-left.png"></td>
-                                                            <td class="AP"><img src="bootstrap/img/wl_device/server.png"></td>
-                                                            <td><img src="bootstrap/img/wl_device/arrow-left.png"></td>
-                                                            <td><img src="bootstrap/img/wl_device/globe.png"></td>
+                                                        <tr class="scenario-icons">
+                                                            <td><span class="op-icon op-clients"></span></td>
+                                                            <td><span class="op-link"></span></td>
+                                                            <td><span class="op-icon op-router"></span></td>
+                                                            <td class="AP"><span class="op-link"></span></td>
+                                                            <td class="AP"><span class="op-icon op-ap"></span></td>
+                                                            <td><span class="op-link"></span></td>
+                                                            <td><span class="op-icon op-internet"></span></td>
                                                         </tr>
                                                     </table>
                                                 </div>
