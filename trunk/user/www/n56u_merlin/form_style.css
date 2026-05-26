@@ -75,7 +75,6 @@ html::-webkit-scrollbar-track{
 	font-size:12px;
 	font-family:Arial, Verdana, Helvetica, MS UI Gothic, MS P Gothic, Microsoft Yahei UI, sans-serif;
 	border:1px solid #4D595D;
-	background:#7B888D;
 	color:white;
 	position:relative;
 	*margin-top:-1px;
@@ -83,7 +82,6 @@ html::-webkit-scrollbar-track{
 	-webkit-border-radius: 0 0 3px 3px;
 	-moz-border-radius: 0 0 3px 3px;
 	border-radius: 0 0 3px 3px;
-	overflow:hidden;
 }
 .FormTitle thead{
 	color:#FFF;
@@ -94,12 +92,6 @@ html::-webkit-scrollbar-track{
 }
 .FormTitle tbody{
 	line-height:180%;
-}
-.FormTitle > tbody > tr > td:first-child{
-	background:#7B888D !important;
-	-webkit-border-radius: 0 0 3px 3px;
-	-moz-border-radius: 0 0 3px 3px;
-	border-radius: 0 0 3px 3px;
 }
 .FormTitle .container{
 	box-sizing:border-box;

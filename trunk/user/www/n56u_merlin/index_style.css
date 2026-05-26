@@ -1256,12 +1256,11 @@ width:122px;
 	background: #4D595D;
 	color: White;
 	float: left;
-	height: 42px;
+	height: 35px;
 	padding: 8px;      
 	padding-top: 5px;
 	margin-left: -3px;
 	margin-right: 2px;
-	margin-bottom: -1px;
 	text-align:center;
 	text-decoration: none;
 	font-family: Verdana, MS UI Gothic, MS P Gothic, Microsoft Yahei UI, sans-serif;
@@ -1271,10 +1270,8 @@ width:122px;
 	align-items: center;
 }
 .submenuBlock{
-	margin-bottom: -1px;
+	margin-bottom: -10px;
 	max-width: 760px;
-	position:relative;
-	z-index:2;
 }
 .merlin-form-page .content{
 	margin-top:-140px;
