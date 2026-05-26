@@ -554,7 +554,7 @@ body {
 .copyright {font-family: Verdana, MS UI Gothic, MS P Gothic, Microsoft Yahei UI, sans-serif;font-size : 11px;text-align:right;color:#FFFFFF;padding-right:10px; margin:0 auto; width:983px;}
 
 .popup_bg{
-	position:absolute;	
+	position:absolute;
 	margin: auto;
 	top: 0;
 	left: 0;
@@ -567,6 +567,9 @@ body {
 	background-repeat: repeat;
 	visibility:hidden;
 	overflow:hidden;
+}
+#Loading.popup_bg{
+	position:fixed;
 }
 .popup_bar_bg{
 	position:absolute;	
@@ -593,15 +596,19 @@ body {
 	behavior: url(/PIE.htc);
 	border-radius: 10px 10px 10px 10px;
 	border: 0px;
-	*margin-top:200px;
 	width:400px;
+	max-width:90%;
 	font-size:20px;
 	color:#FFFFFF;
 	font-weight:bolder;
 	background-color:#000000;
-	position:absolute;
-	/*left:35%;*/
-	top:0;Hot 
+	position:fixed;
+	top:50%;
+	left:50%;
+	margin:0;
+	-webkit-transform:translate(-50%, -50%);
+	-ms-transform:translate(-50%, -50%);
+	transform:translate(-50%, -50%);
 	z-index:200;
 	_position:absolute;
 }

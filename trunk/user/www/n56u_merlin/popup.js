@@ -65,14 +65,6 @@ function showLoading(seconds, flag){
 	htmlbodyforIE[0].style.overflow = "hidden";
 
 	winW_H();
-	var blockmarginTop;
-	var sheight = document.documentElement.scrollHeight;
-	var cheight = document.documentElement.clientHeight
-
-	blockmarginTop = (navigator.userAgent.indexOf("Safari")>=0)?(sheight-cheight<=0)?200:sheight-cheight+200:document.documentElement.scrollTop+200;
-
-	//Lock modified it for Safari4 display issue.
-	$("loadingBlock").style.marginTop = blockmarginTop+"px";
 	$("Loading").style.width = winW+"px";
 	$("Loading").style.height = winH+"px";
 
@@ -129,4 +121,3 @@ function hideLoading(flag){
 	enableCheckChangedStatus();
 	$("Loading").style.visibility = "hidden";
 }
-
