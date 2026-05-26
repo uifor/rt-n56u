@@ -15,6 +15,10 @@ body {
 	padding-top:15px \0;	/* \0 for IE8-9 to move upper for covering the hidden form By Viz*/
 }
 
+#hidden_frame{
+	position:absolute;
+}
+
 .top-logo{
 	width:380px;
 /*	background:url(images/New_ui/top-asustitle.png) #c5d2d6 no-repeat;*/	
@@ -1276,13 +1280,8 @@ width:122px;
 }
 .submenuBlock{
 	margin-bottom: -10px;
+	margin-top: -140px;
 	max-width: 760px;
-}
-.merlin-form-page .content{
-	margin-top:-140px;
-}
-.merlin-form-page .merlin-leftnav{
-	margin-top:-24px;
 }
 /* used for QIS */
 .m_qis_r {
