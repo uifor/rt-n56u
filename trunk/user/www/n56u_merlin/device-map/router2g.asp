@@ -596,16 +596,17 @@ window.onunload  = function(){
 <input type="hidden" name="rt_key4_org" value="<% nvram_char_to_ascii("", "rt_key4"); %>">
 <input type="hidden" name="rt_gmode" value="<% nvram_get_x("","rt_gmode"); %>">
 
-	<ul class="nav nav-tabs router-tabs">
-	    <li class="active"><a href="javascript:;"><#menu5_1#></a></li>
-	    <li><a href="router_status.asp"><#statusTitle_System#></a></li>
-	</ul>
-	<ul class="nav nav-tabs wireless-band-tabs">
-	    <li class="active"><a href="javascript:;">2.4GHz</a></li>
-	    <li id="tab_radio5g"><a href="router.asp">5GHz</a></li>
-	</ul>
+	<div class="main-block wireless-main-block">
+		<div class="display-flex flex-a-center router-tabs">
+			<div class="tab-block tab-click"><#menu5_1#></div>
+			<div class="tab-block" onclick="location.href='router_status.asp'"><#menu5_7_1#></div>
+		</div>
+		<div class="display-flex flex-a-center wireless-band-tabs">
+			<div class="wireless-band-tab wireless-band-active">2.4GHz</div>
+			<div id="tab_radio5g" class="wireless-band-tab" onclick="location.href='router.asp'">5GHz</div>
+		</div>
 
-<table class="table">
+	<table class="table wireless-form-block">
   <tr>
     <th width="50%" style="border-top: 0 none; padding-top: 0px;"><#WLANConfig11b_x_RadioEnable_itemname#></th>
     <td style="border-top: 0 none; padding-top: 0px;">
@@ -712,32 +713,33 @@ window.onunload  = function(){
       </td>
   </tr>
  </table>
- <table class="table">
-  <tr>
-    <th width="50%"><#LAN_IP#></th>
-    <td id="LANIP"></td>
-  </tr>
-  <tr>
-    <th><#MAC_Address#></th>
-    <td id="MAC"></td>
-  </tr>
-  <tr>
-    <th>&nbsp;</th>
-    <td>
-        <select id="Router_domore" class="domore" onchange="domore_link(this);">
-            <option><#MoreConfig#>...</option>
-            <option value="../Advanced_Wireless2g_Content.asp"><#menu5_1#> - <#menu5_1_1#></option>
-            <option value="../Advanced_WGuest2g_Content.asp"><#menu5_1#> - <#menu5_1_2#></option>
-            <option value="../Advanced_WAdvanced2g_Content.asp"><#menu5_1#> - <#menu5_1_6#></option>
-            <option value="../Advanced_LAN_Content.asp"><#menu5_2_1#></option>
-            <option value="../Advanced_DHCP_Content.asp"><#menu5_2_2#></option>
-            <option value="../Advanced_GWStaticRoute_Content.asp"><#menu5_2_3#></option>
-            <option value="../Main_WStatus2g_Content.asp"><#menu5_9#></option>
-            <option value="../Main_LogStatus_Content.asp"><#menu5_7_2#></option>
-        </select>
-    </td>
-  </tr>
-</table>
+	<table class="table wireless-form-block">
+	  <tr>
+	    <th width="50%"><#LAN_IP#></th>
+	    <td id="LANIP"></td>
+	  </tr>
+	  <tr>
+	    <th><#MAC_Address#></th>
+	    <td id="MAC"></td>
+	  </tr>
+	  <tr>
+	    <th>&nbsp;</th>
+	    <td>
+	        <select id="Router_domore" class="domore" onchange="domore_link(this);">
+	            <option><#MoreConfig#>...</option>
+	            <option value="../Advanced_Wireless2g_Content.asp"><#menu5_1#> - <#menu5_1_1#></option>
+	            <option value="../Advanced_WGuest2g_Content.asp"><#menu5_1#> - <#menu5_1_2#></option>
+	            <option value="../Advanced_WAdvanced2g_Content.asp"><#menu5_1#> - <#menu5_1_6#></option>
+	            <option value="../Advanced_LAN_Content.asp"><#menu5_2_1#></option>
+	            <option value="../Advanced_DHCP_Content.asp"><#menu5_2_2#></option>
+	            <option value="../Advanced_GWStaticRoute_Content.asp"><#menu5_2_3#></option>
+	            <option value="../Main_WStatus2g_Content.asp"><#menu5_9#></option>
+	            <option value="../Main_LogStatus_Content.asp"><#menu5_7_2#></option>
+	        </select>
+	    </td>
+	  </tr>
+	</table>
+	</div>
 </form>
 
 </body>
