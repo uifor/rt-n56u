@@ -218,8 +218,8 @@ function show_client_status(clients_count){
 
 function applyClientListText(){
 	$j("#clientListButton").val(nmClientListText.viewList);
-	$j("#clientListTabAll span").html(nmClientListText.all);
-	$j("#clientListTabInterface span").html(nmClientListText.interfaceTab);
+	$j("#clientListTabAll .block_filter_name").html(nmClientListText.all);
+	$j("#clientListTabInterface .block_filter_name").html(nmClientListText.interfaceTab);
 	$j("#clientListThInternet").html(nmClientListText.internet);
 	$j("#clientListThIcon").html(nmClientListText.icon);
 	$j("#clientListThName").html(nmClientListText.name);
@@ -260,17 +260,13 @@ function get_client_interface(client){
 }
 
 function get_client_icon_html(client){
-	var type = client[5] || "1";
-	var iconClass = "pc";
+	var type = parseInt(client[5], 10);
+	if(isNaN(type) || type < 0 || type > 36)
+		type = 1;
 
-	if(type == "2" || type == "3")
-		iconClass = "network";
-	else if(type == "4")
-		iconClass = "storage";
-	else if(type == "5" || type == "6")
-		iconClass = "mobile";
+	var iconType = (type == 0) ? "type0_viewMode" : "type" + type;
 
-	return "<div class='nmClientDeviceIcon nmClientDeviceIcon-" + iconClass + "' title='" + html_escape(type) + "'><span></span></div>";
+	return "<div style='height:40px;width:40px;cursor:default;margin:0 auto;' class='clientIcon_no_hover " + iconType + "' title='" + html_escape(type) + "'></div>";
 }
 
 function get_client_interface_html(client){
@@ -334,8 +330,14 @@ function renderClientListView(){
 	var headerText = (clientListViewMode == "ByInterface") ? nmClientListText.interfaceTab : nmClientListText.allList;
 	var html = "";
 
-	$j("#clientListTabAll").toggleClass("active", clientListViewMode == "All");
-	$j("#clientListTabInterface").toggleClass("active", clientListViewMode == "ByInterface");
+	$j("#clientListTabAll")
+		.toggleClass("block_filter_pressed", clientListViewMode == "All")
+		.toggleClass("block_filter", clientListViewMode != "All");
+	$j("#clientListTabInterface")
+		.toggleClass("block_filter_pressed", clientListViewMode == "ByInterface")
+		.toggleClass("block_filter", clientListViewMode != "ByInterface");
+	$j("#clientListTabAll .block_filter_name").css("color", clientListViewMode == "All" ? "#93A9B1" : "");
+	$j("#clientListTabInterface .block_filter_name").css("color", clientListViewMode == "ByInterface" ? "#93A9B1" : "");
 	$j("#clientListViewHeader").html(headerText + "<a href='javascript:void(0);' onclick='hideClientlistModal(); return false;'>[ " + nmClientListText.hide + " ]</a>");
 
 	if(rows.length < 1){
@@ -346,7 +348,7 @@ function renderClientListView(){
 			html += "<tr>";
 			html += "<td><div class='nmClientInternetIcon' title='" + html_escape(rows[i].internet) + "'></div></td>";
 			html += "<td>" + rows[i].icon + "</td>";
-			html += "<td class='nmClientName'>" + html_escape(rows[i].name) + "</td>";
+			html += "<td>" + html_escape(rows[i].name) + "</td>";
 			html += "<td class='nmClientIp'>" + html_escape(rows[i].ip) + "<span>DHCP</span></td>";
 			html += "<td>" + html_escape(rows[i].mac) + "</td>";
 			html += "<td>" + rows[i].interfaceHtml + "</td>";
@@ -1011,12 +1013,13 @@ $j(document).ready(function(){
 	                    </div>
 	                    <div id="clientListViewMask" onclick="hideClientlistModal();"></div>
 	                    <div id="clientListViewPanel" class="clientlist_viewlist" onclick="event.cancelBubble=true; if(event.stopPropagation) event.stopPropagation();">
-	                    <a class="nmClientListClose" href="javascript:void(0);" onclick="hideClientlistModal(); return false;">×</a>
-	                    <div class="nmClientTabs">
-	                        <div id="clientListTabAll" class="nmClientTab active" onclick="changeClientListViewMode('All');"><span>全部</span></div>
-	                        <div id="clientListTabInterface" class="nmClientTab" onclick="changeClientListViewMode('ByInterface');"><span>接口</span></div>
+	                    <div class="nmClientListSwitch">
+	                        <div id="clientListTabAll" class="block_filter_pressed clientlist_All" onclick="changeClientListViewMode('All');"><div class="block_filter_name" style="color:#93A9B1;">全部</div></div>
+	                        <div id="clientListTabInterface" class="block_filter clientlist_ByInterface" onclick="changeClientListViewMode('ByInterface');"><div class="block_filter_name">接口</div></div>
 	                    </div>
-	                    <table width="100%" cellspacing="0" cellpadding="0" align="center" class="nmClientListTable">
+	                    <div style="float:right;"><img src="/images/button-close.gif" class="nmClientListClose" onclick="hideClientlistModal(); return false;"></div>
+	                    <table border="0" align="center" cellpadding="0" cellspacing="0" class="nmClientListTableWrap"><tbody><tr><td>
+	                    <table width="100%" border="1" cellspacing="0" cellpadding="0" align="center" class="FormTable_table nmClientListTable">
 	                        <thead>
 	                            <tr>
 		                                <td id="clientListViewHeader" colspan="6" class="nmClientListHeader">全部列表<a href="javascript:void(0);" onclick="hideClientlistModal(); return false;">[ 隐藏 ]</a></td>
@@ -1032,6 +1035,7 @@ $j(document).ready(function(){
 	                        </thead>
 	                        <tbody id="clientListTableBody"></tbody>
 	                    </table>
+	                    </td></tr></tbody></table>
 	                    <div class="nmClientExportBlock">
 	                        <input type="button" id="clientListExportButton" class="button_gen nmClientExportButton" value="导出" onclick="exportClientListLog(); return false;">
 	                    </div>

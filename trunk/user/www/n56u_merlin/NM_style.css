@@ -486,113 +486,85 @@
 .clientlist_viewlist{
 	display:none;
 	position:absolute;
-	left:-405px;
+	left:-415px;
 	top:170px;
-	width:930px;
+	width:950px;
 	z-index:200;
 	background:#444f53;
 	border-radius:5px;
-	box-shadow:3px 3px 12px #000000;
-	padding:18px 16px 24px;
+	box-shadow:3px 3px 10px #000000;
+	padding:0;
 	color:#FFFFFF;
 	font-family:Verdana, Arial, Helvetica, MS UI Gothic, MS P Gothic, Microsoft Yahei UI, sans-serif;
+	overflow:auto;
 }
 .nmClientListClose{
-	position:absolute;
-	right:13px;
-	top:9px;
-	color:#9aa3a6;
-	font-size:22px;
-	line-height:22px;
-	font-weight:bold;
-	text-decoration:none;
-	text-shadow:1px 1px 1px #1b2427;
+	width:30px;
+	cursor:pointer;
+	margin:6px 6px 0 0;
 }
 .nmClientListClose:hover{
-	color:#d4dadd;
-	text-decoration:none;
+	filter:brightness(1.15);
 }
-.nmClientTabs{
-	display:flex;
-	width:204px;
-	margin:0 0 18px 0;
-	border:1px solid #131c1f;
-	border-radius:7px;
-	overflow:hidden;
-	background:#2d3a3d;
-	box-shadow:0 1px 0 rgba(255,255,255,.12) inset;
+.nmClientListSwitch{
+	margin-top:15px;
+	margin-left:15px;
+	float:left;
 }
-.nmClientTab{
-	width:102px;
+.clientlist_All{
+	width:100px;
 	height:30px;
-	line-height:30px;
-	text-align:center;
+	border-top-left-radius:8px;
+	border-bottom-left-radius:8px;
 	cursor:pointer;
-	color:#b7c2c6;
-	font-size:14px;
-	font-weight:bold;
-	background:linear-gradient(#4d5c60 0%, #2b383b 100%);
-	border-right:1px solid #172226;
-	text-shadow:1px 1px 1px #000000;
 }
-.nmClientTab:last-child{
-	border-right:0;
+.clientlist_ByInterface{
+	width:100px;
+	height:30px;
+	margin:-32px 0 0 99px;
+	border-top-right-radius:8px;
+	border-bottom-right-radius:8px;
+	cursor:pointer;
 }
-.nmClientTab.active{
-	background:#273236;
-	color:#d9e0e2;
-	box-shadow:0 3px 8px rgba(0,0,0,.3) inset;
+.nmClientListTableWrap{
+	width:100%;
+	padding:0 15px 15px 15px;
+	clear:both;
 }
 .nmClientListTable{
 	width:100%;
-	border:1px solid #12191b;
-	border-collapse:collapse;
-	background:#465a5e;
 	table-layout:fixed;
-	font-size:13px;
-	text-align:center;
-}
-.nmClientListTable th,
-.nmClientListTable td{
-	border:1px solid #12191b;
-	border-collapse:collapse;
-	color:#FFFFFF;
-	vertical-align:middle;
+	margin-top:15px !important;
 }
 .nmClientListTable th{
-	height:40px;
-	padding:6px 4px;
-	background:#2b383c;
-	font-size:13px;
-	font-weight:bold;
-	line-height:17px;
-	text-shadow:1px 1px 1px #000000;
+	height:40px !important;
+	color:#FFFFFF;
+	font-size:12px !important;
+	font-weight:normal !important;
+	line-height:16px;
+	padding:0 4px;
+	vertical-align:middle;
 }
 .nmClientListTable td{
 	height:46px;
-	padding:7px 6px;
-	background:#465a5e;
-	font-size:13px;
-	font-weight:bold;
-	line-height:18px;
+	padding:4px;
+	color:#FFFFFF;
+	font-size:12px;
+	line-height:16px;
+	vertical-align:middle;
 	word-break:break-word;
 }
-.nmClientListTable .nmClientListHeader{
+.nmClientListTable thead td.nmClientListHeader{
 	height:28px;
-	padding:0 11px;
-	background:linear-gradient(#8a999d 0%, #6c7c80 100%);
-	text-align:left;
-	font-size:14px;
-	line-height:28px;
+	padding:3px 10px;
+	font-size:12px;
+	line-height:20px;
 }
 .nmClientListHeader a{
 	float:right;
 	color:#FFFFFF;
 	text-decoration:none;
 	font-size:13px;
-}
-.nmClientName{
-	font-size:14px !important;
 }
 .nmClientIp{
 	position:relative;
@@ -642,99 +614,62 @@
 	border-right:2px solid #32e7f3;
 	border-radius:50%;
 }
-.nmClientDeviceIcon{
+.clientIcon_no_hover{
 	width:50px;
 	height:50px;
-	margin:0 auto;
+	background-color:#798D94;
+	-webkit-border-radius:10px;
+	-moz-border-radius:10px;
 	border-radius:10px;
-	position:relative;
-	background:linear-gradient(#aebbbd 0%, #87989c 100%);
-	box-shadow:0 0 0 2px #2f3b3e, inset 0 1px 2px rgba(255,255,255,.38), inset 0 -2px 4px rgba(0,0,0,.22);
+	box-shadow:0 0 0 1px #3E4243;
+	background-image:url('/images/New_ui/networkmap/client-list.svg');
+	background-repeat:no-repeat;
+	cursor:pointer;
+	background-size:900%;
 }
-.nmClientDeviceIcon span{
-	position:absolute;
-	left:50%;
-	top:50%;
-	width:26px;
-	height:18px;
-	margin:-11px 0 0 -13px;
-	border:4px solid #3d4b4f;
-	border-radius:4px;
-	box-sizing:border-box;
+.type0{
+	background-image:url('/images/New_ui/networkmap/client.svg');
+	background-size:100%;
 }
-.nmClientDeviceIcon span:before,
-.nmClientDeviceIcon span:after{
-	content:"";
-	position:absolute;
-	background:#3d4b4f;
-}
-.nmClientDeviceIcon-pc span:before{
-	left:7px;
-	top:17px;
-	width:5px;
-	height:8px;
-}
-.nmClientDeviceIcon-pc span:after{
-	left:-5px;
-	top:25px;
-	width:28px;
-	height:3px;
-	border-radius:2px;
-}
-.nmClientDeviceIcon-network span{
-	width:24px;
-	height:24px;
-	margin:-12px 0 0 -12px;
-	border-radius:6px;
-}
-.nmClientDeviceIcon-network span:before{
-	left:6px;
-	top:6px;
-	width:6px;
-	height:6px;
-	border-radius:50%;
-	box-shadow:8px 0 0 #3d4b4f, 4px 9px 0 #3d4b4f;
-}
-.nmClientDeviceIcon-network span:after{
-	left:9px;
-	top:9px;
-	width:8px;
-	height:2px;
-	transform:rotate(60deg);
-	box-shadow:-4px 6px 0 #3d4b4f, 4px 6px 0 #3d4b4f;
-}
-.nmClientDeviceIcon-storage span{
-	width:28px;
-	height:28px;
-	margin:-14px 0 0 -14px;
-	border-radius:5px;
-}
-.nmClientDeviceIcon-storage span:before{
-	left:3px;
-	right:3px;
-	top:7px;
-	height:3px;
-	box-shadow:0 7px 0 #3d4b4f;
-}
-.nmClientDeviceIcon-storage span:after{
-	right:4px;
-	bottom:4px;
-	width:5px;
-	height:5px;
-	border-radius:50%;
-}
-.nmClientDeviceIcon-mobile span{
-	width:18px;
-	height:30px;
-	margin:-15px 0 0 -9px;
-	border-radius:5px;
-}
-.nmClientDeviceIcon-mobile span:before{
-	left:5px;
-	bottom:2px;
-	width:4px;
-	height:4px;
-	border-radius:50%;
+.type1{ background-position:16.5% 16.5%; }
+.type2{ background-position:66.5% 50%; }
+.type3{ background-position:66.5% 50%; }
+.type4{ background-position:83% 50%; }
+.type5{ background-position:66.5% 83.3%; }
+.type6{ background-position:49.8% 33%; }
+.type7{ background-position:100.2% 16.5%; }
+.type8{ background-position:100.2% 16.5%; }
+.type9{ background-position:33.3% 16.35%; }
+.type10{ background-position:49.8% 16.5%; }
+.type11{ background-position:49.8% 49.5%; }
+.type12{ background-position:100.2% 67%; }
+.type13{ background-position:100.2% 16.5%; }
+.type14{ background-position:49.8% 66.5%; }
+.type15{ background-position:100.2% 83%; }
+.type16{ background-position:100.2% 16.5%; }
+.type17{ background-position:100.2% 16.5%; }
+.type18{ background-position:83% 33%; }
+.type19{ background-position:16.5% 50.5%; }
+.type20{ background-position:33.3% 33%; }
+.type21{ background-position:49.8% 82.85%; }
+.type22{ background-position:-0.2% 16.5%; }
+.type23{ background-position:83% 82.5%; }
+.type24{ background-position:66.5% 67%; }
+.type25{ background-position:100.4% 100.2%; }
+.type26{ background-position:83% 16.4%; }
+.type27{ background-position:83% 0%; }
+.type28{ background-position:66.4% 16.5%; }
+.type29{ background-position:66.7% 100%; }
+.type30{ background-position:16.5% 0%; }
+.type31{ background-position:33.3% 0%; }
+.type32{ background-position:49.8% 0%; }
+.type33{ background-position:100% 32.7%; }
+.type34{ background-position:100% 50%; }
+.type35{ background-position:16.5% 33%; }
+.type36{ background-position:1.2% 99%; }
+.type0_viewMode{
+	background-image:url('/images/New_ui/networkmap/client.svg');
+	background-size:100%;
 }
 .nmClientInterface{
 	width:62px;
