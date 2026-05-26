@@ -1,0 +1,295 @@
+body {
+	background-color: #21333e;
+	color: #d7e7ee;
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size: 12px;
+	margin: 10px auto;
+}
+
+body.body_iframe,
+body[style*="background"] {
+	background: #253740 !important;
+	margin: 0;
+}
+
+.wrapper {
+	width: 998px;
+	margin: 0 auto;
+}
+
+.container-fluid {
+	width: 998px;
+	margin: 0 auto;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+.row-fluid {
+	display: table;
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.span3,
+.span9,
+.span12 {
+	display: table-cell;
+	box-sizing: border-box;
+	vertical-align: top;
+}
+
+.span3 {
+	width: 202px;
+}
+
+.span9 {
+	width: 796px;
+}
+
+.span12 {
+	display: block;
+	width: 100%;
+}
+
+.side_nav {
+	width: 202px;
+	margin: 0;
+	padding: 0;
+}
+
+.wrapper > .container-fluid:first-child .span3 {
+	display: none;
+}
+
+.wrapper > .container-fluid:first-child .span9 {
+	display: block;
+	width: 998px;
+}
+
+.well,
+.box {
+	margin: 0;
+	padding: 0;
+	background: transparent;
+	border: 0;
+	box-shadow: none;
+	width: 760px;
+}
+
+.round_top,
+.round_bottom {
+	margin: 0;
+	padding: 0;
+	background: transparent;
+	border: 0;
+}
+
+.box_head {
+	display: block;
+	box-sizing: border-box;
+	width: 760px;
+	margin: 0;
+	padding: 8px 12px;
+	color: #fff;
+	font: bold 13px Arial, Verdana, Helvetica, sans-serif;
+	background: #4d595d;
+	border: 1px solid #4d595d;
+	border-bottom: 0;
+}
+
+.round_bottom > .row-fluid {
+	display: block;
+}
+
+.grad_colour_dark_blue {
+	background: transparent;
+}
+
+.round_bottom {
+	display: block;
+	width: 760px;
+	margin: 0;
+	padding: 0;
+}
+
+#tabMenu {
+	margin-bottom: 0;
+}
+
+.round_bottom > .row-fluid {
+	width: 760px;
+	border: 1px solid #4d595d;
+	border-radius: 0 0 3px 3px;
+	background: #4d595d;
+	padding: 10px;
+	box-sizing: border-box;
+}
+
+.round_bottom > .row-fluid:before {
+	content: "";
+	display: block;
+	height: 9px;
+}
+
+.table {
+	width: 100%;
+	color: #fff;
+	font-size: 12px;
+	font-family: Arial, Helvetica, MS UI Gothic, MS P Gothic, Microsoft Yahei UI, sans-serif;
+	border: 1px solid #000;
+	border-collapse: collapse;
+}
+
+.table th {
+	width: 35%;
+	height: 30px;
+	padding-left: 10px;
+	color: #fff;
+	font-weight: normal;
+	text-align: left;
+	line-height: 15px;
+	background: #2f3a3e;
+	border: 1px solid #222;
+}
+
+.table td {
+	padding: 4px 8px 4px 10px;
+	color: #fff;
+	background: #475a5f;
+	border: 1px solid #222;
+}
+
+.table input,
+.table select,
+.table textarea {
+	margin-bottom: 0;
+}
+
+.body_iframe .table,
+body[style*="background"] .table {
+	border-color: #6b8fa3;
+}
+
+.body_iframe .table th,
+body[style*="background"] .table th {
+	width: auto;
+}
+
+.btn,
+.btn-primary,
+.btn-info,
+.btn-success,
+.btn-danger {
+	display: inline-block;
+	min-height: 25px;
+	padding: 3px 10px;
+	color: #fff;
+	font: bold 12px Verdana, Arial, Helvetica, sans-serif;
+	text-shadow: 1px 1px 0 #000;
+	background: linear-gradient(#233438 0%, #0f1011 100%);
+	border: 1px solid #6b8fa3;
+	border-radius: 8px;
+	cursor: pointer;
+	box-sizing: border-box;
+}
+
+.btn:hover,
+.btn-primary:hover,
+.btn-info:hover,
+.btn-success:hover,
+.btn-danger:hover {
+	background: linear-gradient(#09639c 0%, #003047 100%);
+}
+
+.btn-mini {
+	min-height: 21px;
+	padding: 1px 6px;
+	border-radius: 4px;
+}
+
+.label {
+	display: inline-block;
+	padding: 2px 6px;
+	color: #fff;
+	background: #596e74;
+	border: 1px solid #6b8fa3;
+	border-radius: 2px;
+}
+
+.label-info {
+	background: #596e74;
+}
+
+.label-success {
+	background: #3d774d;
+	border-color: #6b9b73;
+}
+
+.label-warning {
+	background: #8a6d2f;
+	border-color: #c09853;
+}
+
+.alert {
+	margin: 10px 0;
+	padding: 8px 10px;
+	color: #fff;
+	background: #596e74;
+	border: 1px solid #6b8fa3;
+}
+
+.alert-danger,
+.alert-error {
+	background: #7a3a3a;
+	border-color: #b94a48;
+}
+
+.alert-info {
+	background: #596e74;
+	border-color: #6b8fa3;
+}
+
+.input-append {
+	display: flex;
+	align-items: center;
+}
+
+.input-append .btn {
+	border-radius: 0 8px 8px 0;
+}
+
+.nav-tabs {
+	margin: 0;
+	padding: 0;
+}
+
+.nav-tabs > li {
+	display: inline-block;
+}
+
+textarea,
+input[type="text"],
+input[type="password"],
+select {
+	color: #fff;
+	background: #596e74;
+	border: 1px solid #929ea1;
+	box-sizing: border-box;
+}
+
+textarea {
+	width: 100%;
+	font-family: "Courier New", Courier, monospace;
+	color: #eee;
+	background: #111819;
+	border-color: #6b8fa3;
+}
+
+.help-block,
+.formfontdesc {
+	color: #d7e7ee;
+}
+
+a {
+	color: #ffcc00;
+}

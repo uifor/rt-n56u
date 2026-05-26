@@ -8,9 +8,13 @@
 
 <link rel="shortcut icon" href="images/favicon.ico">
 <link rel="icon" href="images/favicon.png">
+<link rel="stylesheet" type="text/css" href="/index_style.css">
+<link rel="stylesheet" type="text/css" href="/form_style.css">
+<link rel="stylesheet" type="text/css" href="/other.css">
+<link rel="stylesheet" type="text/css" href="/merlin_legacy.css">
 </head>
 
-<body>
+<body class="body_iframe">
 <div  style="width:99%; height: 100%; font-size:12px; font-family: Arial, Helvetica, sans-serif; border-style:none; ">
 
 <h2>Terms of Service</h2>
