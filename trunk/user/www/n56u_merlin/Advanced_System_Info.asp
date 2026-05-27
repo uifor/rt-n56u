@@ -328,8 +328,8 @@ function getSystemJsonData(cpu,ram){
         background: #596e74;
     }
     .system_chart {
-        width: 670px;
-        padding-left: 5px;
+        width: 100%;
+        padding-left: 0;
     }
 </style>
 </head>

@@ -380,7 +380,7 @@ function switchPage(id){
 
 </script>
 <style>
-.traffic_chart {width: 670px; padding-left: 5px;}
+.traffic_chart {width: 100%; padding-left: 0;}
 .traffic_swatch {height: 16px; border-radius: 5px;}
 </style>
 </head>
@@ -439,32 +439,32 @@ function switchPage(id){
 
                                     <table width="100%" align="center" cellpadding="4" cellspacing="0" class="FormTable table-stat" border="1" bordercolor="#6b8fa3">
                                         <tr>
-                                            <th width="9%"><#Color#></th>
-                                            <th width="11%"><#Network#></th>
-                                            <th width="20%" style="text-align: right"><#Current#></th>
+                                            <th width="5%"><#Color#></th>
+                                            <th width="13%"><#Network#></th>
+                                            <th width="22%" style="text-align: right"><#Current#></th>
                                             <th width="20%" style="text-align: right"><#Average#></th>
                                             <th width="20%" style="text-align: right"><#Maximum#></th>
                                             <th width="20%" style="text-align: right"><#Total#></th>
                                         </tr>
                                         <tr>
-                                            <td width="9%" style="text-align:center; vertical-align: middle;">
+                                            <td width="5%" style="text-align:center; vertical-align: middle;">
                                                 <div id="rx-sel" class="traffic_swatch"></div>
                                             </td>
-                                            <td width="11%"><#Downlink#></td>
-                                            <td width="20%" align="center" valign="top" style="text-align:right;font-weight: bold;"><span id="rx-current"></span></td>
-                                            <td width="20%" align="center" valign="top" style="text-align:right" id="rx-avg"></td>
-                                            <td width="20%" align="center" valign="top" style="text-align:right" id="rx-max"></td>
-                                            <td width="20%" align="center" valign="top" style="text-align:right" id="rx-total"></td>
+                                            <td width="13%"><#Downlink#></td>
+                                            <td width="22%" align="center" valign="top" style="text-align:right;font-weight: bold;white-space: nowrap;"><span id="rx-current"></span></td>
+                                            <td width="20%" align="center" valign="top" style="text-align:right;white-space: nowrap;" id="rx-avg"></td>
+                                            <td width="20%" align="center" valign="top" style="text-align:right;white-space: nowrap;" id="rx-max"></td>
+                                            <td width="20%" align="center" valign="top" style="text-align:right;white-space: nowrap;" id="rx-total"></td>
                                         </tr>
                                         <tr>
-                                            <td width="9%" style="text-align:center; vertical-align: middle;">
+                                            <td width="5%" style="text-align:center; vertical-align: middle;">
                                                 <div id="tx-sel" class="traffic_swatch"></div>
                                             </td>
-                                            <td width="11%"><#Uplink#></td>
-                                            <td width="20%" align="center" valign="top" style="text-align:right;font-weight: bold;"><span id="tx-current"></span></td>
-                                            <td width="20%" align="center" valign="top" style="text-align:right" id='tx-avg'></td>
-                                            <td width="20%" align="center" valign="top" style="text-align:right" id='tx-max'></td>
-                                            <td width="20%" align="center" valign="top" style="text-align:right" id='tx-total'></td>
+                                            <td width="13%"><#Uplink#></td>
+                                            <td width="22%" align="center" valign="top" style="text-align:right;font-weight: bold;white-space: nowrap;"><span id="tx-current"></span></td>
+                                            <td width="20%" align="center" valign="top" style="text-align:right;white-space: nowrap;" id='tx-avg'></td>
+                                            <td width="20%" align="center" valign="top" style="text-align:right;white-space: nowrap;" id='tx-max'></td>
+                                            <td width="20%" align="center" valign="top" style="text-align:right;white-space: nowrap;" id='tx-total'></td>
                                         </tr>
                                                 </table>
                                             </div>

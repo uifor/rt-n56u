@@ -304,25 +304,6 @@ function update_lan_status(){
 		<div id="status_tab" class="tab-block tab-click"><#menu5_7_1#></div>
 	</div>
 
-	<div id="net_field" class="unit-block">
-		<div class="division-block">Internet Traffic</div>
-		<div class="status-row">
-			<div class="bar-title">DL</div>
-			<div class="bar-container"><div id="net_dl_bar" class="core-color-container net-dl-color"></div></div>
-			<div id="net_dl_rate" class="bar-text-width bar-text-percent">--</div>
-		</div>
-		<div class="status-row">
-			<div class="bar-title">UL</div>
-			<div class="bar-container"><div id="net_ul_bar" class="core-color-container net-ul-color"></div></div>
-			<div id="net_ul_rate" class="bar-text-width bar-text-percent">--</div>
-		</div>
-		<div class="status-subrow">
-			<span>RX <b id="net_dl_total">--</b></span>
-			<span>TX <b id="net_ul_total">--</b></span>
-		</div>
-		<svg id="net_graph" class="svg-block status-graph" viewBox="0 0 260 82" preserveAspectRatio="none"></svg>
-	</div>
-
 	<div id="cpu_field" class="unit-block">
 		<div class="division-block">CPU</div>
 		<div class="status-row">
@@ -356,6 +337,25 @@ function update_lan_status(){
 			<span>load <b id="la_info">--</b></span>
 		</div>
 		<svg id="ram_graph" class="svg-block status-graph" viewBox="0 0 260 82" preserveAspectRatio="none"></svg>
+	</div>
+
+	<div id="net_field" class="unit-block">
+		<div class="division-block">Internet Traffic</div>
+		<div class="status-row">
+			<div class="bar-title">DL</div>
+			<div class="bar-container"><div id="net_dl_bar" class="core-color-container net-dl-color"></div></div>
+			<div id="net_dl_rate" class="bar-text-width bar-text-percent">--</div>
+		</div>
+		<div class="status-row">
+			<div class="bar-title">UL</div>
+			<div class="bar-container"><div id="net_ul_bar" class="core-color-container net-ul-color"></div></div>
+			<div id="net_ul_rate" class="bar-text-width bar-text-percent">--</div>
+		</div>
+		<div class="status-subrow">
+			<span>RX <b id="net_dl_total">--</b></span>
+			<span>TX <b id="net_ul_total">--</b></span>
+		</div>
+		<svg id="net_graph" class="svg-block status-graph" viewBox="0 0 260 82" preserveAspectRatio="none"></svg>
 	</div>
 
 	<div id="phy_ports" class="unit-block">

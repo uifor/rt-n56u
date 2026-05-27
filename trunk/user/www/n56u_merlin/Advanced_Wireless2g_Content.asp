@@ -336,10 +336,10 @@ function validate_wlphrase(s, v, obj){
                                         <tr>
                                             <th style="border-top: 0 none;"><a class="help_tooltip"  href="javascript:void(0);" onmouseover="openTooltip(this, 0, 24);"><#WLANConfig11b_x_RadioEnableTime_itemname#></a></th>
                                             <td style="border-top: 0 none;">
-                                                <input type="text" maxlength="2" style="width: 20px;" size="2" name="rt_radio_time_x_starthour" onKeyPress="return is_number(this,event);"/>:
-                                                <input type="text" maxlength="2" style="width: 20px;" size="2" name="rt_radio_time_x_startmin" onKeyPress="return is_number(this,event);"/>&nbsp;-&nbsp;
-                                                <input type="text" maxlength="2" style="width: 20px;" size="2" name="rt_radio_time_x_endhour" onKeyPress="return is_number(this,event);"/>:
-                                                <input type="text" maxlength="2" style="width: 20px;" size="2" name="rt_radio_time_x_endmin" onKeyPress="return is_number(this,event);"/>
+                                                <input type="text" maxlength="2" style="width: 34px;" size="2" name="rt_radio_time_x_starthour" onKeyPress="return is_number(this,event);"/>:
+                                                <input type="text" maxlength="2" style="width: 34px;" size="2" name="rt_radio_time_x_startmin" onKeyPress="return is_number(this,event);"/>&nbsp;-&nbsp;
+                                                <input type="text" maxlength="2" style="width: 34px;" size="2" name="rt_radio_time_x_endhour" onKeyPress="return is_number(this,event);"/>:
+                                                <input type="text" maxlength="2" style="width: 34px;" size="2" name="rt_radio_time_x_endmin" onKeyPress="return is_number(this,event);"/>
                                             </td>
                                         </tr>
                                         <tr>
@@ -354,10 +354,10 @@ function validate_wlphrase(s, v, obj){
                                         <tr>
                                             <th style="border-top: 0 none;"><#WLANConfig11b_x_RadioEnableTime_itemname2#></th>
                                             <td style="border-top: 0 none;">
-                                                <input type="text" maxlength="2" style="width: 20px;" size="2" name="rt_radio_time2_x_starthour" onKeyPress="return is_number(this,event);"/>:
-                                                <input type="text" maxlength="2" style="width: 20px;" size="2" name="rt_radio_time2_x_startmin" onKeyPress="return is_number(this,event);"/>&nbsp;-&nbsp;
-                                                <input type="text" maxlength="2" style="width: 20px;" size="2" name="rt_radio_time2_x_endhour" onKeyPress="return is_number(this,event);"/>:
-                                                <input type="text" maxlength="2" style="width: 20px;" size="2" name="rt_radio_time2_x_endmin" onKeyPress="return is_number(this,event);"/>
+                                                <input type="text" maxlength="2" style="width: 34px;" size="2" name="rt_radio_time2_x_starthour" onKeyPress="return is_number(this,event);"/>:
+                                                <input type="text" maxlength="2" style="width: 34px;" size="2" name="rt_radio_time2_x_startmin" onKeyPress="return is_number(this,event);"/>&nbsp;-&nbsp;
+                                                <input type="text" maxlength="2" style="width: 34px;" size="2" name="rt_radio_time2_x_endhour" onKeyPress="return is_number(this,event);"/>:
+                                                <input type="text" maxlength="2" style="width: 34px;" size="2" name="rt_radio_time2_x_endmin" onKeyPress="return is_number(this,event);"/>
                                             </td>
                                         </tr>
                                         <tr>

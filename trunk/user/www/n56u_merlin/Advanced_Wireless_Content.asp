@@ -345,10 +345,10 @@ function validate_wlphrase(s, v, obj){
                                         <tr>
                                             <th style="border-top: 0 none;"><a class="help_tooltip"  href="javascript:void(0);" onmouseover="openTooltip(this, 0, 24);"><#WLANConfig11b_x_RadioEnableTime_itemname#></a></th>
                                             <td style="border-top: 0 none;">
-                                                <input type="text" maxlength="2" style="width: 20px;" size="2" name="wl_radio_time_x_starthour" onKeyPress="return is_number(this,event);" />:
-                                                <input type="text" maxlength="2" style="width: 20px;" size="2" name="wl_radio_time_x_startmin" onKeyPress="return is_number(this,event);" />&nbsp;-&nbsp;
-                                                <input type="text" maxlength="2" style="width: 20px;" size="2" name="wl_radio_time_x_endhour" onKeyPress="return is_number(this,event);" />:
-                                                <input type="text" maxlength="2" style="width: 20px;" size="2" name="wl_radio_time_x_endmin" onKeyPress="return is_number(this,event);" />
+                                                <input type="text" maxlength="2" style="width: 34px;" size="2" name="wl_radio_time_x_starthour" onKeyPress="return is_number(this,event);" />:
+                                                <input type="text" maxlength="2" style="width: 34px;" size="2" name="wl_radio_time_x_startmin" onKeyPress="return is_number(this,event);" />&nbsp;-&nbsp;
+                                                <input type="text" maxlength="2" style="width: 34px;" size="2" name="wl_radio_time_x_endhour" onKeyPress="return is_number(this,event);" />:
+                                                <input type="text" maxlength="2" style="width: 34px;" size="2" name="wl_radio_time_x_endmin" onKeyPress="return is_number(this,event);" />
                                             </td>
                                         </tr>
                                         <tr>
@@ -363,10 +363,10 @@ function validate_wlphrase(s, v, obj){
                                         <tr>
                                             <th style="border-top: 0 none;"><#WLANConfig11b_x_RadioEnableTime_itemname2#></th>
                                             <td style="border-top: 0 none;">
-                                                <input type="text" maxlength="2" style="width: 20px;" size="2" name="wl_radio_time2_x_starthour" onKeyPress="return is_number(this,event);" />:
-                                                <input type="text" maxlength="2" style="width: 20px;" size="2" name="wl_radio_time2_x_startmin" onKeyPress="return is_number(this,event);" />&nbsp;-&nbsp;
-                                                <input type="text" maxlength="2" style="width: 20px;" size="2" name="wl_radio_time2_x_endhour" onKeyPress="return is_number(this,event);" />:
-                                                <input type="text" maxlength="2" style="width: 20px;" size="2" name="wl_radio_time2_x_endmin" onKeyPress="return is_number(this,event);" />
+                                                <input type="text" maxlength="2" style="width: 34px;" size="2" name="wl_radio_time2_x_starthour" onKeyPress="return is_number(this,event);" />:
+                                                <input type="text" maxlength="2" style="width: 34px;" size="2" name="wl_radio_time2_x_startmin" onKeyPress="return is_number(this,event);" />&nbsp;-&nbsp;
+                                                <input type="text" maxlength="2" style="width: 34px;" size="2" name="wl_radio_time2_x_endhour" onKeyPress="return is_number(this,event);" />:
+                                                <input type="text" maxlength="2" style="width: 34px;" size="2" name="wl_radio_time2_x_endmin" onKeyPress="return is_number(this,event);" />
                                             </td>
                                         </tr>
                                         <tr>
@@ -472,9 +472,9 @@ function validate_wlphrase(s, v, obj){
                                         <tr id="row_wpa2">
                                             <th><a class="help_tooltip" href="javascript:void(0);" onmouseover="openTooltip(this, 0, 7);"><#WLANConfig11b_x_PSKKey_itemname#></a></th>
                                             <td>
-                                                <div class="input-append">
+                                                <div>
                                                     <input type="password" name="wl_wpa_psk" id="wl_wpa_psk" maxlength="64" size="32" value="" style="width: 175px;">
-                                                    <button style="margin-left: -5px;" class="btn" type="button" onclick="passwordShowHide('wl_wpa_psk')"><i class="icon-eye-close"></i></button>
+                                                    <button style="margin-left: -5px;" class="button_gen" type="button" onclick="passwordShowHide('wl_wpa_psk')">...</button>
                                                 </div>
                                             </td>
                                         </tr>
