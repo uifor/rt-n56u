@@ -540,6 +540,9 @@
 	padding:0 4px;
 	vertical-align:middle;
 }
+.FormTable_table.nmClientListTable thead th{
+	color:#FFFFFF;
+}
 .nmClientListTable td{
 	height:46px;
 	padding:4px;
