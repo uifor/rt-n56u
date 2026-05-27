@@ -331,6 +331,9 @@ function getSystemJsonData(cpu,ram){
         width: 100%;
         padding-left: 0;
     }
+    .system_chart_wrap {
+        width: 100%;
+    }
 </style>
 </head>
 <body onload="initial();" class="bg">
@@ -368,14 +371,10 @@ function getSystemJsonData(cpu,ram){
                                                     </ul>
                                                 </div>
 
-                                                <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">
-                                                    <tr>
-                                                        <td align="center">
-                                                            <div id="cpu_chart" class="system_chart"></div>
-                                                            <div id="mem_chart" class="system_chart"></div>
-                                                        </td>
-                                                    </tr>
-                                                </table>
+                                                <div class="system_chart_wrap">
+                                                    <div id="cpu_chart" class="system_chart"></div>
+                                                    <div id="mem_chart" class="system_chart"></div>
+                                                </div>
                                             </div>
                                             <div class="popup_container popup_element_second"></div>
                                         </td>

@@ -249,6 +249,30 @@ html::-webkit-scrollbar-track{
 .traffic_history td{
 	padding:4px 8px;
 }
+.FormTable.table-stat{
+	table-layout:fixed;
+	width:100%;
+}
+.FormTable.table-stat th{
+	width:auto;
+	box-sizing:border-box;
+}
+.FormTable.table-stat th:nth-child(1),
+.FormTable.table-stat td:nth-child(1),
+.FormTable.table-stat th:nth-child(2),
+.FormTable.table-stat td:nth-child(2){
+	width:10%;
+}
+.FormTable.table-stat th:nth-child(3),
+.FormTable.table-stat td:nth-child(3),
+.FormTable.table-stat th:nth-child(4),
+.FormTable.table-stat td:nth-child(4),
+.FormTable.table-stat th:nth-child(5),
+.FormTable.table-stat td:nth-child(5),
+.FormTable.table-stat th:nth-child(6),
+.FormTable.table-stat td:nth-child(6){
+	width:20%;
+}
 .alert{
 	padding:8px 10px;
 	margin:10px 0;
