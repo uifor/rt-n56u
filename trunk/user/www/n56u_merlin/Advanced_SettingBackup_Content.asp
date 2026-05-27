@@ -110,9 +110,22 @@ function restoreStorage(){
 		return false;
 }
 
+function reset_setting_commit_btn(action_id, button_html){
+	var $button = $j('#' + action_id);
+	$button.removeClass('alert-error alert-success')
+		.prop('disabled', false)
+		.html(button_html);
+}
+
 function send_commit_action(action_id,$button){
 	if(action_id == '')
 		return;
+	if(!confirm('<#Commit_confirm#>'))
+		return;
+	var button_label = $button.html();
+	$button.removeClass('alert-error alert-success')
+		.prop('disabled', true)
+		.text('Committing...');
 	$j.ajax({
 		type: "post",
 		url: "/apply.cgi",
@@ -123,17 +136,25 @@ function send_commit_action(action_id,$button){
 		dataType: "json",
 		error: function(xhr) {
 			$button.addClass('alert-error');
-			$button.val('Failed!');
-			setTimeout("reset_btn_commit("+$button+")", 1500);
+			$button.text('Failed!');
+			setTimeout(function(){
+				reset_setting_commit_btn(action_id, button_label);
+			}, 1500);
 		},
 		success: function(response) {
 			var sys_result = (response != null && typeof response === 'object' && "sys_result" in response)
 				? response.sys_result : -1;
-			if(sys_result == 0)
+			if(sys_result == 0){
 				$button.addClass('alert-success');
-			else
+				$button.text('Success!');
+			}
+			else{
 				$button.addClass('alert-error');
-			setTimeout("reset_btn_commit('"+action_id+"')", 1500);
+				$button.text('Failed!');
+			}
+			setTimeout(function(){
+				reset_setting_commit_btn(action_id, button_label);
+			}, 1500);
 		}
 	});
 }
@@ -261,6 +282,14 @@ $j.fn.fileName = function() {
 		background: #596e74;
 		border: 1px solid #6b8fa3;
 		cursor: pointer;
+	}
+	.btn.alert-error {
+		background: #7a3a3a;
+		border-color: #b94a48;
+	}
+	.btn.alert-success {
+		background: #2f855a;
+		border-color: #48a477;
 	}
 	.btn-info {
 		background: #2f769b;

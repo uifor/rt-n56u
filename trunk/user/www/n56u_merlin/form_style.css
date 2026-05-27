@@ -315,10 +315,74 @@ html::-webkit-scrollbar-track{
 	color:#FFFFFF;
 	background:#596e74;
 	border:1px solid #6b8fa3;
+	border-radius:2px;
 	cursor:pointer;
+	box-sizing:border-box;
+	text-align:center;
+	vertical-align:middle;
 }
 .btn:hover{
 	background:#085F96;
+}
+.btn-danger{
+	background:#8a3b3b;
+	border-color:#b94a48;
+}
+.btn-danger:hover{
+	background:#7a2f2f;
+}
+.btn-chevron{
+	min-width:28px;
+	min-height:28px;
+	padding-left:6px;
+	padding-right:6px;
+}
+.icon{
+	display:inline-block;
+	width:14px;
+	height:14px;
+	line-height:14px;
+	text-align:center;
+	font-style:normal;
+	font-weight:bold;
+	vertical-align:text-top;
+}
+.icon-plus:before{
+	content:"+";
+}
+.icon-minus:before{
+	content:"-";
+}
+.icon-chevron-down:before{
+	content:"v";
+	font-size:11px;
+}
+.icon-chevron-up:before{
+	content:"^";
+	font-size:11px;
+}
+.icon-eye-close{
+	display:inline-block;
+	width:14px;
+	height:14px;
+	line-height:14px;
+	text-align:center;
+	font-style:normal;
+	font-weight:bold;
+	vertical-align:text-top;
+}
+.icon-eye-close:before{
+	content:"o";
+}
+button.btn > .icon:only-child{
+	display:block;
+}
+button.btn > .icon-eye-close:only-child{
+	display:block;
+	min-width:14px;
+}
+button.btn:not([style*="width"]) > .icon:only-child{
+	min-width:14px;
 }
 .span12{
 	box-sizing:border-box;
@@ -329,6 +393,7 @@ html::-webkit-scrollbar-track{
 	align-items:center;
 }
 .ddown-list{
+	display:none;
 	position:absolute;
 	z-index:50;
 }
@@ -1058,28 +1123,50 @@ form{
 
 /* btns in table */
 .add_btn{
-	background: transparent url(images/New_ui/accountadd.png) no-repeat scroll center top;
-	border:0;
+	background-color:#596e74;
+	background-image:url(images/New_ui/accountadd.png);
+	background-repeat:no-repeat;
+	background-position:center top;
+	border:1px solid #6b8fa3;
+	border-radius:2px;
 	height:32px;
 	width:32px;
+	color:#FFFFFF;
+	font:bold 22px Arial, Helvetica, sans-serif;
+	line-height:32px;
 	cursor:pointer;
 }
+.add_btn:before{
+	content:"+";
+}
 .add_btn:hover, .add_btn:active{
-	border:0;
+	background-color:#085F96;
+	border:1px solid #6b8fa3;
 	height:32px;
 	width:32px;
 	cursor:pointer;
 }
 
 .remove_btn{
-	background: transparent url(images/New_ui/accountdelete.png) no-repeat scroll center top;
-	border:0;
+	background-color:#8a3b3b;
+	background-image:url(images/New_ui/accountdelete.png);
+	background-repeat:no-repeat;
+	background-position:center top;
+	border:1px solid #b94a48;
+	border-radius:2px;
 	height:32px;
 	width:32px;
+	color:#FFFFFF;
+	font:bold 22px Arial, Helvetica, sans-serif;
+	line-height:30px;
 	cursor:pointer;
 }
+.remove_btn:before{
+	content:"-";
+}
 .remove_btn:hover, .remove_btn:active{
-	border:0;
+	background-color:#7a2f2f;
+	border:1px solid #b94a48;
 	height:32px;
 	width:32px;
 	cursor:pointer;

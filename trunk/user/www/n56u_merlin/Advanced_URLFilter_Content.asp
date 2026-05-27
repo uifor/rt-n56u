@@ -218,6 +218,7 @@ function done_validating(action){
 	        align-items: center;
 	    }
 	    .ddown-list {
+	        display: none;
 	        position: absolute;
 	        z-index: 50;
 	    }
