@@ -289,6 +289,30 @@ function switchPage(id){
 
 </script>
 <style>
+.traffic_history {
+	table-layout: fixed;
+}
+.traffic_history th,
+.traffic_history td {
+	box-sizing: border-box;
+	white-space: nowrap;
+}
+.traffic_history th:nth-child(1),
+.traffic_history td:nth-child(1) {
+	width: 30%;
+}
+.traffic_history th:nth-child(2),
+.traffic_history td:nth-child(2) {
+	width: 23%;
+}
+.traffic_history th:nth-child(3),
+.traffic_history td:nth-child(3) {
+	width: 23%;
+}
+.traffic_history th:nth-child(4),
+.traffic_history td:nth-child(4) {
+	width: 24%;
+}
 .traffic_history td.dl, .traffic_history td.ul, .traffic_history td.total {text-align: right;}
 </style>
 </head>
