@@ -54,6 +54,7 @@ configure:
 		--without-gnutls \
 		--without-ca-bundle \
 		--without-libidn2 \
+		--without-libpsl \
 		--without-libssh2 \
 		--without-nghttp2 \
 		--without-zstd \
