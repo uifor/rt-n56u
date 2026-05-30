@@ -14,7 +14,7 @@ while true ;do
 		if [ -f ./images/*.trx ]; then
 			tail -20 build.log && exit 0
 		else
-			tail -60 build.log && exit 1
+			tail -300 build.log && exit 1
 		fi
 	else
 		echo "$(tail -2 build.log)"
