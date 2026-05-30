@@ -23,7 +23,7 @@ config_test:
 
 configure:
 	( cd $(SRC_NAME) ; \
-	autoreconf -v; \
+	if [ ! -x ./configure ]; then autoreconf -v; fi; \
 	./configure \
 		--prefix=/usr \
 		--disable-lastlog \

@@ -1,4 +1,4 @@
-/* dnsmasq is Copyright (c) 2000-2018 Simon Kelley
+/* dnsmasq is Copyright (c) 2000-2025 Simon Kelley
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,6 +30,10 @@
 #include <idna.h>
 #endif
 
+#ifdef HAVE_LINUX_NETWORK
+#include <sys/utsname.h>
+#endif
+
 /* SURF random number generator */
 
 static u32 seed[32];
@@ -37,13 +41,13 @@ static u32 in[12];
 static u32 out[8];
 static int outleft = 0;
 
-void rand_init()
+void rand_init(void)
 {
   int fd = open(RANDFILE, O_RDONLY);
   
   if (fd == -1 ||
-      !read_write(fd, (unsigned char *)&seed, sizeof(seed), 1) ||
-      !read_write(fd, (unsigned char *)&in, sizeof(in), 1))
+      !read_write(fd, (unsigned char *)&seed, sizeof(seed), RW_READ) ||
+      !read_write(fd, (unsigned char *)&in, sizeof(in), RW_READ))
     die(_("failed to seed the random number generator: %s"), NULL, EC_MISC);
   
   close(fd);
@@ -111,7 +115,21 @@ u64 rand64(void)
   return (u64)out[outleft+1] + (((u64)out[outleft]) << 32);
 }
 
-/* returns 2 if names is OK but contains one or more underscores */
+int rr_on_list(struct rrlist *list, unsigned short rr)
+{
+  while (list)
+    {
+      if (list->rr != 0 && list->rr == rr)
+	return 1;
+
+      list = list->next;
+    }
+
+  return 0;
+}
+
+/* returns 1 if name is OK and ascii printable
+ * returns 2 if name should be processed by IDN */
 static int check_name(char *in)
 {
   /* remove trailing . 
@@ -119,7 +137,9 @@ static int check_name(char *in)
   size_t dotgap = 0, l = strlen(in);
   char c;
   int nowhite = 0;
+  int idn_encode = 0;
   int hasuscore = 0;
+  int hasucase = 0;
   
   if (l == 0 || l > MAXDNAME) return 0;
   
@@ -132,28 +152,49 @@ static int check_name(char *in)
   for (; (c = *in); in++)
     {
       if (c == '.')
-	dotgap = 0;
+        dotgap = 0;
       else if (++dotgap > MAXLABEL)
-	return 0;
+        return 0;
       else if (isascii((unsigned char)c) && iscntrl((unsigned char)c)) 
-	/* iscntrl only gives expected results for ascii */
-	return 0;
-#if !defined(HAVE_IDN) && !defined(HAVE_LIBIDN2)
+        /* iscntrl only gives expected results for ascii */
+        return 0;
       else if (!isascii((unsigned char)c))
-	return 0;
+#if !defined(HAVE_IDN) && !defined(HAVE_LIBIDN2)
+        return 0;
+#else
+        idn_encode = 1;
 #endif
       else if (c != ' ')
-	{
-	  nowhite = 1;
-	  if (c == '_')
-	    hasuscore = 1;
-	}
+        {
+          nowhite = 1;
+#if defined(HAVE_LIBIDN2) && (!defined(IDN2_VERSION_NUMBER) || IDN2_VERSION_NUMBER < 0x02000003)
+          if (c == '_')
+            hasuscore = 1;
+#else
+          (void)hasuscore;
+#endif
+
+#if defined(HAVE_IDN) || defined(HAVE_LIBIDN2)
+          if (c >= 'A' && c <= 'Z')
+            hasucase = 1;
+#else
+          (void)hasucase;
+#endif
+        }
     }
 
   if (!nowhite)
     return 0;
 
-  return hasuscore ? 2 : 1;
+#if defined(HAVE_LIBIDN2) && (!defined(IDN2_VERSION_NUMBER) || IDN2_VERSION_NUMBER < 0x02000003)
+  /* Older libidn2 strips underscores, so don't do IDN processing
+     if the name has an underscore unless it also has non-ascii characters. */
+  idn_encode = idn_encode || (hasucase && !hasuscore);
+#else
+  idn_encode = idn_encode || hasucase;
+#endif
+
+  return (idn_encode) ? 2 : 1;
 }
 
 /* Hostnames have a more limited valid charset than domain names
@@ -200,17 +241,11 @@ char *canonicalise(char *in, int *nomem)
   if (!(rc = check_name(in)))
     return NULL;
   
-#if defined(HAVE_LIBIDN2) && (!defined(IDN2_VERSION_NUMBER) || IDN2_VERSION_NUMBER < 0x02000003)
-  /* older libidn2 strips underscores, so don't do IDN processing
-     if the name has an underscore (check_name() returned 2) */
-  if (rc != 2)
-#endif
 #if defined(HAVE_IDN) || defined(HAVE_LIBIDN2)
+  if (rc == 2)
     {
 #  ifdef HAVE_LIBIDN2
       rc = idn2_to_ascii_lz(in, &ret, IDN2_NONTRANSITIONAL);
-      if (rc == IDN2_DISALLOWED)
-	rc = idn2_to_ascii_lz(in, &ret, IDN2_TRANSITIONAL);
 #  else
       rc = idna_to_ascii_lz(in, &ret, 0);
 #  endif
@@ -230,12 +265,14 @@ char *canonicalise(char *in, int *nomem)
       
       return ret;
     }
+#else
+  (void)rc;
 #endif
   
   if ((ret = whine_malloc(strlen(in)+1)))
     strcpy(ret, in);
   else if (nomem)
-    *nomem = 1;    
+    *nomem = 1;
 
   return ret;
 }
@@ -256,11 +293,9 @@ unsigned char *do_rfc1035_name(unsigned char *p, char *sval, char *limit)
           if (limit && p + 1 > (unsigned char*)limit)
             return NULL;
 
-#ifdef HAVE_DNSSEC
-	  if (option_bool(OPT_DNSSEC_VALID) && *sval == NAME_ESCAPE)
+	  if (*sval == NAME_ESCAPE)
 	    *p++ = (*(++sval))-1;
 	  else
-#endif		
 	    *p++ = *sval;
 	}
       
@@ -312,7 +347,17 @@ void *whine_malloc(size_t size)
   return ret;
 }
 
-int sockaddr_isequal(union mysockaddr *s1, union mysockaddr *s2)
+void *whine_realloc(void *ptr, size_t size)
+{
+  void *ret = realloc(ptr, size);
+
+  if (!ret)
+    my_syslog(LOG_ERR, _("failed to reallocate %d bytes"), (int) size);
+
+  return ret;
+}
+
+int sockaddr_isequal(const union mysockaddr *s1, const union mysockaddr *s2)
 {
   if (s1->sa.sa_family == s2->sa.sa_family)
     { 
@@ -330,6 +375,19 @@ int sockaddr_isequal(union mysockaddr *s1, union mysockaddr *s2)
   return 0;
 }
 
+int sockaddr_isnull(const union mysockaddr *s)
+{
+  if (s->sa.sa_family == AF_INET &&
+      s->in.sin_addr.s_addr == 0)
+    return 1;
+  
+  if (s->sa.sa_family == AF_INET6 &&
+      IN6_IS_ADDR_UNSPECIFIED(&s->in6.sin6_addr))
+    return 1;
+  
+  return 0;
+}
+
 int sa_len(union mysockaddr *addr)
 {
 #ifdef HAVE_SOCKADDR_SA_LEN
@@ -343,7 +401,7 @@ int sa_len(union mysockaddr *addr)
 }
 
 /* don't use strcasecmp and friends here - they may be messed up by LOCALE */
-int hostname_isequal(const char *a, const char *b)
+int hostname_order(const char *a, const char *b)
 {
   unsigned int c1, c2;
   
@@ -356,11 +414,19 @@ int hostname_isequal(const char *a, const char *b)
     if (c2 >= 'A' && c2 <= 'Z')
       c2 += 'a' - 'A';
     
-    if (c1 != c2)
-      return 0;
+    if (c1 < c2)
+      return -1;
+    else if (c1 > c2)
+      return 1;
+    
   } while (c1);
   
-  return 1;
+  return 0;
+}
+
+int hostname_isequal(const char *a, const char *b)
+{
+  return hostname_order(a, b) == 0;
 }
 
 /* is b equal to or a subdomain of a return 2 for equal, 1 for subdomain */
@@ -404,16 +470,24 @@ int hostname_issubdomain(char *a, char *b)
 time_t dnsmasq_time(void)
 {
 #ifdef HAVE_BROKEN_RTC
-  struct tms dummy;
-  static long tps = 0;
+  struct timespec ts;
 
-  if (tps == 0)
-    tps = sysconf(_SC_CLK_TCK);
+  if (clock_gettime(CLOCK_MONOTONIC, &ts) < 0)
+    die(_("cannot read monotonic clock: %s"), NULL, EC_MISC);
 
-  return (time_t)(times(&dummy)/tps);
+  return ts.tv_sec;
 #else
   return time(NULL);
 #endif
+}
+
+u32 dnsmasq_milliseconds(void)
+{
+  struct timeval tv;
+
+  gettimeofday(&tv, NULL);
+
+  return (tv.tv_sec) * 1000 + (tv.tv_usec / 1000);
 }
 
 int netmask_length(struct in_addr mask)
@@ -432,7 +506,17 @@ int netmask_length(struct in_addr mask)
 int is_same_net(struct in_addr a, struct in_addr b, struct in_addr mask)
 {
   return (a.s_addr & mask.s_addr) == (b.s_addr & mask.s_addr);
-} 
+}
+
+int is_same_net_prefix(struct in_addr a, struct in_addr b, int prefix)
+{
+  struct in_addr mask;
+
+  mask.s_addr = htonl(~((1 << (32 - prefix)) - 1));
+
+  return is_same_net(a, b, mask);
+}
+
 
 int is_same_net6(struct in6_addr *a, struct in6_addr *b, int prefixlen)
 {
@@ -514,7 +598,7 @@ void prettyprint_time(char *buf, unsigned int t)
       if ((x = (t/60)%60))
 	p += sprintf(&buf[p], "%um", x);
       if ((x = t%60))
-	p += sprintf(&buf[p], "%us", x);
+	sprintf(&buf[p], "%us", x);
     }
 }
 
@@ -524,20 +608,20 @@ void prettyprint_time(char *buf, unsigned int t)
 int parse_hex(char *in, unsigned char *out, int maxlen, 
 	      unsigned int *wildcard_mask, int *mac_type)
 {
-  int mask = 0, i = 0;
+  int done = 0, mask = 0, i = 0;
   char *r;
     
   if (mac_type)
     *mac_type = 0;
   
-  while (maxlen == -1 || i < maxlen)
+  while (!done && (maxlen == -1 || i < maxlen))
     {
       for (r = in; *r != 0 && *r != ':' && *r != '-' && *r != ' '; r++)
 	if (*r != '*' && !isxdigit((unsigned char)*r))
 	  return -1;
       
       if (*r == 0)
-	maxlen = i;
+	done = 1;
       
       if (r != in )
 	{
@@ -560,7 +644,7 @@ int parse_hex(char *in, unsigned char *out, int maxlen,
 		  int j, bytes = (1 + (r - in))/2;
 		  for (j = 0; j < bytes; j++)
 		    { 
-		      char sav = sav;
+		      char sav;
 		      if (j < bytes - 1)
 			{
 			  sav = in[(j+1)*2];
@@ -681,28 +765,104 @@ int retry_send(ssize_t rc)
   return 0;
 }
 
+/* rw = 0 -> write
+   rw = 1 -> read
+   rw = 2 -> write once
+   rw = 3 -> read once
+
+   "once" fails on EAGAIN, as this a timeout.
+   This indicates a timeout of a TCP socket.
+*/
 int read_write(int fd, unsigned char *packet, int size, int rw)
 {
   ssize_t n, done;
   
   for (done = 0; done < size; done += n)
     {
-      do { 
-	if (rw)
-	  n = read(fd, &packet[done], (size_t)(size - done));
-	else
-	  n = write(fd, &packet[done], (size_t)(size - done));
-	
-	if (n == 0)
-	  return 0;
-	
-      } while (retry_send(n) || errno == ENOMEM || errno == ENOBUFS);
-
-      if (errno != 0)
+      if (rw & 1)
+	n = read(fd, &packet[done], (size_t)(size - done));
+      else
+	n = write(fd, &packet[done], (size_t)(size - done));
+      
+      if (n == 0)
 	return 0;
+
+      if (n == -1)
+	{
+	  n = 0; /* don't mess with counter when we loop. */
+
+	  if (errno == EINTR || errno == ENOMEM || errno == ENOBUFS)
+	    continue;
+
+	  if (errno == EAGAIN || errno == EWOULDBLOCK)
+	    {
+	      /* "once" variant */
+	      if (rw & 2)
+		return 0;
+
+	      continue;
+	    }
+
+	  return 0;
+	}
     }
-     
+          
   return 1;
+}
+
+/* close all fds except STDIN, STDOUT and STDERR, spare1, spare2 and spare3 */
+void close_fds(long max_fd, int spare1, int spare2, int spare3) 
+{
+  /* On Linux, use the /proc/ filesystem to find which files
+     are actually open, rather than iterate over the whole space,
+     for efficiency reasons.
+
+     On *BSD, the same facility is found at /dev/fd.
+
+     If this fails we drop back to the dumb code.
+  */
+
+#ifdef HAVE_LINUX_NETWORK
+#define FDESCFS "/proc/self/fd"
+#endif
+
+#ifdef HAVE_BSD_NETWORK
+#define FDESCFS "/dev/fd"
+#endif
+
+#ifdef FDESCFS
+  DIR *d;
+  
+  if ((d = opendir(FDESCFS)))
+    {
+      struct dirent *de;
+
+      while ((de = readdir(d)))
+	{
+	  long fd;
+	  char *e = NULL;
+	  
+	  errno = 0;
+	  fd = strtol(de->d_name, &e, 10);
+	  	  
+      	  if (errno != 0 || !e || *e || fd == dirfd(d) ||
+	      fd == STDOUT_FILENO || fd == STDERR_FILENO || fd == STDIN_FILENO ||
+	      fd == spare1 || fd == spare2 || fd == spare3)
+	    continue;
+	  
+	  close(fd);
+	}
+      
+      closedir(d);
+      return;
+  }
+#endif
+
+  /* fallback, dumb code. */
+  for (max_fd--; max_fd >= 0; max_fd--)
+    if (max_fd != STDOUT_FILENO && max_fd != STDERR_FILENO && max_fd != STDIN_FILENO &&
+	max_fd != spare1 && max_fd != spare2 && max_fd != spare3)
+      close(max_fd);
 }
 
 /* Basically match a string value against a wildcard pattern.  */
@@ -741,3 +901,22 @@ int wildcard_matchn(const char* wildcard, const char* match, int num)
 
   return (!num) || (*wildcard == *match);
 }
+
+#ifdef HAVE_LINUX_NETWORK
+int kernel_version(void)
+{
+  struct utsname utsname;
+  int version;
+  char *split;
+  
+  if (uname(&utsname) < 0)
+    die(_("failed to find kernel version: %s"), NULL, EC_MISC);
+  
+  split = strtok(utsname.release, ".");
+  version = (split ? atoi(split) : 0);
+  split = strtok(NULL, ".");
+  version = version * 256 + (split ? atoi(split) : 0);
+  split = strtok(NULL, ".");
+  return version * 256 + (split ? atoi(split) : 0);
+}
+#endif

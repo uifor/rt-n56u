@@ -1,42 +1,51 @@
-diff -rupw curl.orig/Makefile.am curl/Makefile.am
---- curl.orig/Makefile.am	2020-08-07 23:38:12.000000000 +0800
-+++ curl/Makefile.am	2020-08-19 20:57:35.661728998 +0800
-@@ -192,7 +192,7 @@ CLEANFILES = $(VC6_LIBDSP) $(VC6_SRCDSP)
+--- curl.orig/Makefile.am	2026-05-30 19:49:02.000000000 +0800
++++ curl/Makefile.am	2026-05-30 19:49:04.000000000 +0800
+@@ -83,8 +83,8 @@ DISTCLEANFILES = buildinfo.txt
+ 
  bin_SCRIPTS = curl-config
  
- SUBDIRS = lib src
--DIST_SUBDIRS = $(SUBDIRS) tests packages scripts include docs
+-SUBDIRS = lib docs src scripts
+-DIST_SUBDIRS = $(SUBDIRS) tests packages include docs
++SUBDIRS = lib src
 +DIST_SUBDIRS = $(SUBDIRS) packages include
  
  pkgconfigdir = $(libdir)/pkgconfig
  pkgconfig_DATA = libcurl.pc
-@@ -303,8 +303,6 @@ cygwinbin:
- # We extend the standard install with a custom hook:
+@@ -180,12 +180,9 @@ rpm:
+ if BUILD_DOCS
  install-data-hook:
  	(cd include && $(MAKE) install)
 -	(cd docs && $(MAKE) install)
 -	(cd docs/libcurl && $(MAKE) install)
+ else
+ install-data-hook:
+ 	(cd include && $(MAKE) install)
+-	(cd docs && $(MAKE) install)
+ endif
  
  # We extend the standard uninstall with a custom hook:
- uninstall-hook:
-diff -rupw curl.orig/Makefile.in curl/Makefile.in
---- curl.orig/Makefile.in	2020-08-19 15:38:16.000000000 +0800
-+++ curl/Makefile.in	2020-08-19 20:58:06.895062329 +0800
-@@ -692,7 +692,7 @@ CLEANFILES = $(VC6_LIBDSP) $(VC6_SRCDSP)
+--- curl.orig/Makefile.in	2026-05-30 19:49:02.000000000 +0800
++++ curl/Makefile.in	2026-05-30 19:49:04.000000000 +0800
+@@ -498,8 +498,8 @@ EXTRA_DIST = CHANGES.md COPYING RELEASE-
  
+ DISTCLEANFILES = buildinfo.txt
  bin_SCRIPTS = curl-config
- SUBDIRS = lib src
--DIST_SUBDIRS = $(SUBDIRS) tests packages scripts include docs
+-SUBDIRS = lib docs src scripts
+-DIST_SUBDIRS = $(SUBDIRS) tests packages include docs
++SUBDIRS = lib src
 +DIST_SUBDIRS = $(SUBDIRS) packages include
  pkgconfigdir = $(libdir)/pkgconfig
  pkgconfig_DATA = libcurl.pc
- LIB_VAUTH_CFILES = vauth/cleartext.c vauth/cram.c vauth/digest.c             \
-@@ -1516,8 +1516,6 @@ cygwinbin:
+ all: all-recursive
+@@ -1134,11 +1134,8 @@ rpm:
  # We extend the standard install with a custom hook:
- install-data-hook:
- 	(cd include && $(MAKE) install)
--	(cd docs && $(MAKE) install)
--	(cd docs/libcurl && $(MAKE) install)
+ @BUILD_DOCS_TRUE@install-data-hook:
+ @BUILD_DOCS_TRUE@	(cd include && $(MAKE) install)
+-@BUILD_DOCS_TRUE@	(cd docs && $(MAKE) install)
+-@BUILD_DOCS_TRUE@	(cd docs/libcurl && $(MAKE) install)
+ @BUILD_DOCS_FALSE@install-data-hook:
+ @BUILD_DOCS_FALSE@	(cd include && $(MAKE) install)
+-@BUILD_DOCS_FALSE@	(cd docs && $(MAKE) install)
  
  # We extend the standard uninstall with a custom hook:
  uninstall-hook:

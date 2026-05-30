@@ -1,4 +1,4 @@
-/* dnsmasq is Copyright (c) 2000-2018 Simon Kelley
+/* dnsmasq is Copyright (c) 2000-2025 Simon Kelley
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -66,7 +66,8 @@ struct script_data
 #endif
   struct in6_addr addr6;
 #ifdef HAVE_DHCP6
-  int iaid, vendorclass_count;
+  int vendorclass_count;
+  unsigned int iaid;
 #endif
   unsigned char hwaddr[DHCP_CHADDR_MAX];
   char interface[IF_NAMESIZE];
@@ -80,7 +81,8 @@ int create_helper(int event_fd, int err_fd, uid_t uid, gid_t gid, long max_fd)
   pid_t pid;
   int i, pipefd[2];
   struct sigaction sigact;
-
+  unsigned char *alloc_buff = NULL;
+  
   /* create the pipe through which the main program sends us commands,
      then fork our process. */
   if (pipe(pipefd) == -1 || !fix_fd(pipefd[1]) || (pid = fork()) == -1)
@@ -129,12 +131,8 @@ int create_helper(int event_fd, int err_fd, uid_t uid, gid_t gid, long max_fd)
      Don't close err_fd, in case the lua-init fails.
      Note that we have to do this before lua init
      so we don't close any lua fds. */
-  for (max_fd--; max_fd >= 0; max_fd--)
-    if (max_fd != STDOUT_FILENO && max_fd != STDERR_FILENO && 
-	max_fd != STDIN_FILENO && max_fd != pipefd[0] && 
-	max_fd != event_fd && max_fd != err_fd)
-      close(max_fd);
-
+  close_fds(max_fd, pipefd[0], event_fd, err_fd);
+  
 #ifdef HAVE_LUASCRIPT
   if (daemon->luascript)
     {
@@ -186,14 +184,19 @@ int create_helper(int event_fd, int err_fd, uid_t uid, gid_t gid, long max_fd)
       struct script_data data;
       char *p, *action_str, *hostname = NULL, *domain = NULL;
       unsigned char *buf = (unsigned char *)daemon->namebuff;
-      unsigned char *end, *extradata, *alloc_buff = NULL;
+      unsigned char *end, *extradata;
       int is6, err = 0;
       int pipeout[2];
 
-      free(alloc_buff);
+      /* Free rarely-allocated memory from previous iteration. */
+      if (alloc_buff)
+	{
+	  free(alloc_buff);
+	  alloc_buff = NULL;
+	}
       
       /* we read zero bytes when pipe closed: this is our signal to exit */ 
-      if (!read_write(pipefd[0], (unsigned char *)&data, sizeof(data), 1))
+      if (!read_write(pipefd[0], (unsigned char *)&data, sizeof(data), RW_READ))
 	{
 #ifdef HAVE_LUASCRIPT
 	  if (daemon->luascript)
@@ -230,9 +233,13 @@ int create_helper(int event_fd, int err_fd, uid_t uid, gid_t gid, long max_fd)
 	  is6 = (data.flags != AF_INET);
 	  data.action = ACTION_ARP;
 	}
-       else 
-	continue;
-
+       else if (data.action == ACTION_RELAY_SNOOP)
+	 {
+	   is6 = 1;
+	   action_str = "relay-snoop";
+	 }
+       else
+	 continue;
       	
       /* stringify MAC into dhcp_buff */
       p = daemon->dhcp_buff;
@@ -251,7 +258,7 @@ int create_helper(int event_fd, int err_fd, uid_t uid, gid_t gid, long max_fd)
 	continue;
       
       if (!read_write(pipefd[0], buf, 
-		      data.hostname_len + data.ed_len + data.clid_len, 1))
+		      data.hostname_len + data.ed_len + data.clid_len, RW_READ))
 	continue;
 
       /* CLID into packet */
@@ -284,7 +291,7 @@ int create_helper(int event_fd, int err_fd, uid_t uid, gid_t gid, long max_fd)
 	  char *dot;
 	  hostname = (char *)buf;
 	  hostname[data.hostname_len - 1] = 0;
-	  if (data.action != ACTION_TFTP)
+	  if (data.action != ACTION_TFTP && data.action != ACTION_RELAY_SNOOP)
 	    {
 	      if (!legal_hostname(hostname))
 		hostname = NULL;
@@ -327,6 +334,24 @@ int create_helper(int event_fd, int err_fd, uid_t uid, gid_t gid, long max_fd)
 		  lua_setfield(lua, -2, "file_name"); 
 		  lua_pushstring(lua, is6 ? daemon->packet : daemon->dhcp_buff);
 		  lua_setfield(lua, -2, "file_size");
+		  lua_call(lua, 2, 0);	/* pass 2 values, expect 0 */
+		}
+	    }
+	  else if (data.action == ACTION_RELAY_SNOOP)
+	    {
+	      lua_getglobal(lua, "snoop"); 
+	      if (lua_type(lua, -1) != LUA_TFUNCTION)
+		lua_pop(lua, 1); /* tftp function optional */
+	      else
+		{
+		  lua_pushstring(lua, action_str); /* arg1 - action */
+		  lua_newtable(lua);               /* arg2 - data table */
+		  lua_pushstring(lua, daemon->addrbuff);
+		  lua_setfield(lua, -2, "client_address");
+		  lua_pushstring(lua, hostname);
+		  lua_setfield(lua, -2, "prefix"); 
+		  lua_pushstring(lua, data.interface);
+		  lua_setfield(lua, -2, "client_interface");
 		  lua_call(lua, 2, 0);	/* pass 2 values, expect 0 */
 		}
 	    }
@@ -396,6 +421,9 @@ int create_helper(int event_fd, int err_fd, uid_t uid, gid_t gid, long max_fd)
 	      
 	      end = extradata + data.ed_len;
 	      buf = extradata;
+
+	      lua_pushnumber(lua, data.ed_len == 0 ? 1 : 0);
+	      lua_setfield(lua, -2, "data_missing");
 	      
 	      if (!is6)
 		buf = grab_extradata_lua(buf, end, "vendor_class");
@@ -423,14 +451,17 @@ int create_helper(int event_fd, int err_fd, uid_t uid, gid_t gid, long max_fd)
 		  buf = grab_extradata_lua(buf, end, "subscriber_id");
 		  buf = grab_extradata_lua(buf, end, "remote_id");
 		}
-	      
+
+	      buf = grab_extradata_lua(buf, end, "requested_options");
+	      buf = grab_extradata_lua(buf, end, "mud_url");
 	      buf = grab_extradata_lua(buf, end, "tags");
 	      
 	      if (is6)
 		buf = grab_extradata_lua(buf, end, "relay_address");
 	      else if (data.giaddr.s_addr != 0)
 		{
-		  lua_pushstring(lua, inet_ntoa(data.giaddr));
+		  inet_ntop(AF_INET, &data.giaddr, daemon->dhcp_buff2, ADDRSTRLEN);
+		  lua_pushstring(lua, daemon->dhcp_buff2);
 		  lua_setfield(lua, -2, "relay_address");
 		}
 	      
@@ -550,7 +581,7 @@ int create_helper(int event_fd, int err_fd, uid_t uid, gid_t gid, long max_fd)
 	  close(pipeout[1]);
 	}
       
-      if (data.action != ACTION_TFTP && data.action != ACTION_ARP)
+      if (data.action != ACTION_TFTP && data.action != ACTION_ARP && data.action != ACTION_RELAY_SNOOP)
 	{
 #ifdef HAVE_DHCP6
 	  my_setenv("DNSMASQ_IAID", is6 ? daemon->dhcp_buff3 : NULL, &err);
@@ -573,6 +604,9 @@ int create_helper(int event_fd, int err_fd, uid_t uid, gid_t gid, long max_fd)
 	  
 	  end = extradata + data.ed_len;
 	  buf = extradata;
+
+	  if (data.ed_len == 0)
+	    my_setenv("DNSMASQ_DATA_MISSING", "1", &err);
 	  
 	  if (!is6)
 	    buf = grab_extradata(buf, end, "DNSMASQ_VENDOR_CLASS", &err);
@@ -601,15 +635,21 @@ int create_helper(int event_fd, int err_fd, uid_t uid, gid_t gid, long max_fd)
 	      buf = grab_extradata(buf, end, "DNSMASQ_CIRCUIT_ID", &err);
 	      buf = grab_extradata(buf, end, "DNSMASQ_SUBSCRIBER_ID", &err);
 	      buf = grab_extradata(buf, end, "DNSMASQ_REMOTE_ID", &err);
-	      buf = grab_extradata(buf, end, "DNSMASQ_REQUESTED_OPTIONS", &err);
 	    }
 	  
+	  buf = grab_extradata(buf, end, "DNSMASQ_REQUESTED_OPTIONS", &err);
+	  buf = grab_extradata(buf, end, "DNSMASQ_MUD_URL", &err);
 	  buf = grab_extradata(buf, end, "DNSMASQ_TAGS", &err);
-
+	  	  
 	  if (is6)
 	    buf = grab_extradata(buf, end, "DNSMASQ_RELAY_ADDRESS", &err);
-	  else 
-	    my_setenv("DNSMASQ_RELAY_ADDRESS", data.giaddr.s_addr != 0 ? inet_ntoa(data.giaddr) : NULL, &err); 
+	  else
+	    {
+	      const char *giaddr = NULL;
+	      if (data.giaddr.s_addr != 0)
+		  giaddr = inet_ntop(AF_INET, &data.giaddr, daemon->dhcp_buff2, ADDRSTRLEN);
+	      my_setenv("DNSMASQ_RELAY_ADDRESS", giaddr, &err);
+	    }
 	  
 	  for (i = 0; buf; i++)
 	    {
@@ -632,6 +672,9 @@ int create_helper(int event_fd, int err_fd, uid_t uid, gid_t gid, long max_fd)
 	fcntl(event_fd, F_SETFD, i | FD_CLOEXEC);
       close(pipefd[0]);
 
+      if (data.action == ACTION_RELAY_SNOOP)
+	strcpy(daemon->packet, data.interface);
+      
       p =  strrchr(daemon->lease_change_command, '/');
       if (err == 0)
 	{
@@ -802,6 +845,29 @@ void queue_script(int action, struct dhcp_lease *lease, char *hostname, time_t n
   bytes_in_buf = p - (unsigned char *)buf;
 }
 
+#ifdef HAVE_DHCP6
+void queue_relay_snoop(struct in6_addr *client, int if_index, struct in6_addr *prefix, int prefix_len)
+{
+  /* no script */
+  if (daemon->helperfd == -1)
+    return;
+  
+  inet_ntop(AF_INET6, prefix, daemon->addrbuff, ADDRSTRLEN);
+
+  /* 5 for /nnn and zero on the end of the prefix. */
+  buff_alloc(sizeof(struct script_data) + ADDRSTRLEN + 5);
+  memset(buf, 0, sizeof(struct script_data));
+
+  buf->action = ACTION_RELAY_SNOOP;
+  buf->addr6 = *client;
+  buf->hostname_len = sprintf((char *)(buf+1), "%s/%u", daemon->addrbuff, prefix_len) + 1;
+  
+  indextoname(daemon->dhcp6fd, if_index, buf->interface);
+
+  bytes_in_buf = sizeof(struct script_data) + buf->hostname_len;
+}
+#endif
+
 #ifdef HAVE_TFTP
 /* This nastily re-uses DHCP-fields for TFTP stuff */
 void queue_tftp(off_t file_len, char *filename, union mysockaddr *peer)
@@ -879,7 +945,4 @@ void helper_write(void)
     }
 }
 
-#endif
-
-
-
+#endif /* HAVE_SCRIPT */

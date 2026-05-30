@@ -1,3 +1,512 @@
+2025.89 - 16 December 2025
+
+- Security: Avoid privilege escalation via unix stream forwarding in Dropbear
+  server. Other programs on a system may authenticate unix sockets via
+  SO_PEERCRED, which would be root user for Dropbear forwarded connections,
+  allowing root privilege escalation.
+  Reported by Turistu, and thanks for advice on the fix.
+  This is tracked as CVE-2025-14282, and affects 2024.84 to 2025.88.
+
+  It is fixed by dropping privileges of the dropbear process after
+  authentication. Unix stream sockets are now disallowed when a
+  forced command is used, either with authorized_key restrictions or
+  "dropbear -c command".
+
+  In previous affected releases running with "dropbear -j" (will also disable
+  TCP fowarding) or building with localoptions.h/distrooptions.h
+  "#define DROPBEAR_SVR_LOCALSTREAMFWD 0" is a mitigation.
+
+- Security: Include scp fix for CVE-2019-6111. This allowed
+  a malicious server to overwrite arbitrary local files.
+  The missing fix was reported by Ashish Kunwar.
+
+- Server dropping privileges post-auth is enabled by default. This requires
+  setresgid() support, so some platforms such as netbsd or macos will have to
+  disable DROPBEAR_SVR_DROP_PRIVS in localoptions.h. Unix stream forwarding is
+  not available if DROPBEAR_SVR_DROP_PRIVS is disabled.
+
+  Remote server TCP socket forwarding will now use OS privileged port
+  restrictions rather than having a fixed "allow >=1024 for non-root" rule.
+
+  A future release may implement privilege dropping for netbsd/macos.
+
+- Fix a regression in 2025.87 when RSA and DSS are not built. This would lead
+  to a crash at startup with bad_bufptr().
+  Reported by Dani Schmitt and Sebastian Priebe.
+
+- Don't limit channel window to 500MB. That is could cause stuck connections
+  if peers advise a large window and don't send an increment within 500MB.
+  Affects SSH.NET https://github.com/sshnet/SSH.NET/issues/1671
+  Reported by Rob Hague.
+
+- Ignore -g -s when passwords arent enabled. Patch from Norbert Lange.
+  Ignore -m (disable MOTD), -j/-k (tcp forwarding) when not enabled.
+
+- Report SIGBUS and SIGTRAP signals. Patch from Loïc Mangeonjean.
+
+- Fix incorrect server auth delay. Was meant to be 250-350ms, it was actually
+  150-350ms or possibly negative (zero). Reported by pickaxprograms.
+
+- Fix building without public key options. Thanks to Konstantin Demin
+
+- Fix building with proxycmd but without netcat. Thanks to Konstantin Demin
+
+- Fix incorrect path documentation for distrooptions, thanks to Todd Zullinger
+
+- Fix SO_REUSEADDR for TCP tests, reported by vt-alt.
+
+2025.88 - 7 May 2025
+
+- Security: Don't allow dbclient hostname arguments to be interpreted
+  by the shell.
+
+  dbclient hostname arguments with a comma (for multihop) would be
+  passed to the shell which could result in running arbitrary shell
+  commands locally. That could be a security issue in situations
+  where dbclient is passed untrusted hostname arguments.
+
+  Now the multihop command is executed directly, no shell is involved.
+  Thanks to Marcin Nowak for the report, tracked as CVE-2025-47203
+
+- Fix compatibility for htole64 and htole32, regression in 2025.87
+  Patch from Peter Fichtner to work with old GCC versions, and
+  patch from Matt Robinson to check different header files.
+
+- Fix building on older compilers or libc that don't support
+  static_assert(). Regression in 2025.87
+
+- Support ~R in the client to force a key re-exchange.
+
+- Improve strict KEX handling. Dropbear previously would allow other
+  packets at the end of key exchange prior to receiving the remote
+  peer's NEWKEYS message, which should be forbidden by strict KEX.
+  Reported by Fabian Bäumer.
+
+2025.87 - 5 March 2025
+
+Note >> for compatibility/configuration changes
+
+- >> Disable SHA-1 algorithms by default. SHA-1 has known weakness and
+  most implementations support alternatives.
+
+- Add post-quantum key exchange. These avoid the possibility of current
+  stored traffic being decrypted using a possible future quantum
+  computer.
+
+  sntrup761 added by Matt Johnston, using sntrup761 implementation from
+  Daniel J. Bernstein, Chitchanok Chuengsatiansup, Tanja Lange and
+  Christine van Vredendaal, with integration work from OpenSSH.
+
+  ML-KEM added by Loganaden Velvindron, Jaykishan Mutkawoa, Kavish Nadan,
+  using libcrux, also based on OpenSSH work.
+
+  These do increase code size, at least sntrup761 is recommended,
+  see default_options.h
+
+- >> Decompression is disabled on the server, compression
+  is still supported.
+  This avoids attack surface for zlib and saves runtime memory.
+
+- Add -D server flag to specify authorized_keys directory, from Darren Tucker.
+
+- Include remote host in "Login attempt with wrong user" message for fail2ban,
+  patch from MichaIng.
+
+- Workaround writing hostkeys on FUSE filesystem that don't
+  support hardlinks, reported by elijahr.
+
+- Fix truncated error messages such as host key mismatch.
+
+- >> Preference aes256 ahead of aes128 for the client. chacha20-poly1305
+  is still first preference.
+
+- Fix ubsan failure in curve25519 code, reported by Steven Bytnar.
+  Has no effect on execution.
+
+2024.86 - 22 October 2024
+
+- Fix failure on concurrent channel open/close.
+  This was a regression in 2022.82, reported by rsflo in Github #321.
+    failed assertion in common-channel.c:705: !channel->sent_close
+
+- Print remote host after "Login attempt for nonexistent user" log entry to
+  assist fail2ban. Fix from MichaIng, the format changed in 2020.79
+
+- Dropbear now exits with exit status 0 on SIGINT/SIGTERM. This is a more
+  graceful behaviour for "systemctl stop dropbear".
+  Reported by Ninad Palsule
+
+- New IDENT_VERSION_PART config allows customising some of the SSH version
+  string. From Marius Dinu
+
+- Fix building SK_KEYS with just one of ECDSA or ED25519
+  From Marius Dinu
+
+- Fix dbclient "-m help" and "-c help" without a hostname.
+  Patch from Darren Tucker
+
+- Remove fprintf/gettimeofday from sigchld handler when running with
+  verbose trace enabled.
+
+- Improved configure help output, from Mikel Olasagasti Uranga
+
+- Compile fix for GNU Hurd, from Guilhem Moulin
+
+- Support running test_aslr without venv, from Guilhem Moulin
+
+- Compilation fixes for older compilers, and better build tests
+
+- Update some test infrastructure versions of python packages,
+  github actions, and github runner OSes
+
+2024.85 - 25 April 2024
+
+  This release fixes build regressions in 2024.84
+
+- Fix build failure when SHA1 is disabled, thanks to Peter Krefting
+
+- Fix build failure when DROPBEAR_CLI_PUBKEY_AUTH disabled, thanks to
+  Sergey Ponomarev
+
+- Update debian/ directory with changed paths
+
+2024.84 - 4 April 2024
+
+Features and Changes:
+  Note >> for compatibility/configuration changes
+
+- >> Only use /etc/shadow when a user has :x: as the crypt in /etc/passwd.
+  This is the documented behaviour of passwd(5) so should be consistent with
+  other programs. Thanks to Paulo Cabral for the report.
+  Note that any users without x as the crypt will not be able
+  to log in with /etc/shadow, in cases were the existing configuration
+  differs.
+
+- Support -o StrictHostKeyChecking, patch from Sergey Ponomarev
+
+- Support -o BatchMode, from Sergey Ponomarev and Hans Harder
+
+- Support various other -o options compatible with OpenSSH, from
+  Sergey Ponomarev. Includes -o PasswordAuthentication
+
+- Add dbclient config file support, ~/.ssh/dropbear_config
+  Thanks to tjkolev
+  Disabled by default, set #define DROPBEAR_USE_SSH_CONFIG 1
+
+- Add support for unix socket forwarding (destination) on
+  the server, thanks to WangYi for the implementation
+
+- Add option to bind to interface, from Diederik De Coninck
+
+- Ignore unsupported arguments in dropbearkey, allow running
+  binary as 'ssh-key'. From Sergey Ponomarev
+
+- Save a public key file on generation with dropbearkey.
+  -C can be used for a comment, and choose a default key
+  type (ed25519 first preference).
+  Thanks to Sergey Ponomarev
+
+- Allow inetd to run in non-syslog modes. Thanks to Laurent Bercot
+  for the report
+
+- Allow user's own gid in PTY permissions, lets Dropbear work as non-root
+  even if /dev/pts isn't mounted with gid=5
+
+- src/distrooptions.h can now be used as another config file.
+  This can be used by distributions for customisations (separate
+  to the build directory's localoptions.h)
+
+Fixes:
+
+- "dbclient host >> output" would previously overwrite "output", instead of
+  appending. Thanks for the report from eSotoIoT
+
+- Add "Strict KEX" support. This mitigates a SSH protocol flaw which lets
+  a MITM attacker silently remove packets immediately after the
+  first key exchange. At present the flaw does not seem to reduce Dropbear's
+  security (the only packet affected would be a server-sig-algs extension,
+  which is used for compatibility not security).
+  For Dropbear, chacha20-poly1305 is the only affected cipher.
+  Both sides of the connection must support Strict KEX for it to be used.
+
+  The protocol flaw is tracked as CVE-2023-48795, details
+  at https://terrapin-attack.com . Thanks to the researchers Fabian Bäumer,
+  Marcus Brinkmann, and Jörg Schwenk. Thanks to OpenSSH for specifying
+  strict KEX mode.
+
+- Fix blocking while closing forwarded TCP sessions. Noticable
+  when many connections are being forwarded. Reported and
+  tested by GektorUA. Github #230
+
+- Don't offer RSA (then fail) if there is no RSA key. Regression in 2020.79
+  Github #219
+
+- Fix missing response to remote TCP requests when it is disabled.
+  Patch from Justin Chen. Github #254
+
+- Fix building with DROPBEAR_RSA disabled
+
+- /proc/timer_list is no longer used for entropy, it was a bottleneck.
+  Thanks to Aleksei Plotnikov for the report.
+
+- Don't unconditionally enable DROPBEAR_DSS
+
+- Make banner reading failure non-fatal
+
+- Fix DROPBEAR_SVR_MULTIUSER. This appears to have been broken since when it
+  was added in 2019. If you're using this let me know (it might be removed
+  if I don't hear otherwise). Thanks to davidatrsp
+
+- Fix Y2038 issues
+
+Infrastructure:
+
+- Move source files to src/ subdirectory. Thanks to tjkolev
+
+- Remove more files with "make distclean"
+
+- Add tests for disabled options
+
+2022.83 - 14 November 2022
+
+Features and Changes:
+  Note >> for compatibility/configuration changes
+
+- >> Disable DROPBEAR_DSS by default
+  It is only 1024 bit and uses sha1, most distros disable it by default already.
+
+- Added DROPBEAR_RSA_SHA1 option to allow disabling sha1 rsa signatures.
+  >> RSA with sha1 will be disabled in a future release (rsa keys will continue
+  to work OK, with sha256 signatures used instead).
+
+- Add option for requiring both password and pubkey (-t)
+  Patch from Jackkal
+
+- Add 'no-touch-required' and 'verify-required' options for sk keys
+  Patch from Egor Duda
+
+  - >> DROPBEAR_SK_KEYS config option now replaces separate DROPBEAR_SK_ECDSA
+  and DROPBEAR_SK_ED25519 options.
+
+- Add 'permitopen' option for authorized_keys to restrict forwarded ports
+  Patch from Tuomas Haikarainen
+
+- >> Added LTM_CFLAGS configure argument to set flags for building
+  bundled libtommath. This also restores the previous arguments used
+  in 2020.81 (-O3 -funroll-loops). That gives a big speedup for RSA
+  key generation, which regressed in 2022.82.
+  There is a tradeoff with code size, so -Os can be used if required.
+  https://github.com/mkj/dropbear/issues/174
+  Reported by David Bernard
+
+- Add '-z' flag to disable setting QoS traffic class. This may be necessary
+  to work with broken networks or network drivers, exposed after changes to use
+  AF21 in 2022.82
+  https://github.com/mkj/dropbear/issues/193
+  Reported by yuhongwei380, patch from Petr Štetiar
+
+- Allow overriding user shells with COMPAT_USER_SHELLS
+  Based on a patch from Matt Robinson
+
+- Improve permission error message
+  Patch from k-kurematsu
+
+- >> Remove HMAC_MD5 entirely
+
+Regression fixes from 2022.82:
+
+- Fix X11 build
+
+- Fix build warning
+
+- Fix compilation when disabling pubkey authentication
+  Patch from MaxMougg
+
+- Fix MAX_UNAUTH_CLIENTS regression
+  Reported by ptpt52
+
+- Avoid using slower prime testing in bundled libtomcrypt when DSS is disabled
+  https://github.com/mkj/dropbear/issues/174
+  Suggested by Steffen Jaeckel
+
+- Fix Dropbear plugin support
+  https://github.com/mkj/dropbear/issues/194
+  Reported by Struan Bartlett
+
+Other fixes:
+
+- Fix long standing incorrect compression size check. Dropbear
+  (client or server) would erroneously exit with
+  "bad packet, oversized decompressed"
+  when receiving a compressed packet of exactly the maximum size.
+
+- Fix missing setsid() removed in 2020.79
+  https://github.com/mkj/dropbear/issues/180
+  Reported and debugged by m5jt and David Bernard
+
+- Try keyboard-interactive auth before password, in dbclient.
+  This was unintentionally changed back in 2013
+  https://github.com/mkj/dropbear/pull/190
+  Patch from Michele Giacomoli
+
+- Drain the terminal when reading the fingerprint confirmation response
+  https://github.com/mkj/dropbear/pull/191
+  Patch from Michele Giacomoli
+
+- Fix utx wtmp variable typo. This has been wrong for a long time but
+  only recently became a problem when wtmp was detected.
+  https://github.com/mkj/dropbear/pull/189
+  Patch from Michele Giacomoli
+
+- Improve configure test for hardening options.
+  Fixes building on AIX
+  https://github.com/mkj/dropbear/issues/158
+
+- Fix debian/dropbear.init newline
+  From wulei-student
+
+Infrastructure:
+
+- Test off-by-default compile options
+
+- Set -Wundef to catch typos in #if statements
+
+
+2022.82 - 1 April 2022
+
+Features and Changes:
+  Note >> for compatibility/configuration changes
+
+- Implemented OpenSSH format private key handling for dropbearconvert.
+  Keys can be read in OpenSSH format or the old PEM format.
+  >> Keys are now written in OpenSSH format rather than PEM.
+  ED25519 support is now correct. DSS keys are still PEM format.
+
+- Use SHA256 for key fingerprints
+
+- >> Reworked -v verbose printing, specifying multiple times will increase
+  verbosity. -vvvv is equivalent to the old DEBUG_TRACE -v level, it
+  can be configured at compile time in localoptions.h (see default_options.h)
+  Lower -v options can be used to check connection progress or algorithm
+  negotiation.
+  Thanks to Hans Harder for the implementation
+
+  localoptions.h DEBUG_TRACE should be set to 4 for the same result as the
+  previous DEBUG_TRACE 1.
+
+- Added server support for U2F/FIDO keys (ecdsa-sk and ed25519-sk) in
+  authorized_keys. no-touch-required option isn't allowed yet.
+  Thanks to Egor Duda for the implementation
+
+- autoconf output (configure script etc) is now committed to version control.
+  >> It isn't necessary to run "autoconf" any more on a checkout.
+
+- sha1 will be omitted from the build if KEX/signing/MAC algorithms don't
+  require it. Instead sha256 is used for random number generation.
+  See sysoptions.h to see which algorithms require which hashes.
+
+- Set SSH_PUBKEYINFO environment variable based on the authorized_keys
+  entry used for auth. The first word of the comment after the key is used
+  (must only have characters a-z A-Z 0-9 .,_-+@)
+  Patch from Hans Harder, modified by Matt Johnston
+
+- Let dbclient multihop mode be used with '-J'.
+  Patch from Hans Harder
+
+- Allow home-directory relative paths ~/path for various settings
+  and command line options.
+  *_PRIV_FILENAME DROPBEAR_PIDFILE SFTPSERVER_PATH MOTD_FILENAME
+  Thanks to Begley Brothers Inc
+
+  >> The default DROPBEAR_DEFAULT_CLI_AUTHKEY has now changed, it now needs
+  a tilde prefix.
+
+- LANG environment variable is carried over from the Dropbear server process
+  From Maxim Kochetkov
+
+- Add /usr/sbin and /sbin to $PATH when logging in as root.
+  Patch from Raphaël Hertzog
+  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=903403
+
+- Added client option "-o DisableTrivialAuth". It disallows a server immediately
+  giving successful authentication (without presenting any password/pubkey prompt).
+  This avoids a UI confusion issue where it may appear that the user is accepting
+  a SSH agent prompt from their local machine, but are actually accepting a prompt
+  sent immediately by the remote server. 
+  CVE-2021-36369 though the description there is a bit confused. It only applies
+  to Dropbear as a client.
+  Thanks to Manfred Kaiser from Austrian MilCERT
+
+- Add -q client option to hide remote banner, from Hans Harder
+
+- Add -e option to pass all server environment variables to child processes.
+  This should be used with caution.
+  Patch from Roland Vollgraf (github #118)
+
+- >> Use DSCP for QoS traffic classes. Priority (tty) traffic is now set to
+  AF21 "interactive". Previously TOS classes were used, they are not used by
+  modern traffic classifiers. Non-tty traffic is left at default priority.
+
+- >> Disable dh-group1 key exchange by default. It has been disabled server
+  side by default since 2018.
+
+- >> Removed Twofish cipher
+
+Fixes:
+
+- Fix flushing channel data when pty was allocated (github #85)
+  Data wasn't completely transmitted at channel close.
+  Reported and initial patch thanks to Yousong Zhou
+
+- Dropbear now re-executes itself rather than just forking for each connection
+  (only on Linux). This allows ASLR to randomise address space for each
+  connection as a security mitigation. It should not have any visible impact
+  - if there are any performance impacts in the wild please report it.
+
+- Check authorized_keys permissions as the user, fixes NFS squash root.
+  Patch from Chris Dragan (github #107)
+
+- A missing home directory is now non-fatal, starting in / instead
+
+- Fixed IPv6 [address]:port parsing for dbclient -b
+  Reported by Fabio Molinari
+
+- Improve error logging so that they are logged on the server rather than being
+  sent to the client over the connection
+
+- Max window size is increased to 10MB, more graceful fallback if it's invalid.
+
+- Fix correctness of Dropbear's handling of global requests.
+  Patch from Dirkjan Bussink
+
+- Fix some small bugs found by fuzzers, null pointer dereference crash and leaks
+  (post authentication)
+
+- $HOME variable is used before /etc/passwd when expanding paths such as
+  ~/.ssh/id_dropbear (for the client). Patch from Matt Robinson
+
+- C89 build fixes from Guillaume Picquet
+
+Infrastructure:
+
+- Improvements to fuzzers. Added post-auth fuzzer, and a mutator that can
+  handle the structure of SSH packet streams. Added cifuzz to run on commits
+  and pull requests.
+  Thanks to OSS-Fuzz for the tools/clusters and reward funding.
+
+- Dropbear source tarballs generated by release.sh are now reproducible from a
+  Git or Mercurial checkout, they will be identical on any system. Tested
+  on ubuntu and macos.
+
+- Added some integration testing using pytest. Currently this has tests
+  for various channel handling edge cases, ASLR fork randomisation,
+  dropbearconvert, and SSH_PUBKEYINFO
+
+- Set up github actions. This runs the pytest suite and other checks.
+  - build matrix includes c89, dropbearmulti, bundled libtom, macos, DEBUG_TRACE
+  - test for configure script regeneration
+  - build a tarball for external reproducibility
+
 2020.81 - 29 October 2020
 
 - Fix regression in 2020.79 which prevented connecting with some SSH 

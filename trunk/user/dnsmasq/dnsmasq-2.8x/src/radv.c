@@ -1,4 +1,4 @@
-/* dnsmasq is Copyright (c) 2000-2018 Simon Kelley
+/* dnsmasq is Copyright (c) 2000-2025 Simon Kelley
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ static int add_prefixes(struct in6_addr *local,  int prefix,
 			unsigned int preferred, unsigned int valid, void *vparam);
 static int iface_search(struct in6_addr *local,  int prefix,
 			int scope, int if_index, int flags, 
-			int prefered, int valid, void *vparam);
+			unsigned int prefered, unsigned int valid, void *vparam);
 static int add_lla(int index, unsigned int type, char *mac, size_t maclen, void *parm);
 static void new_timeout(struct dhcp_context *context, char *iface_name, time_t now);
 static unsigned int calc_lifetime(struct ra_interface *ra);
@@ -123,7 +123,11 @@ void ra_start_unsolicited(time_t now, struct dhcp_context *context)
      and pick up new interfaces */
   
   if (context)
-    context->ra_short_period_start = context->ra_time = now;
+    {
+      context->ra_short_period_start = now;
+      /* start after 1 second to get logging right at startup. */
+      context->ra_time = now + 1;
+    }
   else
     for (context = daemon->dhcp6; context; context = context->next)
       if (!(context->flags & CONTEXT_TEMPLATE))
@@ -162,7 +166,7 @@ void icmp6_packet(time_t now)
     return;
    
   packet = (unsigned char *)daemon->outpacket.iov_base;
-  
+
   for (cmptr = CMSG_FIRSTHDR(&msg); cmptr; cmptr = CMSG_NXTHDR(&msg, cmptr))
     if (cmptr->cmsg_level == IPPROTO_IPV6 && cmptr->cmsg_type == daemon->v6pktinfo)
       {
@@ -182,29 +186,42 @@ void icmp6_packet(time_t now)
     return;
   
   for (tmp = daemon->dhcp_except; tmp; tmp = tmp->next)
-    if (tmp->name && wildcard_match(tmp->name, interface))
+    if (tmp->name && (tmp->flags & INAME_6) &&
+	wildcard_match(tmp->name, interface))
       return;
  
   if (packet[1] != 0)
     return;
-  
+
   if (packet[0] == ICMP6_ECHO_REPLY)
     lease_ping_reply(&from.sin6_addr, packet, interface); 
   else if (packet[0] == ND_ROUTER_SOLICIT)
     {
       char *mac = "";
       struct dhcp_bridge *bridge, *alias;
+      ssize_t rem;
+      unsigned char *p;
+      int opt_sz;
+      
+#ifdef HAVE_DUMPFILE
+      dump_packet_icmp(DUMP_RA, (void *)packet, sz, (union mysockaddr *)&from, NULL);
+#endif           
       
       /* look for link-layer address option for logging */
-      if (sz >= 16 && packet[8] == ICMP6_OPT_SOURCE_MAC && (packet[9] * 8) + 8 <= sz)
+      for (rem = sz - 8, p = &packet[8]; rem >= 2; rem -= opt_sz, p += opt_sz)
 	{
-	  if ((packet[9] * 8 - 2) * 3 - 1 >= MAXDNAME) {
-	    return;
-	  }
-	  print_mac(daemon->namebuff, &packet[10], (packet[9] * 8) - 2);
-	  mac = daemon->namebuff;
+	  opt_sz = p[1] * 8;
+	  
+	  if (opt_sz == 0 || opt_sz > rem)
+	    return; /* Bad packet */
+	  
+	  if (p[0] == ICMP6_OPT_SOURCE_MAC && ((opt_sz - 2) * 3 - 1 < MAXDNAME))
+	    {
+	      print_mac(daemon->namebuff, &p[2], opt_sz - 2);
+	      mac = daemon->namebuff;
+	    }
 	}
-         
+      
       if (!option_bool(OPT_QUIET_RA))
 	my_syslog(MS_DHCP | LOG_INFO, "RTR-SOLICIT(%s) %s", interface, mac);
 
@@ -288,7 +305,10 @@ static void send_ra_alias(time_t now, int iface, char *iface_name, struct in6_ad
       context->netid.next = &context->netid;
     }
 
-  if (!iface_enumerate(AF_INET6, &parm, add_prefixes))
+  /* If no link-local address then we can't advertise since source address of
+     advertisement must be link local address: RFC 4861 para 6.1.2. */
+  if (!iface_enumerate(AF_INET6, &parm, (callback_t){.af_inet6=add_prefixes}) ||
+      parm.link_pref_time == 0)
     return;
 
   /* Find smallest preferred time within address classes,
@@ -412,7 +432,7 @@ static void send_ra_alias(time_t now, int iface, char *iface_name, struct in6_ad
   if (mtu == 0)
     {
       char *mtu_name = ra_param ? ra_param->mtu_name : NULL;
-      sprintf(daemon->namebuff, "/proc/sys/net/ipv6/conf/%s/mtu", mtu_name ? : iface_name);
+      sprintf(daemon->namebuff, "/proc/sys/net/ipv6/conf/%s/mtu", mtu_name ? mtu_name : iface_name);
       if ((f = fopen(daemon->namebuff, "r")))
         {
           if (fgets(daemon->namebuff, MAXDNAME, f))
@@ -429,10 +449,10 @@ static void send_ra_alias(time_t now, int iface, char *iface_name, struct in6_ad
       put_opt6_long(mtu);
     }
      
-  iface_enumerate(AF_LOCAL, &send_iface, add_lla);
+  iface_enumerate(AF_LOCAL, &send_iface, (callback_t){.af_local=add_lla});
  
   /* RDNSS, RFC 6106, use relevant DHCP6 options */
-  (void)option_filter(parm.tags, NULL, daemon->dhcp_opts6);
+  (void)option_filter(parm.tags, NULL, daemon->dhcp_opts6, 0);
   
   for (opt_cfg = daemon->dhcp_opts6; opt_cfg; opt_cfg = opt_cfg->next)
     {
@@ -540,6 +560,16 @@ static void send_ra_alias(time_t now, int iface, char *iface_name, struct in6_ad
       setsockopt(daemon->icmp6fd, IPPROTO_IPV6, IPV6_MULTICAST_IF, &send_iface, sizeof(send_iface));
     }
   
+#ifdef HAVE_DUMPFILE
+  {
+    struct sockaddr_in6 src;
+    src.sin6_family = AF_INET6;
+    src.sin6_addr = parm.link_local;
+    
+    dump_packet_icmp(DUMP_RA, (void *)daemon->outpacket.iov_base, save_counter(-1), (union mysockaddr *)&src, (union mysockaddr *)&addr);
+  }
+#endif
+
   while (retry_send(sendto(daemon->icmp6fd, daemon->outpacket.iov_base, 
 			   save_counter(-1), 0, (struct sockaddr *)&addr, 
 			   sizeof(addr))));
@@ -623,8 +653,11 @@ static int add_prefixes(struct in6_addr *local,  int prefix,
 		    real_prefix = context->prefix;
 		  }
 
-		/* find floor time, don't reduce below 3 * RA interval. */
-		if (time > context->lease_time)
+		/* find floor time, don't reduce below 3 * RA interval.
+		   If the lease time has been left as default, don't
+		   use that as a floor. */
+		if ((context->flags & CONTEXT_SETLEASE) &&
+		    time > context->lease_time)
 		  {
 		    time = context->lease_time;
 		    if (time < ((unsigned int)(3 * param->adv_interval)))
@@ -740,6 +773,8 @@ static int add_lla(int index, unsigned int type, char *mac, size_t maclen, void 
 	 add 7 to round up */
       int len = (maclen + 9) >> 3;
       unsigned char *p = expand(len << 3);
+      if (!p)
+	return 1;
       memset(p, 0, len << 3);
       *p++ = ICMP6_OPT_SOURCE_MAC;
       *p++ = len;
@@ -788,7 +823,7 @@ time_t periodic_ra(time_t now)
 	  param.iface = context->if_index;
 	  new_timeout(context, param.name, now);
 	}
-      else if (iface_enumerate(AF_INET6, &param, iface_search))
+      else if (iface_enumerate(AF_INET6, &param, (callback_t){.af_inet6=iface_search}))
 	/* There's a context overdue, but we can't find an interface
 	   associated with it, because it's for a subnet we dont 
 	   have an interface on. Probably we're doing DHCP on
@@ -801,7 +836,8 @@ time_t periodic_ra(time_t now)
 	{
 	  struct iname *tmp;
 	  for (tmp = daemon->dhcp_except; tmp; tmp = tmp->next)
-	    if (tmp->name && wildcard_match(tmp->name, param.name))
+	    if (tmp->name && (tmp->flags & INAME_6) &&
+		wildcard_match(tmp->name, param.name))
 	      break;
 	  if (!tmp)
             {
@@ -820,7 +856,7 @@ time_t periodic_ra(time_t now)
                     aparam.iface = param.iface;
                     aparam.alias_ifs = NULL;
                     aparam.num_alias_ifs = 0;
-                    iface_enumerate(AF_LOCAL, &aparam, send_ra_to_aliases);
+                    iface_enumerate(AF_LOCAL, &aparam, (callback_t){.af_local=send_ra_to_aliases});
                     my_syslog(MS_DHCP | LOG_INFO, "RTR-ADVERT(%s) %s => %d alias(es)",
                               param.name, daemon->addrbuff, aparam.num_alias_ifs);
 
@@ -835,7 +871,7 @@ time_t periodic_ra(time_t now)
                            those. */
                         aparam.max_alias_ifs = aparam.num_alias_ifs;
                         aparam.num_alias_ifs = 0;
-                        iface_enumerate(AF_LOCAL, &aparam, send_ra_to_aliases);
+                        iface_enumerate(AF_LOCAL, &aparam, (callback_t){.af_local=send_ra_to_aliases});
                         for (; aparam.num_alias_ifs; aparam.num_alias_ifs--)
                           {
                             my_syslog(MS_DHCP | LOG_INFO, "RTR-ADVERT(%s) %s => i/f %d",
@@ -884,15 +920,26 @@ static int send_ra_to_aliases(int index, unsigned int type, char *mac, size_t ma
 
 static int iface_search(struct in6_addr *local,  int prefix,
 			int scope, int if_index, int flags, 
-			int preferred, int valid, void *vparam)
+			unsigned int preferred, unsigned int valid, void *vparam)
 {
   struct search_param *param = vparam;
   struct dhcp_context *context;
-
+  struct iname *tmp;
+  
   (void)scope;
   (void)preferred;
   (void)valid;
- 
+
+  /* ignore interfaces we're not doing DHCP on. */
+  if (!indextoname(daemon->icmp6fd, if_index, param->name) ||
+      !iface_check(AF_LOCAL, NULL, param->name, NULL))
+    return 1;
+
+  for (tmp = daemon->dhcp_except; tmp; tmp = tmp->next)
+    if (tmp->name && (tmp->flags & INAME_6) &&
+	wildcard_match(tmp->name, param->name))
+      return 1;
+
   for (context = daemon->dhcp6; context; context = context->next)
     if (!(context->flags & (CONTEXT_TEMPLATE | CONTEXT_OLD)) &&
 	prefix <= context->prefix &&
@@ -904,16 +951,8 @@ static int iface_search(struct in6_addr *local,  int prefix,
 	/* found an interface that's overdue for RA determine new 
 	   timeout value and arrange for RA to be sent unless interface is
 	   still doing DAD.*/
-	
 	if (!(flags & IFACE_TENTATIVE))
 	  param->iface = if_index;
-	
-	/* should never fail */
-	if (!indextoname(daemon->icmp6fd, if_index, param->name))
-	  {
-	    param->iface = 0;
-	    return 0;
-	  }
 	
 	new_timeout(context, param->name, param->now);
 	

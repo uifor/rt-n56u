@@ -1,4 +1,4 @@
-/* dnsmasq is Copyright (c) 2000-2018 Simon Kelley
+/* dnsmasq is Copyright (c) 2000-2025 Simon Kelley
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -22,8 +22,7 @@
 
 struct iface_param {
   struct dhcp_context *current;
-  struct dhcp_relay *relay;
-  struct in6_addr fallback, relay_local, ll_addr, ula_addr;
+  struct in6_addr fallback, ll_addr, ula_addr;
   int ind, addr_match;
 };
 
@@ -90,11 +89,10 @@ void dhcp6_init(void)
 void dhcp6_packet(time_t now)
 {
   struct dhcp_context *context;
-  struct dhcp_relay *relay;
   struct iface_param parm;
   struct cmsghdr *cmptr;
   struct msghdr msg;
-  int if_index = 0;
+  uint32_t if_index = 0;
   union {
     struct cmsghdr align; /* this ensures alignment */
     char control6[CMSG_SPACE(sizeof(struct in6_pktinfo))];
@@ -105,7 +103,8 @@ void dhcp6_packet(time_t now)
   struct iname *tmp;
   unsigned short port;
   struct in6_addr dst_addr;
-
+  struct in6_addr all_servers;
+  
   memset(&dst_addr, 0, sizeof(dst_addr));
 
   msg.msg_control = control_u.control6;
@@ -134,28 +133,66 @@ void dhcp6_packet(time_t now)
 
   if (!indextoname(daemon->dhcp6fd, if_index, ifr.ifr_name))
     return;
+  
+#ifdef HAVE_LINUX_NETWORK
+  /* This works around a possible Linux kernel bug when using interfaces
+     enslaved to a VRF. The scope_id in the source address gets set
+     to the index of the VRF interface, not the slave. Fortunately,
+     the interface index returned by packetinfo is correct so we use
+     that instead. Log this once, so if it triggers in other circumstances
+     we've not anticipated and breaks things, we get some clues. */
+  if (from.sin6_scope_id != if_index)
+    {
+      static int logged = 0;
+      
+      if (!logged)
+	{
+	  my_syslog(MS_DHCP | LOG_WARNING,
+		    _("Working around kernel bug: faulty source address scope for VRF slave %s"),
+		    ifr.ifr_name);
+	  logged = 1;
+	}
+      
+      from.sin6_scope_id = if_index;
+    }
+#endif
 
-  if ((port = relay_reply6(&from, sz, ifr.ifr_name)) == 0)
+#ifdef HAVE_DUMPFILE
+  dump_packet_udp(DUMP_DHCPV6, (void *)daemon->dhcp_packet.iov_base, sz,
+		  (union mysockaddr *)&from, NULL, daemon->dhcp6fd);
+#endif
+
+  if (relay_reply6(&from, sz, ifr.ifr_name))
+    {
+#ifdef HAVE_DUMPFILE
+      dump_packet_udp(DUMP_DHCPV6, (void *)daemon->outpacket.iov_base, save_counter(-1), NULL,
+		      (union mysockaddr *)&from, daemon->dhcp6fd);
+#endif
+      
+      while (retry_send(sendto(daemon->dhcp6fd, daemon->outpacket.iov_base, 
+			       save_counter(-1), 0, (struct sockaddr *)&from, 
+			       sizeof(from))));
+    }
+  else
     {
       struct dhcp_bridge *bridge, *alias;
-
+      
       for (tmp = daemon->if_except; tmp; tmp = tmp->next)
 	if (tmp->name && wildcard_match(tmp->name, ifr.ifr_name))
 	  return;
       
       for (tmp = daemon->dhcp_except; tmp; tmp = tmp->next)
-	if (tmp->name && wildcard_match(tmp->name, ifr.ifr_name))
+	if (tmp->name && (tmp->flags & INAME_6) &&
+	    wildcard_match(tmp->name, ifr.ifr_name))
 	  return;
       
       parm.current = NULL;
-      parm.relay = NULL;
-      memset(&parm.relay_local, 0, IN6ADDRSZ);
       parm.ind = if_index;
       parm.addr_match = 0;
       memset(&parm.fallback, 0, IN6ADDRSZ);
       memset(&parm.ll_addr, 0, IN6ADDRSZ);
       memset(&parm.ula_addr, 0, IN6ADDRSZ);
-
+      
       /* If the interface on which the DHCPv6 request was received is
          an alias of some other interface (as specified by the
          --bridge-interface option), change parm.ind so that we look
@@ -193,13 +230,25 @@ void dhcp6_packet(time_t now)
 	    context->current = context;
 	    memset(&context->local6, 0, IN6ADDRSZ);
 	  }
-
-      for (relay = daemon->relay6; relay; relay = relay->next)
-	relay->current = relay;
       
-      if (!iface_enumerate(AF_INET6, &parm, complete_context6))
+      /* Ignore requests sent to the ALL_SERVERS multicast address for relay when
+	 we're listening there for DHCPv6 server reasons. */
+      inet_pton(AF_INET6, ALL_SERVERS, &all_servers);
+      
+      if (!IN6_ARE_ADDR_EQUAL(&dst_addr, &all_servers) &&
+	  relay_upstream6(if_index, (size_t)sz, &from.sin6_addr, from.sin6_scope_id, now))
 	return;
-
+      
+      if (!iface_enumerate(AF_INET6, &parm, (callback_t){.af_inet6=complete_context6}))
+	return;
+      
+      /* Check for a relay again after iface_enumerate/complete_context has had
+	 chance to fill in relay->iface_index fields. This handles first time through
+	 and any changes in interface config. */
+      if (!IN6_ARE_ADDR_EQUAL(&dst_addr, &all_servers) &&
+	  relay_upstream6(if_index, (size_t)sz, &from.sin6_addr, from.sin6_scope_id, now))
+	return;
+      
       if (daemon->if_names || daemon->if_addrs)
 	{
 	  
@@ -211,42 +260,36 @@ void dhcp6_packet(time_t now)
 	    return;
 	}
       
-      if (parm.relay)
-	{
-	  /* Ignore requests sent to the ALL_SERVERS multicast address for relay when
-	     we're listening there for DHCPv6 server reasons. */
-	  struct in6_addr all_servers;
-	  
-	  inet_pton(AF_INET6, ALL_SERVERS, &all_servers);
-	  
-	  if (!IN6_ARE_ADDR_EQUAL(&dst_addr, &all_servers))
-	    relay_upstream6(parm.relay, sz, &from.sin6_addr, from.sin6_scope_id, now);
-	  return;
-	}
-      
       /* May have configured relay, but not DHCP server */
       if (!daemon->doing_dhcp6)
 	return;
-
+      
       lease_prune(NULL, now); /* lose any expired leases */
       
       port = dhcp6_reply(parm.current, if_index, ifr.ifr_name, &parm.fallback, 
 			 &parm.ll_addr, &parm.ula_addr, sz, &from.sin6_addr, now);
       
+      /* The port in the source address of the original request should
+	 be correct, but at least once client sends from the server port,
+	 so we explicitly send to the client port to a client, and the
+	 server port to a relay. */
+      if (port != 0)
+	{
+	  from.sin6_port = htons(port);
+	  
+#ifdef HAVE_DUMPFILE
+	  dump_packet_udp(DUMP_DHCPV6, (void *)daemon->outpacket.iov_base, save_counter(-1),
+			  NULL, (union mysockaddr *)&from, daemon->dhcp6fd);
+#endif 
+	  
+	  while (retry_send(sendto(daemon->dhcp6fd, daemon->outpacket.iov_base,
+				   save_counter(-1), 0, (struct sockaddr *)&from, sizeof(from))));
+	}
+      
+      /* These need to be called _after_ we send DHCPv6 packet, since lease_update_file()
+	 may trigger sending an RA packet, which overwrites our buffer. */
       lease_update_file(now);
       lease_update_dns(0);
-    }
-			  
-  /* The port in the source address of the original request should
-     be correct, but at least once client sends from the server port,
-     so we explicitly send to the client port to a client, and the
-     server port to a relay. */
-  if (port != 0)
-    {
-      from.sin6_port = htons(port);
-      while (retry_send(sendto(daemon->dhcp6fd, daemon->outpacket.iov_base, 
-			       save_counter(0), 0, (struct sockaddr *)&from, 
-			       sizeof(from))));
     }
 }
 
@@ -283,7 +326,7 @@ void get_client_mac(struct in6_addr *client, int iface, unsigned char *mac, unsi
       if ((maclen = find_mac(&addr, mac, 0, now)) != 0)
 	break;
 	  
-      sendto(daemon->icmp6fd, &neigh, sizeof(neigh), 0, &addr.sa, sizeof(addr));
+      while(retry_send(sendto(daemon->icmp6fd, &neigh, sizeof(neigh), 0, &addr.sa, sizeof(addr))));
       
       ts.tv_sec = 0;
       ts.tv_nsec = 100000000; /* 100ms */
@@ -299,106 +342,133 @@ static int complete_context6(struct in6_addr *local,  int prefix,
 			     unsigned int valid, void *vparam)
 {
   struct dhcp_context *context;
+  struct shared_network *share;
   struct dhcp_relay *relay;
   struct iface_param *param = vparam;
   struct iname *tmp;
+  int match = !daemon->if_addrs;
  
   (void)scope; /* warning */
   
-  if (if_index == param->ind)
-    {
-      if (IN6_IS_ADDR_LINKLOCAL(local))
-	param->ll_addr = *local;
-      else if (IN6_IS_ADDR_ULA(local))
-	param->ula_addr = *local;
-
-      if (!IN6_IS_ADDR_LOOPBACK(local) &&
-	  !IN6_IS_ADDR_LINKLOCAL(local) &&
-	  !IN6_IS_ADDR_MULTICAST(local))
-	{
-	  /* if we have --listen-address config, see if the 
-	     arrival interface has a matching address. */
-	  for (tmp = daemon->if_addrs; tmp; tmp = tmp->next)
-	    if (tmp->addr.sa.sa_family == AF_INET6 &&
-		IN6_ARE_ADDR_EQUAL(&tmp->addr.in6.sin6_addr, local))
-	      param->addr_match = 1;
-	  
-	  /* Determine a globally address on the arrival interface, even
-	     if we have no matching dhcp-context, because we're only
-	     allocating on remote subnets via relays. This
-	     is used as a default for the DNS server option. */
-	  param->fallback = *local;
-	  
-	  for (context = daemon->dhcp6; context; context = context->next)
-	    {
-	      if ((context->flags & CONTEXT_DHCP) &&
-		  !(context->flags & (CONTEXT_TEMPLATE | CONTEXT_OLD)) &&
-		  prefix <= context->prefix &&
-		  is_same_net6(local, &context->start6, context->prefix) &&
-		  is_same_net6(local, &context->end6, context->prefix))
-		{
-		  
-		  
-		  /* link it onto the current chain if we've not seen it before */
-		  if (context->current == context)
-		    {
-		      struct dhcp_context *tmp, **up;
-		      
-		      /* use interface values only for constructed contexts */
-		      if (!(context->flags & CONTEXT_CONSTRUCTED))
-			preferred = valid = 0xffffffff;
-		      else if (flags & IFACE_DEPRECATED)
-			preferred = 0;
-		      
-		      if (context->flags & CONTEXT_DEPRECATE)
-			preferred = 0;
-		      
-		      /* order chain, longest preferred time first */
-		      for (up = &param->current, tmp = param->current; tmp; tmp = tmp->current)
-			if (tmp->preferred <= preferred)
-			  break;
-			else
-			  up = &tmp->current;
-		      
-		      context->current = *up;
-		      *up = context;
-		      context->local6 = *local;
-		      context->preferred = preferred;
-		      context->valid = valid;
-		    }
-		}
-	    }
-	}
-
-      for (relay = daemon->relay6; relay; relay = relay->next)
-	if (IN6_ARE_ADDR_EQUAL(local, &relay->local.addr6) && relay->current == relay &&
-	    (IN6_IS_ADDR_UNSPECIFIED(&param->relay_local) || IN6_ARE_ADDR_EQUAL(local, &param->relay_local)))
-	  {
-	    relay->current = param->relay;
-	    param->relay = relay;
-	    param->relay_local = *local;
-	  }
+  if (if_index != param->ind)
+    return 1;
+  
+  if (IN6_IS_ADDR_LINKLOCAL(local))
+    param->ll_addr = *local;
+  else if (IN6_IS_ADDR_ULA(local))
+    param->ula_addr = *local;
       
-    }          
- 
- return 1;
+  if (IN6_IS_ADDR_LOOPBACK(local) ||
+      IN6_IS_ADDR_LINKLOCAL(local) ||
+      IN6_IS_ADDR_MULTICAST(local))
+    return 1;
+  
+  /* if we have --listen-address config, see if the 
+     arrival interface has a matching address. */
+  for (tmp = daemon->if_addrs; tmp; tmp = tmp->next)
+    if (tmp->addr.sa.sa_family == AF_INET6 &&
+	IN6_ARE_ADDR_EQUAL(&tmp->addr.in6.sin6_addr, local))
+      match = param->addr_match = 1;
+  
+  /* Determine a globally address on the arrival interface, even
+     if we have no matching dhcp-context, because we're only
+     allocating on remote subnets via relays. This
+     is used as a default for the DNS server option. */
+  param->fallback = *local;
+  
+  for (context = daemon->dhcp6; context; context = context->next)
+    if ((context->flags & CONTEXT_DHCP) &&
+	!(context->flags & (CONTEXT_TEMPLATE | CONTEXT_OLD)) &&
+	prefix <= context->prefix &&
+	context->current == context)
+      {
+	if (is_same_net6(local, &context->start6, context->prefix) &&
+	    is_same_net6(local, &context->end6, context->prefix))
+	  {
+	    struct dhcp_context *tmp, **up;
+	    
+	    /* use interface values only for constructed contexts */
+	    if (!(context->flags & CONTEXT_CONSTRUCTED))
+	      preferred = valid = 0xffffffff;
+	    else if (flags & IFACE_DEPRECATED)
+	      preferred = 0;
+		    
+	    if (context->flags & CONTEXT_DEPRECATE)
+	      preferred = 0;
+	    
+	    /* order chain, longest preferred time first */
+	    for (up = &param->current, tmp = param->current; tmp; tmp = tmp->current)
+	      if (tmp->preferred <= preferred)
+		break;
+	      else
+		up = &tmp->current;
+	    
+	    context->current = *up;
+	    *up = context;
+	    context->local6 = *local;
+	    context->preferred = preferred;
+	    context->valid = valid;
+	  }
+	else
+	  {
+	    for (share = daemon->shared_networks; share; share = share->next)
+	      {
+		/* IPv4 shared_address - ignore */
+		if (share->shared_addr.s_addr != 0)
+		  continue;
+			
+		if (share->if_index != 0)
+		  {
+		    if (share->if_index != if_index)
+		      continue;
+		  }
+		else
+		  {
+		    if (!IN6_ARE_ADDR_EQUAL(&share->match_addr6, local))
+		      continue;
+		  }
+		
+		if (is_same_net6(&share->shared_addr6, &context->start6, context->prefix) &&
+		    is_same_net6(&share->shared_addr6, &context->end6, context->prefix))
+		  {
+		    context->current = param->current;
+		    param->current = context;
+		    context->local6 = *local;
+		    context->preferred = context->flags & CONTEXT_DEPRECATE ? 0 :0xffffffff;
+		    context->valid = 0xffffffff;
+		  }
+	      }
+	  }      
+      }
+  
+  if (match)
+    for (relay = daemon->relay6; relay; relay = relay->next)
+      if (IN6_ARE_ADDR_EQUAL(local, &relay->local.addr6))
+	relay->iface_index = if_index;
+  
+  return 1;
 }
 
-struct dhcp_config *config_find_by_address6(struct dhcp_config *configs, struct in6_addr *net, int prefix, u64 addr)
+struct dhcp_config *config_find_by_address6(struct dhcp_config *configs, struct in6_addr *net, int prefix,  struct in6_addr *addr)
 {
   struct dhcp_config *config;
   
   for (config = configs; config; config = config->next)
-    if ((config->flags & CONFIG_ADDR6) &&
-	is_same_net6(&config->addr6, net, prefix) &&
-	(prefix == 128 || addr6part(&config->addr6) == addr))
-      return config;
+    if (config->flags & CONFIG_ADDR6)
+      {
+	struct addrlist *addr_list;
+	
+	for (addr_list = config->addr6; addr_list; addr_list = addr_list->next)
+	  if ((!net || is_same_net6(&addr_list->addr.addr6, net, prefix) || ((addr_list->flags & ADDRLIST_WILDCARD) && prefix == 64)) &&
+	      is_same_net6(&addr_list->addr.addr6, addr, (addr_list->flags & ADDRLIST_PREFIX) ? addr_list->prefixlen : 128))
+	    return config;
+      }
   
   return NULL;
 }
 
 struct dhcp_context *address6_allocate(struct dhcp_context *context,  unsigned char *clid, int clid_len, int temp_addr,
-				       int iaid, int serial, struct dhcp_netid *netids, int plain_range, struct in6_addr *ans)   
+				       unsigned int iaid, int serial, struct dhcp_netid *netids, int plain_range, struct in6_addr *ans)
 {
   /* Find a free address: exclude anything in use and anything allocated to
      a particular hwaddr/clientid/hostname in our configuration.
@@ -460,16 +530,15 @@ struct dhcp_context *address6_allocate(struct dhcp_context *context,  unsigned c
 	    for (d = context; d; d = d->current)
 	      if (addr == addr6part(&d->local6))
 		break;
+	    
+	    *ans = c->start6;
+	    setaddr6part (ans, addr);
 
 	    if (!d &&
 		!lease6_find_by_addr(&c->start6, c->prefix, addr) && 
-		!config_find_by_address6(daemon->dhcp_conf, &c->start6, c->prefix, addr))
-	      {
-		*ans = c->start6;
-		setaddr6part (ans, addr);
-		return c;
-	      }
-	
+		!config_find_by_address6(daemon->dhcp_conf, &c->start6, c->prefix, ans))
+	      return c;
+	    
 	    addr++;
 	    
 	    if (addr  == addr6part(&c->end6) + 1)
@@ -523,27 +592,6 @@ struct dhcp_context *address6_valid(struct dhcp_context *context,
   return NULL;
 }
 
-int config_valid(struct dhcp_config *config, struct dhcp_context *context, struct in6_addr *addr)
-{
-  if (!config || !(config->flags & CONFIG_ADDR6))
-    return 0;
-
-  if ((config->flags & CONFIG_WILDCARD) && context->prefix == 64)
-    {
-      *addr = context->start6;
-      setaddr6part(addr, addr6part(&config->addr6));
-      return 1;
-    }
-  
-  if (is_same_net6(&context->start6, &config->addr6, context->prefix))
-    {
-      *addr = config->addr6;
-      return 1;
-    }
-  
-  return 0;
-}
-
 void make_duid(time_t now)
 {
   (void)now;
@@ -569,7 +617,7 @@ void make_duid(time_t now)
 	newnow = now - 946684800;
 #endif      
       
-      iface_enumerate(AF_LOCAL, &newnow, make_duid1);
+      iface_enumerate(AF_LOCAL, &newnow, (callback_t){.af_local=make_duid1});
       
       if(!daemon->duid)
 	die("Cannot create DHCPv6 server DUID: %s", NULL, EC_MISC);
@@ -619,12 +667,13 @@ struct cparam {
 
 static int construct_worker(struct in6_addr *local, int prefix, 
 			    int scope, int if_index, int flags, 
-			    int preferred, int valid, void *vparam)
+			    unsigned int preferred, unsigned int valid, void *vparam)
 {
   char ifrn_name[IFNAMSIZ];
   struct in6_addr start6, end6;
   struct dhcp_context *template, *context;
-
+  struct iname *tmp;
+  
   (void)scope;
   (void)flags;
   (void)valid;
@@ -643,9 +692,15 @@ static int construct_worker(struct in6_addr *local, int prefix,
   if (flags & IFACE_DEPRECATED)
     return 1;
 
-  if (!indextoname(daemon->icmp6fd, if_index, ifrn_name))
-    return 0;
+  /* Ignore interfaces where we're not doing RA/DHCP6 */
+  if (!indextoname(daemon->icmp6fd, if_index, ifrn_name) ||
+      !iface_check(AF_LOCAL, NULL, ifrn_name, NULL))
+    return 1;
   
+  for (tmp = daemon->dhcp_except; tmp; tmp = tmp->next)
+    if (tmp->name && wildcard_match(tmp->name, ifrn_name))
+      return 1;
+
   for (template = daemon->dhcp6; template; template = template->next)
     if (!(template->flags & (CONTEXT_TEMPLATE | CONTEXT_CONSTRUCTED)))
       {
@@ -655,7 +710,7 @@ static int construct_worker(struct in6_addr *local, int prefix,
 	    is_same_net6(local, &template->end6, template->prefix))
 	  {
 	    /* First time found, do fast RA. */
-	    if (template->if_index != if_index || !IN6_ARE_ADDR_EQUAL(&template->local6, local))
+	    if (template->if_index == 0)
 	      {
 		ra_start_unsolicited(param->now, template);
 		param->newone = 1;
@@ -746,7 +801,7 @@ void dhcp_construct_contexts(time_t now)
     if (context->flags & CONTEXT_CONSTRUCTED)
       context->flags |= CONTEXT_GC;
    
-  iface_enumerate(AF_INET6, &param, construct_worker);
+  iface_enumerate(AF_INET6, &param, (callback_t){.af_inet6=construct_worker});
 
   for (up = &daemon->dhcp6, context = daemon->dhcp6; context; context = tmp)
     {
@@ -801,6 +856,4 @@ void dhcp_construct_contexts(time_t now)
     }
 }
 
-#endif
-
-
+#endif /* HAVE_DHCP6 */

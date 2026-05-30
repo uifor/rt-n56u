@@ -1,4 +1,4 @@
-/* dnsmasq is Copyright (c) 2000-2018 Simon Kelley
+/* dnsmasq is Copyright (c) 2000-2025 Simon Kelley
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -80,8 +80,44 @@
 
 #define EDNS0_OPTION_MAC            65001 /* dyndns.org temporary assignment */
 #define EDNS0_OPTION_CLIENT_SUBNET  8     /* IANA */
+#define EDNS0_OPTION_EDE            15    /* IANA - RFC 8914 */
 #define EDNS0_OPTION_NOMDEVICEID    65073 /* Nominum temporary assignment */
 #define EDNS0_OPTION_NOMCPEID       65074 /* Nominum temporary assignment */
+#define EDNS0_OPTION_UMBRELLA       20292 /* Cisco Umbrella temporary assignment */
+
+/* RFC-8914 extended errors, negative values are our definitions */
+#define EDE_UNSET          -1  /* No extended DNS error available */
+#define EDE_OTHER           0  /* Other */
+#define EDE_USUPDNSKEY      1  /* Unsupported DNSKEY algo */
+#define EDE_USUPDS          2  /* Unsupported DS Digest */
+#define EDE_STALE           3  /* Stale answer */
+#define EDE_FORGED          4  /* Forged answer */
+#define EDE_DNSSEC_IND      5  /* DNSSEC Indeterminate  */
+#define EDE_DNSSEC_BOGUS    6  /* DNSSEC Bogus */
+#define EDE_SIG_EXP         7  /* Signature Expired */
+#define EDE_SIG_NYV         8  /* Signature Not Yet Valid  */
+#define EDE_NO_DNSKEY       9  /* DNSKEY missing */
+#define EDE_NO_RRSIG       10  /* RRSIGs missing */
+#define EDE_NO_ZONEKEY     11  /* No Zone Key Bit Set */
+#define EDE_NO_NSEC        12  /* NSEC Missing  */
+#define EDE_CACHED_ERR     13  /* Cached Error */
+#define EDE_NOT_READY      14  /* Not Ready */
+#define EDE_BLOCKED        15  /* Blocked */
+#define EDE_CENSORED       16  /* Censored */
+#define EDE_FILTERED       17  /* Filtered */
+#define EDE_PROHIBITED     18  /* Prohibited */
+#define EDE_STALE_NXD      19  /* Stale NXDOMAIN */
+#define EDE_NOT_AUTH       20  /* Not Authoritative */
+#define EDE_NOT_SUP        21  /* Not Supported */
+#define EDE_NO_AUTH        22  /* No Reachable Authority */
+#define EDE_NETERR         23  /* Network error */
+#define EDE_INVALID_DATA   24  /* Invalid Data */
+#define EDE_SIG_E_B_V      25  /* Signature Expired before Valid */
+#define EDE_TOO_EARLY      26  /* To Early */
+#define EDE_UNS_NS3_ITER   27  /* Unsupported NSEC3 Iterations Value */
+#define EDE_UNABLE_POLICY  28  /* Unable to conform to policy */
+#define EDE_SYNTHESIZED    29  /* Synthesized */
+
 
 struct dns_header {
   u16 id;
@@ -106,15 +142,15 @@ struct dns_header {
 #define RCODE(x)           ((x)->hb4 & HB4_RCODE)
 #define SET_RCODE(x, code) (x)->hb4 = ((x)->hb4 & ~HB4_RCODE) | code
   
-#define GETSHORT(s, cp) { \
+#define GETSHORT(s, cp) do { \
 	unsigned char *t_cp = (unsigned char *)(cp); \
 	(s) = ((u16)t_cp[0] << 8) \
 	    | ((u16)t_cp[1]) \
 	    ; \
 	(cp) += 2; \
-}
+  } while(0)
 
-#define GETLONG(l, cp) { \
+#define GETLONG(l, cp) do { \
 	unsigned char *t_cp = (unsigned char *)(cp); \
 	(l) = ((u32)t_cp[0] << 24) \
 	    | ((u32)t_cp[1] << 16) \
@@ -122,17 +158,17 @@ struct dns_header {
 	    | ((u32)t_cp[3]) \
 	    ; \
 	(cp) += 4; \
-}
+  } while (0)
 
-#define PUTSHORT(s, cp) { \
+#define PUTSHORT(s, cp) do { \
 	u16 t_s = (u16)(s); \
 	unsigned char *t_cp = (unsigned char *)(cp); \
 	*t_cp++ = t_s >> 8; \
 	*t_cp   = t_s; \
 	(cp) += 2; \
-}
+  } while(0)
 
-#define PUTLONG(l, cp) { \
+#define PUTLONG(l, cp) do { \
 	u32 t_l = (u32)(l); \
 	unsigned char *t_cp = (unsigned char *)(cp); \
 	*t_cp++ = t_l >> 24; \
@@ -140,7 +176,7 @@ struct dns_header {
 	*t_cp++ = t_l >> 8; \
 	*t_cp   = t_l; \
 	(cp) += 4; \
-}
+  } while (0)
 
 #define CHECK_LEN(header, pp, plen, len) \
     ((size_t)((pp) - (unsigned char *)(header) + (len)) <= (plen))

@@ -1,4 +1,4 @@
-/* dnsmasq is Copyright (c) 2000-2018 Simon Kelley
+/* dnsmasq is Copyright (c) 2000-2025 Simon Kelley
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,21 +15,24 @@
 */
 
 #define FTABSIZ 150 /* max number of outstanding requests (default) */
-#define MAX_PROCS 20 /* max no children for TCP requests */
+#define MAX_PROCS 20 /* default max no children for TCP requests */
 #define CHILD_LIFETIME 150 /* secs 'till terminated (RFC1035 suggests > 120s) */
 #define TCP_MAX_QUERIES 100 /* Maximum number of queries per incoming TCP connection */
+#define TCP_TIMEOUT 5 /* timeout waiting to connect to an upstream server - double this for answer */
 #define TCP_BACKLOG 32  /* kernel backlog limit for TCP connections */
-#define EDNS_PKTSZ 4096 /* default max EDNS.0 UDP packet from RFC5625 */
-#define SAFE_PKTSZ 1280 /* "go anywhere" UDP packet size */
+#define EDNS_PKTSZ 1232 /* default max EDNS.0 UDP packet from from  /dnsflagday.net/2020 */
 #define KEYBLOCK_LEN 40 /* choose to minimise fragmentation when storing DNSSEC keys */
-#define DNSSEC_WORK 50 /* Max number of queries to validate one question */
-#define TIMEOUT 10 /* drop UDP queries after TIMEOUT seconds */
+#define DNSSEC_LIMIT_WORK 40 /* Max number of queries to validate one question */
+#define DNSSEC_LIMIT_SIG_FAIL 20 /* Number of signature that can fail to validate in one answer */
+#define DNSSEC_LIMIT_CRYPTO 200 /* max no. of crypto operations to validate one query. */
+#define DNSSEC_LIMIT_NSEC3_ITERS 150 /* Max. number if iterations allowed in NSEC3 record. */
+#define TIMEOUT 10     /* drop UDP queries after TIMEOUT seconds */
+#define SMALL_PORT_RANGE 30 /* If DNS port range is smaller than this, use different allocation. */
 #define FORWARD_TEST 50 /* try all servers every 50 queries */
 #define FORWARD_TIME 20 /* or 20 seconds */
 #define UDP_TEST_TIME 60 /* How often to reset our idea of max packet size. */
 #define SERVERS_LOGGED 30 /* Only log this many servers when logging state */
 #define LOCALS_LOGGED 8 /* Only log this many local addresses when logging state */
-#define RANDOM_SOCKS 64 /* max simultaneous random ports */
 #define LEASE_RETRY 60 /* on error, retry writing leasefile after LEASE_RETRY seconds */
 #define CACHESIZ 150 /* default cache size */
 #define TTL_FLOOR_LIMIT 3600 /* don't allow --min-cache-ttl to raise TTL above this under any circumstances */
@@ -40,9 +43,11 @@
 #define DHCP_PACKET_MAX 16384 /* hard limit on DHCP packet size */
 #define SMALLDNAME 50 /* most domain names are smaller than this */
 #define CNAME_CHAIN 10 /* chains longer than this atr dropped for loop protection */
+#define DNSSEC_MIN_TTL 60 /* DNSKEY and DS records in cache last at least this long */
 #define HOSTSFILE "/etc/hosts"
 #define ETHERSFILE "/etc/ethers"
-#define DEFLEASE 3600 /* default lease time, 1 hour */
+#define DEFLEASE 3600 /* default DHCPv4 lease time, one hour */
+#define DEFLEASE6 (3600*24) /* default lease time for DHCPv6. One day. */
 #define CHUSER "nobody"
 #define CHGRP "dip"
 #define TFTP_MAX_CONNECTIONS 50 /* max simultaneous connections */
@@ -50,12 +55,15 @@
 #define RANDFILE "/dev/urandom"
 #define DNSMASQ_SERVICE "uk.org.thekelleys.dnsmasq" /* Default - may be overridden by config */
 #define DNSMASQ_PATH "/uk/org/thekelleys/dnsmasq"
+#define DNSMASQ_UBUS_NAME "dnsmasq" /* Default - may be overridden by config */
 #define AUTH_TTL 600 /* default TTL for auth DNS */
 #define SOA_REFRESH 1200 /* SOA refresh default */
 #define SOA_RETRY 180 /* SOA retry default */
 #define SOA_EXPIRY 1209600 /* SOA expiry default */
 #define LOOP_TEST_DOMAIN "test" /* domain for loop testing, "test" is reserved by RFC 2606 and won't therefore clash */
 #define LOOP_TEST_TYPE T_TXT
+#define DEFAULT_FAST_RETRY 1000 /* ms, default delay before fast retry */
+#define STALE_CACHE_EXPIRY 86400 /* 1 day in secs, default maximum expiry time for stale cache data */
  
 /* compile-time options: uncomment below to enable or do eg.
    make COPTS=-DHAVE_BROKEN_RTC
@@ -113,12 +121,13 @@ HAVE_IPSET
     define this to include the ability to selectively add resolved ip addresses
     to given ipsets.
 
+HAVE_NFTSET
+    define this to include the ability to selectively add resolved ip addresses
+    to given nftables sets.
+
 HAVE_AUTH
    define this to include the facility to act as an authoritative DNS
    server for one or more zones.
-
-HAVE_NETTLEHASH
-   include just hash function from nettle, but no DNSSEC.
 
 HAVE_DNSSEC
    include DNSSEC validator.
@@ -141,6 +150,7 @@ NO_SCRIPT
 NO_LARGEFILE
 NO_AUTH
 NO_DUMPFILE
+NO_LOOP
 NO_INOTIFY
    these are available to explicitly disable compile time options which would 
    otherwise be enabled automatically or which are enabled  by default 
@@ -187,9 +197,8 @@ RESOLVFILE
 /* #define HAVE_IDN */
 /* #define HAVE_LIBIDN2 */
 /* #define HAVE_CONNTRACK */
-/* #define HAVE_NETTLEHASH */
 /* #define HAVE_DNSSEC */
-
+/* #define HAVE_NFTSET */
 
 /* Default locations for important system files. */
 
@@ -277,11 +286,16 @@ HAVE_SOCKADDR_SA_LEN
 #define HAVE_BSD_NETWORK
 #define HAVE_GETOPT_LONG
 #define HAVE_SOCKADDR_SA_LEN
+#define NO_IPSET
 /* Define before sys/socket.h is included so we get socklen_t */
 #define _BSD_SOCKLEN_T_
 /* Select the RFC_3542 version of the IPv6 socket API. 
    Define before netinet6/in6.h is included. */
-#define __APPLE_USE_RFC_3542 
+#define __APPLE_USE_RFC_3542
+/* Required for Mojave. */
+#ifndef SOL_TCP
+#  define SOL_TCP IPPROTO_TCP
+#endif
 #define NO_IPSET
 
 #elif defined(__NetBSD__)
@@ -348,6 +362,11 @@ HAVE_SOCKADDR_SA_LEN
 #define HAVE_INOTIFY
 #endif
 
+/* This never compiles code, it's only used by the makefile to fingerprint builds. */
+#ifdef DNSMASQ_COMPILE_FLAGS
+static char *compile_flags = DNSMASQ_COMPILE_FLAGS;
+#endif
+
 /* Define a string indicating which options are in use.
    DNSMASQ_COMPILE_OPTS is only defined in dnsmasq.c */
 
@@ -366,6 +385,10 @@ static char *compile_opts =
 "no-"
 #endif
 "DBus "
+#ifndef HAVE_UBUS
+"no-"
+#endif
+"UBus "
 #ifndef LOCALEDIR
 "no-"
 #endif
@@ -408,14 +431,14 @@ static char *compile_opts =
 "no-"
 #endif
 "ipset "
+#ifndef HAVE_NFTSET
+"no-"
+#endif
+"nftset "
 #ifndef HAVE_AUTH
 "no-"
 #endif
 "auth "
-#if !defined(HAVE_NETTLEHASH) && !defined(HAVE_DNSSEC)
-"no-"
-#endif
-"nettlehash "
 #ifndef HAVE_DNSSEC
 "no-"
 #endif
@@ -436,7 +459,4 @@ static char *compile_opts =
 #endif
 "dumpfile";
 
-#endif
-
-
-
+#endif /* defined(HAVE_DHCP) */

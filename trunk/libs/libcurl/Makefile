@@ -1,5 +1,5 @@
-SRC_NAME=curl-7.75.0
-SRC_URL=https://github.com/curl/curl/releases/download/curl-7_75_0/curl-7.75.0.tar.xz
+SRC_NAME=curl-8.17.0
+SRC_URL=https://curl.se/download/$(SRC_NAME).tar.xz
 
 LDFLAGS += -Wl,-rpath-link=$(STAGEDIR)/lib
 
@@ -50,13 +50,13 @@ configure:
 		--disable-tls-srp \
 		--disable-libcurl-option \
 		--disable-threaded-resolver \
+		--without-brotli \
 		--without-gnutls \
 		--without-ca-bundle \
-		--without-libidn \
+		--without-libidn2 \
 		--without-libssh2 \
-		--without-krb4 \
-		--without-nss \
-		--with-random=/dev/urandom \
+		--without-nghttp2 \
+		--without-zstd \
 		--with-zlib=$(STAGEDIR) \
 		--with-ssl=$(STAGEDIR) \
 		--host=$(HOST_TARGET) \
