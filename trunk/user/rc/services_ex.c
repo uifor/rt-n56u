@@ -900,6 +900,7 @@ static const struct inadyn_system_t {
 	{ "PDD.YANDEX.RU",        "default@pdd.yandex.ru"      },
 	{ "CLOUDFLARE.COM",       "default@cloudflare.com"     },
 	{ "ORAY.COM",             "default@oray.com"           },
+	{ "ALIDNS.COM",            "default@alidns.com"         },
 	{ "CUSTOM",               "custom"                     },
 	{ NULL, NULL }
 };
@@ -1174,4 +1175,3 @@ manual_ddns_hostname_check(void)
 {
 	nvram_set_temp("ddns_return_code", "inadyn_unsupport");
 }
-

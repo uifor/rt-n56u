@@ -69,6 +69,7 @@ var ddns_list = [
 	[ 0x0f, "PDD.YANDEX.RU",        "", "https://connect.yandex.ru/admintools" ],
 	[ 0x0f, "CLOUDFLARE.COM",       "", "https://www.cloudflare.com/products/registrar" ],
 	[ 0x0f, "ORAY.COM",             "", "https://hsk.oray.com/" ],
+	[ 0x01, "ALIDNS.COM",           "", "https://www.aliyun.com/product/dns" ],
 	[ 0x01, "CUSTOM",               "(http basic auth)", "" ]
 ];
 
@@ -143,19 +144,22 @@ function change_ddns_server(man)
 	var v = document.form.ddns_server_x.value;
 	var o = document.form.x_DDNSHostCheck;
 	var e = (v == "WWW.ASUS.COM") ? 0 : 1;
+	var is_alidns = (v == "ALIDNS.COM");
 	var tourl = get_url_link(v);
 
 	showhide("ddnsname_input", e);
 	showhide("asusddnsname_input", !e);
 	showhide_div("ddns_link", (tourl != ""));
-	showhide_div("row_ddns_hname2", e);
-	showhide_div("row_ddns_hname3", e);
+	showhide_div("row_ddns_hname2", (e && !is_alidns));
+	showhide_div("row_ddns_hname3", (e && !is_alidns));
 	showhide_div("row_ddns_user", e);
 	showhide_div("row_ddns_pass", e);
 	showhide_div("row_ddns_ssl", (e && support_ddns_ssl()));
 	o.disabled = e;
 
-	showhide_div("row_ddns_wcard", 1);
+	showhide_div("row_ddns_wcard", !is_alidns);
+	document.form.ddns_username_x.placeholder = is_alidns ? "AccessKey ID" : "";
+	document.form.ddns_passwd_x.placeholder = is_alidns ? "AccessKey Secret" : "";
 
 	e = (v == "CUSTOM") ? 1 : 0;
 	showhide_div("row_ddns_cst_svr", e);
@@ -345,6 +349,12 @@ function validForm(){
 				o3.select();
 				return false;
 			}
+		}
+		if(o1.value == "ALIDNS.COM" &&
+		   (document.form.ddns_username_x.value == "" ||
+		    document.form.ddns_passwd_x.value == "")){
+			alert("AccessKey ID and AccessKey Secret are required.");
+			return false;
 		}
 		if(o1.value == "CUSTOM"){
 			var o5 = document.form.ddns_cst_svr;
