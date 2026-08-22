@@ -251,7 +251,7 @@ diff -rupwN inadyn-2.8.1-orig/src/openssl.c inadyn-2.8.1/src/openssl.c
 diff -rupwN inadyn-2.8.1-orig/plugins/alidns.c inadyn-2.8.1/plugins/alidns.c
 --- inadyn-2.8.1-orig/plugins/alidns.c	1970-01-01 08:00:00.000000000 +0800
 +++ inadyn-2.8.1/plugins/alidns.c	2026-08-21 00:00:00.000000000 +0800
-@@ -0,0 +1,756 @@
+@@ -0,0 +1,804 @@
 +/*
 + * AliDNS provider for In-a-Dyn.
 + *
@@ -283,6 +283,8 @@ diff -rupwN inadyn-2.8.1-orig/plugins/alidns.c inadyn-2.8.1/plugins/alidns.c
 +typedef struct {
 +	char record_id[64];
 +	char rr[SERVER_NAME_LEN];
++	char value[MAX_ADDRESS_LEN];
++	ddns_t *ctx;
 +} alidns_data_t;
 +
 +typedef struct {
@@ -749,19 +751,32 @@ diff -rupwN inadyn-2.8.1-orig/plugins/alidns.c inadyn-2.8.1/plugins/alidns.c
 +	return 0;
 +}
 +
-+static int parse_api_error(const char *json, const jsmntok_t *tokens, int count)
++static int get_api_error_code(const char *json, const jsmntok_t *tokens,
++			      int count, char *code, size_t code_size)
 +{
 +	int value;
-+	char code[64];
 +
 +	if (count <= 0 || tokens[0].type != JSMN_OBJECT)
-+		return RC_DDNS_RSP_NOTOK;
++		return -1;
 +
 +	value = object_value(json, tokens, 0, "Code");
 +	if (value < 0)
-+		return RC_OK;
-+	if (copy_token(code, sizeof(code), json, &tokens[value]))
++		return 0;
++	if (copy_token(code, code_size, json, &tokens[value]))
++		return -1;
++	return 1;
++}
++
++static int parse_api_error(const char *json, const jsmntok_t *tokens, int count)
++{
++	char code[64];
++	int error;
++
++	error = get_api_error_code(json, tokens, count, code, sizeof(code));
++	if (error < 0)
 +		return RC_DDNS_RSP_NOTOK;
++	if (error == 0)
++		return RC_OK;
 +
 +	logit(LOG_ERR, "AliDNS API error: %s", code);
 +	if (strcmp(code, "InvalidAccessKeyId") == 0 ||
@@ -780,6 +795,7 @@ diff -rupwN inadyn-2.8.1-orig/plugins/alidns.c inadyn-2.8.1/plugins/alidns.c
 +	int records;
 +	int i;
 +	int n;
++	int matches = 0;
 +	int rc;
 +
 +	rc = parse_api_error(json, tokens, count);
@@ -804,6 +820,7 @@ diff -rupwN inadyn-2.8.1-orig/plugins/alidns.c inadyn-2.8.1/plugins/alidns.c
 +		int id;
 +		int rr;
 +		int line;
++		int value;
 +
 +		if (tokens[record].type != JSMN_OBJECT)
 +			return RC_DDNS_RSP_NOTOK;
@@ -811,17 +828,28 @@ diff -rupwN inadyn-2.8.1-orig/plugins/alidns.c inadyn-2.8.1/plugins/alidns.c
 +		id = object_value(json, tokens, record, "RecordId");
 +		rr = object_value(json, tokens, record, "RR");
 +		line = object_value(json, tokens, record, "Line");
-+		if (type >= 0 && id >= 0 && rr >= 0 && line >= 0 &&
++		value = object_value(json, tokens, record, "Value");
++		if (type >= 0 && id >= 0 && rr >= 0 && line >= 0 && value >= 0 &&
 +		    jsoneq(json, &tokens[type], "A") == 0 &&
 +		    jsoneq(json, &tokens[line], "default") == 0) {
-+			if (copy_token(data->record_id, sizeof(data->record_id),
-+				       json, &tokens[id]) ||
-+			    copy_token(data->rr, sizeof(data->rr), json, &tokens[rr]))
++			matches++;
++			if (matches == 1 &&
++			    (copy_token(data->record_id, sizeof(data->record_id),
++					json, &tokens[id]) ||
++			     copy_token(data->rr, sizeof(data->rr), json, &tokens[rr]) ||
++			     copy_token(data->value, sizeof(data->value),
++					json, &tokens[value])))
 +				return RC_DDNS_RSP_NOTOK;
-+			return 0;
 +		}
 +		i = token_next(tokens, record);
 +	}
++
++	if (matches > 1) {
++		logit(LOG_ERR, "AliDNS found multiple A records on the default line; refusing ambiguous update.");
++		return RC_DDNS_RSP_NOTOK;
++	}
++	if (matches == 1)
++		return RC_OK;
 +
 +	logit(LOG_ERR, "AliDNS A record was not found; refusing to create one.");
 +	return RC_DDNS_RSP_NOHOST;
@@ -928,7 +956,13 @@ diff -rupwN inadyn-2.8.1-orig/plugins/alidns.c inadyn-2.8.1/plugins/alidns.c
 +
 +	if (info->data)
 +		free(info->data);
++	data->ctx = ctx;
 +	info->data = data;
++	if (strcmp(data->value, alias->address) == 0) {
++		logit(LOG_INFO, "AliDNS record '%s' is already %s; skipping update.",
++		      alias->name, alias->address);
++		alias->update_required = 0;
++	}
 +	return RC_OK;
 +}
 +
@@ -969,27 +1003,41 @@ diff -rupwN inadyn-2.8.1-orig/plugins/alidns.c inadyn-2.8.1/plugins/alidns.c
 +
 +static int response(http_trans_t *trans, ddns_info_t *info, ddns_alias_t *alias)
 +{
++	alidns_data_t *data = (alidns_data_t *)info->data;
++	alidns_data_t current;
 +	jsmntok_t *tokens = NULL;
 +	int token_count;
 +	int rc;
++	char code[64];
++	int error;
++	int status_rc;
 +
-+	(void)info;
-+
-+	rc = http_status_valid(trans->status);
-+	if (rc) {
++	status_rc = http_status_valid(trans->status);
++	if (status_rc) {
 +		logit(LOG_WARNING, "AliDNS update HTTP status %d (%s): %.512s",
 +		      trans->status, trans->status_desc,
 +		      trans->rsp_body ? trans->rsp_body : "");
-+		return rc;
 +	}
 +	token_count = parse_json(trans->rsp_body, &tokens);
 +	if (token_count < 0)
-+		return RC_DDNS_RSP_RETRY_LATER;
++		return status_rc ? status_rc : RC_DDNS_RSP_RETRY_LATER;
 +
-+	rc = parse_api_error(trans->rsp_body, tokens, token_count);
-+	if (rc == RC_OK &&
++	rc = status_rc ? status_rc : parse_api_error(trans->rsp_body, tokens, token_count);
++	if (!status_rc && rc == RC_OK &&
 +	    object_value(trans->rsp_body, tokens, 0, "RecordId") < 0)
 +		rc = RC_DDNS_RSP_NOTOK;
++	error = get_api_error_code(trans->rsp_body, tokens, token_count,
++				   code, sizeof(code));
++	if (status_rc && error == 1 &&
++	    strcmp(code, "DomainRecordDuplicate") == 0 && data && data->ctx) {
++		memset(&current, 0, sizeof(current));
++		if (query_record(data->ctx, info, alias, &current) == RC_OK &&
++		    strcmp(current.value, alias->address) == 0) {
++			logit(LOG_INFO, "AliDNS record '%s' already reached %s; treating duplicate as success.",
++			      alias->name, alias->address);
++			rc = RC_OK;
++		}
++	}
 +	if (rc == RC_OK)
 +		logit(LOG_INFO, "AliDNS record '%s' updated to %s.",
 +		      alias->name, alias->address);
@@ -1007,4 +1055,11 @@ diff -rupwN inadyn-2.8.1-orig/plugins/alidns.c inadyn-2.8.1/plugins/alidns.c
 +{
 +	plugin_unregister(&plugin);
 +}
++
+diff -rupwN inadyn-2.8.1-orig/src/ddns.c inadyn-2.8.1/src/ddns.c
+--- inadyn-2.8.1-orig/src/ddns.c	2021-01-31 23:59:28.000000000 +0800
++++ inadyn-2.8.1/src/ddns.c	2026-08-22 00:00:00.000000000 +0800
+@@ -611,0 +611,3 @@
++	if (!alias->update_required)
++		return RC_OK;
 +
