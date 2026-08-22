@@ -1450,11 +1450,6 @@ static VOID ReceiveBTMQuery(IN PRTMP_ADAPTER pAd,
 	BTMPeerEntry->DialogToken = WNMFrame->u.BTM_QUERY.DialogToken;
 	BTMPeerEntry->Priv = pAd;
 
-#ifndef CONFIG_11KV_API_SUPPORT
-	RTMPInitTimer(pAd, &BTMPeerEntry->WaitPeerBTMRspTimer,
-			GET_TIMER_FUNCTION(WaitPeerBTMRspTimeout), BTMPeerEntry, FALSE);
-#endif
-
 	RTMP_SEM_EVENT_WAIT(&pWNMCtrl->BTMPeerListLock, Ret);
 	DlListAddTail(&pWNMCtrl->BTMPeerList, &BTMPeerEntry->List);
 	RTMP_SEM_EVENT_UP(&pWNMCtrl->BTMPeerListLock);
@@ -1555,8 +1550,10 @@ static VOID ReceiveBTMRsp(IN PRTMP_ADAPTER pAd,
 	}
 
 	/* Cancel Wait peer wnm response frame */
-	RTMPCancelTimer(&BTMPeerEntry->WaitPeerBTMRspTimer, &Cancelled);
-	RTMPReleaseTimer(&BTMPeerEntry->WaitPeerBTMRspTimer, &Cancelled);
+	if (BTMPeerEntry->WaitPeerBTMRspTimer.Valid) {
+		RTMPCancelTimer(&BTMPeerEntry->WaitPeerBTMRspTimer, &Cancelled);
+		RTMPReleaseTimer(&BTMPeerEntry->WaitPeerBTMRspTimer, &Cancelled);
+	}
 
 #ifdef CONFIG_11KV_API_SUPPORT
 	RTMP_SEM_EVENT_WAIT(&pWNMCtrl->BTMPeerListLock, Ret);
@@ -1659,20 +1656,52 @@ VOID BTMSetPeerCurrentState(
 	RTMP_SEM_EVENT_UP(&pWNMCtrl->BTMPeerListLock);
 }
 
+static VOID BTMRemoveAllPeerEntries(
+	IN PRTMP_ADAPTER pAd,
+	IN UCHAR APIndex)
+{
+	PWNM_CTRL pWNMCtrl = &pAd->ApCfg.MBSSID[APIndex].WNMCtrl;
+	BTM_PEER_ENTRY *BTMPeerEntry, *BTMPeerEntryTmp;
+	INT32 Ret;
+	BOOLEAN Cancelled;
+
+	RTMP_SEM_EVENT_WAIT(&pWNMCtrl->BTMPeerListLock, Ret);
+	DlListForEachSafe(BTMPeerEntry, BTMPeerEntryTmp,
+					  &pWNMCtrl->BTMPeerList, BTM_PEER_ENTRY, List) {
+		if (BTMPeerEntry->WaitPeerBTMReqTimer.Valid) {
+			RTMPCancelTimer(&BTMPeerEntry->WaitPeerBTMReqTimer, &Cancelled);
+			RTMPReleaseTimer(&BTMPeerEntry->WaitPeerBTMReqTimer, &Cancelled);
+		}
+		if (BTMPeerEntry->WaitPeerBTMRspTimer.Valid) {
+			RTMPCancelTimer(&BTMPeerEntry->WaitPeerBTMRspTimer, &Cancelled);
+			RTMPReleaseTimer(&BTMPeerEntry->WaitPeerBTMRspTimer, &Cancelled);
+		}
+		DlListDel(&BTMPeerEntry->List);
+		os_free_mem(BTMPeerEntry);
+	}
+	DlListInit(&pWNMCtrl->BTMPeerList);
+	RTMP_SEM_EVENT_UP(&pWNMCtrl->BTMPeerListLock);
+}
+
 static VOID SendBTMQueryIndication(
 	IN PRTMP_ADAPTER    pAd,
 	IN MLME_QUEUE_ELEM * Elem)
 {
 	BTM_EVENT_DATA *Event = (BTM_EVENT_DATA *)Elem->Msg;
 	PNET_DEV NetDev = pAd->ApCfg.MBSSID[Event->ControlIndex].wdev.if_dev;
+	PWNM_CTRL pWNMCtrl = &pAd->ApCfg.MBSSID[Event->ControlIndex].WNMCtrl;
 
-	printk("%s\n", __func__);
-		/* Send BTM query indication to daemon */
-		SendBTMQueryEvent(NetDev,
-						  Event->PeerMACAddr,
-						  Event->u.PEER_BTM_QUERY_DATA.BTMQuery,
-						  Event->u.PEER_BTM_QUERY_DATA.BTMQueryLen,
-						  RA_WEXT);
+	if (!pWNMCtrl->WNMBTMEnable) {
+		BTMRemoveAllPeerEntries(pAd, Event->ControlIndex);
+		return;
+	}
+
+	/* Send BTM query indication to daemon */
+	SendBTMQueryEvent(NetDev,
+					  Event->PeerMACAddr,
+					  Event->u.PEER_BTM_QUERY_DATA.BTMQuery,
+					  Event->u.PEER_BTM_QUERY_DATA.BTMQueryLen,
+					  RA_WEXT);
 	BTMStartWaitBTMReqTimer(pAd, Elem);
 
 	BTMSetPeerCurrentState(pAd, Elem, WAIT_BTM_REQ);
@@ -1696,9 +1725,6 @@ VOID WaitPeerBTMReqTimeout(
 	BOOLEAN Cancelled;
 #endif /* CONFIG_11KV_API_SUPPORT */
 
-	MTWF_LOG(DBG_CAT_PROTO, CATPROTO_WNM, DBG_LVL_OFF,
-		("%s\n", __func__));
-
 	if (!BTMPeerEntry)
 		return;
 
@@ -1706,10 +1732,8 @@ VOID WaitPeerBTMReqTimeout(
 
 #ifndef CONFIG_11KV_API_SUPPORT
 	RTMPReleaseTimer(&BTMPeerEntry->WaitPeerBTMReqTimer, &Cancelled);
-	/* fix xiaomi time crash issue */
+	/* Release the response timer if a BTM request was sent before timeout. */
 	if (BTMPeerEntry->WaitPeerBTMRspTimer.Valid) {
-		MTWF_LOG(DBG_CAT_INIT, DBG_SUBCAT_ALL, DBG_LVL_ERROR, ("%s: WaitPeerBTMRspTimer isn't release, release it!!\n",
-						 __func__));
 		RTMPReleaseTimer(&BTMPeerEntry->WaitPeerBTMRspTimer, &Cancelled);
 	}
 #endif
@@ -1839,6 +1863,9 @@ static VOID SendBTMReq(
 	RTMPCancelTimer(&BTMPeerEntry->WaitPeerBTMReqTimer, &Cancelled);
 	RTMPReleaseTimer(&BTMPeerEntry->WaitPeerBTMReqTimer, &Cancelled);
 
+	if (!BTMPeerEntry->WaitPeerBTMRspTimer.Valid)
+		RTMPInitTimer(pAd, &BTMPeerEntry->WaitPeerBTMRspTimer,
+			GET_TIMER_FUNCTION(WaitPeerBTMRspTimeout), BTMPeerEntry, FALSE);
 	RTMPSetTimer(&BTMPeerEntry->WaitPeerBTMRspTimer, WaitPeerBTMRspTimeoutVale);
 #if (defined(CONFIG_HOTSPOT_R2) || defined(CONFIG_DOT11V_WNM))
 	{
@@ -2168,6 +2195,9 @@ static VOID SendBTMReqFrame(
 
 	RTMPCancelTimer(&BTMPeerEntry->WaitPeerBTMReqTimer, &Cancelled);
 	RTMPReleaseTimer(&BTMPeerEntry->WaitPeerBTMReqTimer, &Cancelled);
+	if (!BTMPeerEntry->WaitPeerBTMRspTimer.Valid)
+		RTMPInitTimer(pAd, &BTMPeerEntry->WaitPeerBTMRspTimer,
+			GET_TIMER_FUNCTION(WaitPeerBTMRspTimeout), BTMPeerEntry, FALSE);
 	RTMPSetTimer(&BTMPeerEntry->WaitPeerBTMRspTimer, WaitPeerBTMRspTimeoutVale);
 
 	if ((pEntry = MacTableLookup(pAd, pBtmReqActionFrame->PeerMACAddr)) != NULL) {	
@@ -2330,6 +2360,7 @@ NDIS_STATUS wnm_handle_command(IN PRTMP_ADAPTER pAd, IN struct wnm_command *pCmd
 		if (pCmd_data->command_body[0] == 0) {
 			/*Disable All Features*/
 			pWNMCtrl->WNMBTMEnable = 0;
+			BTMRemoveAllPeerEntries(pAd, APIndex);
 			UpdateBeaconHandler(pAd, &pAd->ApCfg.MBSSID[APIndex].wdev, BCN_UPDATE_IE_CHG);
 		} else
 			MTWF_LOG(DBG_CAT_PROTO, CATPROTO_WNM, DBG_LVL_ERROR,
@@ -2342,6 +2373,9 @@ NDIS_STATUS wnm_handle_command(IN PRTMP_ADAPTER pAd, IN struct wnm_command *pCmd
 			pWNMCtrl->WNMBTMEnable = 1;
 		else
 			pWNMCtrl->WNMBTMEnable = 0;
+
+		if (!pWNMCtrl->WNMBTMEnable)
+			BTMRemoveAllPeerEntries(pAd, APIndex);
 
 		UpdateBeaconHandler(pAd, &pAd->ApCfg.MBSSID[APIndex].wdev, BCN_UPDATE_IE_CHG);
 	}
